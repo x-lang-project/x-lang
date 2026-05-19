@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::{CodeGen, INSTANTIATION_CACHE};
+use inkwell::AddressSpace;
 use inkwell::attributes::{Attribute, AttributeLoc};
 use inkwell::types::{BasicMetadataTypeEnum, BasicType, BasicTypeEnum};
 use inkwell::values::{BasicMetadataValueEnum, BasicValueEnum, FunctionValue};
-use inkwell::AddressSpace;
 use x_ast::{Expr, ExternParam, Param, Statement, StringLiteral, StringPart, StructDef, Type};
 
 use x_logging::{debug, error, info, trace, warn};
@@ -300,7 +300,7 @@ impl<'ctx> CodeGen<'ctx> {
                     _ => {
                         return Err(
                             "Unsupported expression form for monomorphised candidate".to_string()
-                        )
+                        );
                     }
                 };
                 ts.push(inferred.to_string());
@@ -519,7 +519,7 @@ impl<'ctx> CodeGen<'ctx> {
                 return Err(format!(
                     "Unsupported type for print: {:?}",
                     arg_val.get_type()
-                ))
+                ));
             }
         };
 
@@ -679,9 +679,9 @@ impl<'ctx> CodeGen<'ctx> {
                         BasicTypeEnum::VectorType(vt) => vt.const_zero().into(),
                         _ => {
                             return Err(format!(
-                                    "Function '{}' must return a value but none was produced (unsupported default for type {:?})",
-                                    name, exp_bt
-                                ));
+                                "Function '{}' must return a value but none was produced (unsupported default for type {:?})",
+                                name, exp_bt
+                            ));
                         }
                     };
                     self.builder.build_return(Some(&default_val)).unwrap();
@@ -1540,7 +1540,9 @@ impl<'ctx> CodeGen<'ctx> {
                                 (got, want) => {
                                     return Err(format!(
                                         "Unsupported return coercion for function '{}': got {:?}, want {:?}",
-                                        name, got.get_type(), want
+                                        name,
+                                        got.get_type(),
+                                        want
                                     ));
                                 }
                             };

@@ -1,5 +1,5 @@
-use inkwell::values::BasicValueEnum;
 use inkwell::FloatPredicate;
+use inkwell::values::BasicValueEnum;
 use x_ast::{Expr, Statement, Type};
 
 use crate::CodeGen;

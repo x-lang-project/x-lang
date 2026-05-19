@@ -1,5 +1,5 @@
-use std::path::{Path, PathBuf};
 use assert_cmd::prelude::*;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn example_path(name: &str) -> PathBuf {
@@ -18,6 +18,5 @@ pub fn compile_example(name: &str) {
         .arg("build")
         .arg(src.as_os_str());
 
-    cmd.assert()
-        .success();
+    cmd.assert().success();
 }

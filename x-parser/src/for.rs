@@ -1,4 +1,4 @@
-use crate::{block::parse_block, expression::parse_expr, Rule};
+use crate::{Rule, block::parse_block, expression::parse_expr};
 use pest::iterators::Pair;
 use x_ast::Statement;
 
@@ -6,7 +6,9 @@ pub fn parse_for_range_loop(pair: Pair<Rule>) -> Statement {
     let mut inner = pair.into_inner().peekable();
 
     // Check for the optional 'parallel' keyword.
-    let is_parallel = inner.peek().map_or(false, |p| p.as_rule() == Rule::parallel_kw);
+    let is_parallel = inner
+        .peek()
+        .map_or(false, |p| p.as_rule() == Rule::parallel_kw);
     if is_parallel {
         inner.next(); // Consume the keyword if it's present.
     }
@@ -32,7 +34,9 @@ pub fn parse_for_each_loop(pair: Pair<Rule>) -> Statement {
     let mut inner = pair.into_inner().peekable();
 
     // Check for the optional 'parallel' keyword.
-    let is_parallel = inner.peek().map_or(false, |p| p.as_rule() == Rule::parallel_kw);
+    let is_parallel = inner
+        .peek()
+        .map_or(false, |p| p.as_rule() == Rule::parallel_kw);
     if is_parallel {
         inner.next(); // Consume the keyword if it's present.
     }
@@ -43,7 +47,7 @@ pub fn parse_for_each_loop(pair: Pair<Rule>) -> Statement {
         Statement::Block { statements } => statements,
         _ => unreachable!(),
     };
-    
+
     Statement::ForEachLoop {
         var,
         iterator,

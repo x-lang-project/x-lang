@@ -60,18 +60,18 @@ impl TypeChecker {
                                 .collect::<Vec<_>>()
                                 .join(" | ");
                             return Err(format!(
-                              "No matching multi overload for '{}'. Got {:?}, expected one of: {}",
-                              name, arg_types, expects
-                          ));
+                                "No matching multi overload for '{}'. Got {:?}, expected one of: {}",
+                                name, arg_types, expects
+                            ));
                         }
                         1 => {
                             return Ok(matches.remove(0).return_type.clone());
                         }
                         _ => {
                             return Err(format!(
-                              "Ambiguous multi overload for '{}': arguments {:?} match multiple candidates",
-                              name, arg_types
-                          ));
+                                "Ambiguous multi overload for '{}': arguments {:?} match multiple candidates",
+                                name, arg_types
+                            ));
                         }
                     }
                 }
@@ -236,39 +236,39 @@ impl TypeChecker {
                             // If callee expects a mutable reference, caller must provide a mutable one.
                             if *exp_mut && !*act_mut {
                                 return Err(format!(
-                                  "Type mismatch in call to '{}'. Expected mutable reference for argument {}, but got immutable reference.",
-                                  name, i
-                              ));
+                                    "Type mismatch in call to '{}'. Expected mutable reference for argument {}, but got immutable reference.",
+                                    name, i
+                                ));
                             }
                             if !self.types_compatible(&*exp_inner, &*act_inner) {
                                 return Err(format!(
-                                  "Type mismatch in call to '{}'. Expected {:?} for argument {}, but got {:?}.",
-                                  name, expected, i, at
-                              ));
+                                    "Type mismatch in call to '{}'. Expected {:?} for argument {}, but got {:?}.",
+                                    name, expected, i, at
+                                ));
                             }
                         }
                         (Type::Ref { .. }, _other) => {
                             // expected a reference but caller passed a non-reference
                             return Err(format!(
-                              "Type mismatch in call to '{}'. Expected reference type {:?} for argument {}, but got {:?}.",
-                              name, expected, i, at
-                          ));
+                                "Type mismatch in call to '{}'. Expected reference type {:?} for argument {}, but got {:?}.",
+                                name, expected, i, at
+                            ));
                         }
                         (expected_nonref, Type::Ref { inner, .. }) => {
                             // caller passed a reference but callee expects a plain value -> allow by unwrapping
                             if !self.types_compatible(expected_nonref, &*inner) {
                                 return Err(format!(
-                                  "Type mismatch in call to '{}'. Expected {:?} for argument {}, but got {:?}.",
-                                  name, expected_nonref, i, at
-                              ));
+                                    "Type mismatch in call to '{}'. Expected {:?} for argument {}, but got {:?}.",
+                                    name, expected_nonref, i, at
+                                ));
                             }
                         }
                         (expected_nonref, other_actual) => {
                             if !self.types_compatible(expected_nonref, other_actual) {
                                 return Err(format!(
-                                  "Type mismatch in call to '{}'. Expected {:?} for argument {}, but got {:?}.",
-                                  name, expected_nonref, i, at
-                              ));
+                                    "Type mismatch in call to '{}'. Expected {:?} for argument {}, but got {:?}.",
+                                    name, expected_nonref, i, at
+                                ));
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-use inkwell::{values::BasicValueEnum, FloatPredicate, IntPredicate};
+use inkwell::{FloatPredicate, IntPredicate, values::BasicValueEnum};
 use x_ast::{Expr, Operator, Type};
 
 use crate::CodeGen;

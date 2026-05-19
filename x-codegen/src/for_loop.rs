@@ -1,7 +1,7 @@
+use inkwell::IntPredicate;
 use inkwell::module::Linkage;
 use inkwell::types::{AnyType, BasicType};
 use inkwell::values::{BasicValueEnum, FunctionValue};
-use inkwell::IntPredicate;
 use std::collections::HashMap;
 use x_ast::{Expr, Statement, Type};
 

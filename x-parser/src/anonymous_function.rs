@@ -1,7 +1,7 @@
 use pest::iterators::Pair;
 use x_ast::{Expr, Statement, Type};
 
-use crate::{block::parse_block, types::parse_type, Rule};
+use crate::{Rule, block::parse_block, types::parse_type};
 
 /// Parse an anonymous_fn pair produced by the `anonymous_fn` rule:
 /// grammar: "|" (param_list_nonempty)? "|" (return_type_ann)? (block | expr)

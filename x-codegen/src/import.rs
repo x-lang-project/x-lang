@@ -26,7 +26,7 @@ impl<'ctx> CodeGen<'ctx> {
                 match import_path_with_ext.canonicalize() {
                     Ok(p) => p,
                     Err(e) => {
-                        return Err(format!("Failed to resolve import path: {}: {}", path, e))
+                        return Err(format!("Failed to resolve import path: {}: {}", path, e));
                     }
                 }
             }

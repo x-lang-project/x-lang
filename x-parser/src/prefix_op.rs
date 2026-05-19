@@ -1,4 +1,4 @@
-use crate::{term::parse_term, Rule};
+use crate::{Rule, term::parse_term};
 use pest::iterators::Pair;
 use x_ast::{Expr, UnaryOperator};
 

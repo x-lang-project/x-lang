@@ -2,6 +2,7 @@ use pest::iterators::Pair;
 use x_ast::Expr;
 
 use crate::{
+    Rule,
     anonymous_function::parse_anonymous_fn,
     array::parse_array_literal,
     boolean::parse_boolean,
@@ -11,9 +12,8 @@ use crate::{
     number::parse_number,
     postfix_op::{parse_postfix, parse_postfix_op},
     prefix_op::parse_prefix_op,
-    r#struct::parse_struct_instantiate,
     string::parse_string,
-    Rule,
+    r#struct::parse_struct_instantiate,
 };
 
 pub fn parse_term(pair: Pair<Rule>) -> Expr {

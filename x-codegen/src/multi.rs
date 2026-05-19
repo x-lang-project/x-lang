@@ -70,7 +70,7 @@ impl<'ctx> CodeGen<'ctx> {
                         return Err(format!(
                             "multi '{}' requires first param to be a reference/pointer type",
                             name
-                        ))
+                        ));
                     }
                 };
                 let p1 = match a1 {
@@ -79,7 +79,7 @@ impl<'ctx> CodeGen<'ctx> {
                         return Err(format!(
                             "multi '{}' requires second param to be a reference/pointer type",
                             name
-                        ))
+                        ));
                     }
                 };
 

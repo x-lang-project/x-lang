@@ -1,5 +1,5 @@
-use x_ast::ExternParam;
 use std::io::Write;
+use x_ast::ExternParam;
 
 pub fn generate_extern_fn_decl<W: Write>(
     writer: &mut W,
@@ -8,15 +8,15 @@ pub fn generate_extern_fn_decl<W: Write>(
     _return_type: &Option<String>,
 ) -> std::io::Result<()> {
     write!(writer, "extern ")?;
-    
+
     write!(writer, "{}(", name)?;
-    
+
     for (i, _param) in params.iter().enumerate() {
         if i > 0 {
             write!(writer, ", ")?;
         }
     }
-    
+
     writeln!(writer, ");")?;
     Ok(())
 }

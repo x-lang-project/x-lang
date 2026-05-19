@@ -1,7 +1,7 @@
 use pest::iterators::Pair;
 use x_ast::{Expr, Layout, Statement, StructDef, StructInit};
 
-use crate::{parse_expr, types::parse_type, Rule};
+use crate::{Rule, parse_expr, types::parse_type};
 
 pub fn parse_struct_decl(pair: Pair<Rule>) -> Statement {
     let mut inner = pair.into_inner().peekable();

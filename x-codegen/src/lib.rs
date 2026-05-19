@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet};
 
 use inkwell::values::GlobalValue;
 use inkwell::{
+    OptimizationLevel,
     builder::Builder,
     context::Context,
     execution_engine::ExecutionEngine,
     module::Module,
     types::{BasicTypeEnum, StructType},
     values::{FunctionValue, PointerValue},
-    OptimizationLevel,
 };
 use x_ast::{Program, Statement, StructDef, TraitDef, Type};
 use x_std::StdLib;

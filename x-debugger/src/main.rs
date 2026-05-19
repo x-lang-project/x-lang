@@ -1,5 +1,5 @@
 use clap::Parser;
-use console::{style, Style};
+use console::{Style, style};
 use indicatif::{ProgressBar, ProgressStyle};
 use similar::{ChangeTag, TextDiff};
 use std::collections::BTreeMap;

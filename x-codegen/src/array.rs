@@ -19,7 +19,7 @@ impl<'ctx> CodeGen<'ctx> {
                             .builder
                             .build_load(self.context.i32_type(), ptr, "ld_i32")
                             .map_err(|e| e.to_string())?
-                            .into())
+                            .into());
                     }
                     Type::Float => self.context.f64_type().as_basic_type_enum(),
                     _ => return Err(format!("Unsupported array element type: {:?}", inner)),
@@ -81,7 +81,7 @@ impl<'ctx> CodeGen<'ctx> {
                         return Err(format!(
                             "Unsupported array element type for '{}': {:?}",
                             name, inner
-                        ))
+                        ));
                     }
                 }
             } else {

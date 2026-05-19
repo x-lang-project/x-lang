@@ -1,6 +1,6 @@
+use inkwell::AddressSpace;
 use inkwell::types::BasicTypeEnum;
 use inkwell::values::FunctionValue;
-use inkwell::AddressSpace;
 use x_ast::{Param, Statement};
 
 use crate::CodeGen;

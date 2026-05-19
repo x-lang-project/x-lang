@@ -4,7 +4,7 @@ use pest::{
 };
 use x_ast::{Expr, Operator};
 
-use crate::{term::parse_term, types::parse_type, Rule};
+use crate::{Rule, term::parse_term, types::parse_type};
 
 pub fn parse_expr(pair: Pair<Rule>) -> Expr {
     let pratt = PrattParser::new()

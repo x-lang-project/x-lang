@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use inkwell::{
-    types::{BasicType, BasicTypeEnum},
     AddressSpace,
+    types::{BasicType, BasicTypeEnum},
 };
 use x_ast::{Expr, Layout, Statement, StructDef, Type};
 

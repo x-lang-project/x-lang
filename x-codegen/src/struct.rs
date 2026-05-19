@@ -368,7 +368,7 @@ impl<'ctx> CodeGen<'ctx> {
                 return Err(format!(
                     "Cannot access member on non-struct type: {:?}",
                     other
-                ))
+                ));
             }
         };
 

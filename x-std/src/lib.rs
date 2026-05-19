@@ -1,7 +1,7 @@
+use inkwell::AddressSpace;
 use inkwell::context::Context;
 use inkwell::module::Module;
 use inkwell::values::FunctionValue;
-use inkwell::AddressSpace;
 
 pub struct StdLib<'ctx> {
     module: Module<'ctx>,

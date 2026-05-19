@@ -1,15 +1,17 @@
 use inkwell::{context::Context, values::AnyValue};
-use x_parser::parse;
-use x_typechecker::TypeChecker;
 use x_borrow_checker::BorrowChecker;
 use x_codegen::CodeGen;
+use x_parser::parse;
+use x_typechecker::TypeChecker;
 
 /// Compile source through parse -> typecheck -> borrow check -> codegen and return the IR.
 /// On error this will panic with detailed diagnostic info (typed program + partial IR + declared functions + per-function IR)
 pub fn compile_and_get_ir(src: &str, module_name: &str) -> String {
     let program = parse(src).expect("parse failed");
     let typed = TypeChecker::new().check(program).expect("typecheck failed");
-    BorrowChecker::new().check(&typed).expect("borrow check failed");
+    BorrowChecker::new()
+        .check(&typed)
+        .expect("borrow check failed");
 
     let ctx = Context::create();
     let mut cg = CodeGen::new(&ctx, module_name);

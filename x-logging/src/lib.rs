@@ -1,10 +1,10 @@
 use once_cell::sync::OnceCell;
-use tracing_subscriber::{fmt, EnvFilter};
+use tracing_subscriber::{EnvFilter, fmt};
 use x_diagnostics::{Diagnostic, Severity, Suggestion};
 
 static INIT: OnceCell<()> = OnceCell::new();
 
-pub use tracing::{debug, error, info, span, trace, warn, Level};
+pub use tracing::{Level, debug, error, info, span, trace, warn};
 
 pub fn init() {
     INIT.get_or_init(|| {

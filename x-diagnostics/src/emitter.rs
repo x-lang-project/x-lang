@@ -298,8 +298,7 @@ impl Emitter {
             return Ok(());
         }
 
-        let mut by_file: BTreeMap<_, Vec<&SpanEdit>> =
-            BTreeMap::new();
+        let mut by_file: BTreeMap<_, Vec<&SpanEdit>> = BTreeMap::new();
         for e in &sug.edits {
             by_file.entry(e.span.source).or_default().push(e);
         }

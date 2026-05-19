@@ -1,4 +1,4 @@
-use x_diagnostics::{Emitter, FileDatabase, Diagnostic};
+use x_diagnostics::{Diagnostic, Emitter, FileDatabase};
 
 pub fn emit_all(db: &FileDatabase, diags: &[Diagnostic]) -> i32 {
     let emitter = Emitter::default();

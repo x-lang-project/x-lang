@@ -1,5 +1,5 @@
 use expression::parse_expr;
-use pest::{iterators::Pair, Parser};
+use pest::{Parser, iterators::Pair};
 use pest_derive::Parser;
 use statement::parse_statement;
 use x_ast::Program;

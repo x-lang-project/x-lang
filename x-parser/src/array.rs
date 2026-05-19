@@ -1,11 +1,9 @@
 use pest::iterators::Pair;
 use x_ast::Expr;
 
-use crate::{expression::parse_expr, Rule};
+use crate::{Rule, expression::parse_expr};
 
 pub fn parse_array_literal(pair: Pair<Rule>) -> Expr {
-    let elements = pair.into_inner()
-        .map(parse_expr)
-        .collect();
+    let elements = pair.into_inner().map(parse_expr).collect();
     Expr::Array(elements)
 }

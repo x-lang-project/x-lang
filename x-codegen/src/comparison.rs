@@ -1,4 +1,4 @@
-use inkwell::{values::FloatValue, FloatPredicate};
+use inkwell::{FloatPredicate, values::FloatValue};
 
 use crate::CodeGen;
 

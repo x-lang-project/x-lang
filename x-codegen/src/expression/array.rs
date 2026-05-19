@@ -1,7 +1,7 @@
 use inkwell::{
+    AddressSpace,
     types::BasicTypeEnum,
     values::{BasicValue, BasicValueEnum},
-    AddressSpace,
 };
 use x_ast::{Expr, Type};
 

@@ -1,4 +1,4 @@
-use crate::{expression::parse_expr, statement::parse_statement, Rule};
+use crate::{Rule, expression::parse_expr, statement::parse_statement};
 use pest::iterators::Pair;
 use x_ast::Statement;
 

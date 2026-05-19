@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use crate::CodeGen;
 use inkwell::{
+    AddressSpace,
     module::Linkage,
     values::{BasicMetadataValueEnum, BasicValueEnum, FloatValue, FunctionValue},
-    AddressSpace,
 };
 use x_ast::{Expr, Statement, StringLiteral, StringPart, StructDef, Type};
 

@@ -106,7 +106,7 @@ impl<'ctx> CodeGen<'ctx> {
                 start,
                 end,
                 body,
-                is_parallel
+                is_parallel,
             } => {
                 self.gen_for_range_loop(var, start, end, body, *is_parallel, self_type)?;
                 Ok(None)
@@ -115,7 +115,7 @@ impl<'ctx> CodeGen<'ctx> {
                 var,
                 iterator,
                 body,
-                is_parallel: _is_parallel
+                is_parallel: _is_parallel,
             } => {
                 self.gen_for_each_loop(var, iterator, body, self_type)?;
                 Ok(None)

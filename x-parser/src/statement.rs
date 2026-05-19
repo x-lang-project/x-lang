@@ -1,8 +1,8 @@
 use crate::{
+    Rule,
     expression::parse_expr,
     function::{parse_function_call, parse_function_def},
     types::parse_type,
-    Rule,
 };
 use pest::iterators::Pair;
 use x_ast::{Expr, ImplDef, Statement, TraitDef, Type};
