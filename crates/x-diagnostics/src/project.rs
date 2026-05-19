@@ -53,3 +53,57 @@ pub enum ProjectDiagnostic {
     ModuleCycle,
     PackageEntryMissing,
 }
+
+impl ProjectDiagnostic {
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::SubmoduleMissing => "M0004",
+            Self::ModuleIdentityConflict => "M0005",
+            Self::ModuleCountLimit => "M0101",
+            Self::ModuleDepthLimit => "M0102",
+            Self::ProjectSourceLimit => "M0103",
+            Self::SourceRead => "P0000",
+            Self::SourceEncoding => "P0001",
+            Self::SourceSizeLimit => "P0100",
+            Self::LockPackageMissing => "XLF0001",
+            Self::LockStale => "XLF0002",
+            Self::LockCandidateCreate => "XLF0003",
+            Self::LockCandidateWrite => "XLF0004",
+            Self::LockInstall => "XLF0006",
+            Self::LockDependencyShape => "XLF0007",
+            Self::LockDependencyManifestMissing => "XLF0008",
+            Self::LockDependencyParse => "XLF0009",
+            Self::ManifestStructure => "XMF0001",
+            Self::PackageOrWorkspaceMissing => "XMF0002",
+            Self::PackageName => "XMF0003",
+            Self::PackageVersion => "XMF0004",
+            Self::LanguageEdition => "XMF0005",
+            Self::PackageEntryPath => "XMF0006",
+            Self::PackageKind => "XMF0007",
+            Self::ToolchainMissing => "XMF0008",
+            Self::RuntimeAbiType => "XMF0009",
+            Self::RuntimeAbiUnsupported => "XMF0010",
+            Self::WorkspaceDefaultMember => "XMF0011",
+            Self::DependenciesTable => "XMF0012",
+            Self::DependencyPathTable => "XMF0013",
+            Self::LinkTable => "XMF0014",
+            Self::TargetTable => "XMF0015",
+            Self::TargetUnsupported => "XMF0016",
+            Self::UnknownManifestField => "XMF0017",
+            Self::ManifestStringField => "XMF0018",
+            Self::RequiredManifestField => "XMF0019",
+            Self::ManifestStringArray => "XMF0020",
+            Self::ManifestArrayEmpty => "XMF0021",
+            Self::ManifestTomlParse | Self::LinkLibraryName => "XMF0022",
+            Self::LinkPathEscapesPackage => "XMF0023",
+            Self::BuildConfiguration => "XMF0024",
+            Self::OsConfiguration => "XMF0025",
+            Self::OsPathEscapesPackage => "XMF0026",
+            Self::EmulatorConfiguration => "XMF0027",
+            Self::PackageEntryResolution | Self::ModuleCycle | Self::PackageEntryMissing => {
+                "XPR0001"
+            }
+            Self::PackageImportAmbiguous => "XPR0002",
+        }
+    }
+}
