@@ -37,4 +37,13 @@ impl LinkDiagnostic {
             Self::RuntimeSourceWrite => "L0005",
         }
     }
+
+    pub fn into_failure(self, detail: impl fmt::Display) -> CompilationFailure {
+        let detail = match self {
+            Self::TinyCcFailure => format!("TinyCC: {detail}"),
+            _ => detail.to_string(),
+        };
+
+        Error::new(detail).with_code(self.code()).into_failure()
+    }
 }
