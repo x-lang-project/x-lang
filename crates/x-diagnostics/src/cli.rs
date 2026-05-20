@@ -10,6 +10,12 @@ pub enum CliError {
     NonExecutableArtifact(PathBuf),
 }
 
+impl CliError {
+    pub fn into_failure(self) -> CompilationFailure {
+        self.into()
+    }
+}
+
 impl From<CliError> for CompilationFailure {
     fn from(error: CliError) -> Self {
         let detail = match error {
