@@ -1,5 +1,26 @@
 use super::*;
 
+pub fn memoise_function_name_must_also_be_pure(name: &str) -> String {
+    Error::new(format!("`memoise` function `{name}` must also be pure")).render_detail()
+}
+
+pub fn memoise_function_name_cannot_throw(name: &str) -> String {
+    Error::new(format!("`memoise` function `{name}` cannot throw")).render_detail()
+}
+
+pub fn memoise_and_multi_cannot_be_combined_on_name(name: &str) -> String {
+    Error::new(format!(
+        "`memoise` and `multi` cannot be combined on `{name}`"
+    ))
+    .render_detail()
+}
+
+pub fn memoise_function_name_requires_scalar_numeric_boolean_or_char_parameters_and_return(
+    name: &str,
+) -> String {
+    Error::new(format!("`memoise` function `{name}` requires scalar numeric, bool, or char parameters and return value")).render_detail()
+}
+
 pub fn multi_function_name_requires_a_non_static_dispatch_parameter(name: &str) -> String {
     Error::new(format!(
         "`multi` function `{name}` requires a non-static dispatch parameter"
