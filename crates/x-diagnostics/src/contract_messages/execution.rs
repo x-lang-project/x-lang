@@ -1,5 +1,12 @@
 use super::*;
 
+pub fn multi_function_name_requires_a_non_static_dispatch_parameter(name: &str) -> String {
+    Error::new(format!(
+        "`multi` function `{name}` requires a non-static dispatch parameter"
+    ))
+    .render_detail()
+}
+
 pub fn x_contract_parallel_parallel_range_body_must_be_exactly_one_direct_worker() -> String {
     Error::new("x-contract-parallel: `parallel` range body must be exactly one direct worker call")
         .render_detail()
@@ -27,6 +34,10 @@ pub fn x_contract_parallel_captures_must_be_invariant_scalar_values_or_transitiv
 
 pub fn parallel_foreach_is_not_executable_use_a_range_worker() -> String {
     Error::new("`parallel` foreach is not executable; use a range worker").render_detail()
+}
+
+pub fn become_must_be_the_final_statement_in_its_block() -> String {
+    Error::new("`become` must be the final statement in its block").render_detail()
 }
 
 pub fn use_x_cheri_build_the_ordinary_llvm_object_path_cannot_certify_the() -> String {
