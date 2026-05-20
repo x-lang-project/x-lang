@@ -1,5 +1,9 @@
 use super::*;
 
+pub fn pure_function_name_cannot_throw(name: &str) -> String {
+    Error::new(format!("`pure` function `{name}` cannot throw")).render_detail()
+}
+
 pub fn memoise_function_name_must_also_be_pure(name: &str) -> String {
     Error::new(format!("`memoise` function `{name}` must also be pure")).render_detail()
 }
@@ -26,6 +30,12 @@ pub fn multi_function_name_requires_a_non_static_dispatch_parameter(name: &str) 
         "`multi` function `{name}` requires a non-static dispatch parameter"
     ))
     .render_detail()
+}
+
+pub fn x_contract_invariant_struct_invariant_for_value_cannot_contain_calls_assignments_dereferences(
+    struct_name: &str,
+) -> String {
+    Error::new(format!("x-contract-invariant: struct invariant for `{struct_name}` cannot contain calls, assignments, dereferences, or other unsupported expressions")).render_detail()
 }
 
 pub fn x_contract_parallel_parallel_range_body_must_be_exactly_one_direct_worker() -> String {
