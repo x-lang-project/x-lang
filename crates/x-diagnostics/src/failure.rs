@@ -45,6 +45,13 @@ impl CompilationFailure {
         Self(Box::new(FailureData::from_diagnostic(diagnostic)))
     }
 
+    pub fn diagnostic(source: &str, path: impl AsRef<Path>, diagnostic: Diagnostic) -> Self {
+        let mut data = FailureData::from_diagnostic(diagnostic);
+        data.source = Some((path.as_ref().into(), source.into()));
+
+        Self(Box::new(data))
+    }
+
     pub(crate) fn from_internal_error(diagnostic: Diagnostic, stage: String) -> Self {
         let mut failure = Self::from_error(diagnostic);
         failure.0.kind = FailureKind::Internal;
