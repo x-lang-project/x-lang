@@ -11,6 +11,10 @@ pub enum CliError {
 }
 
 impl CliError {
+    pub fn operational(detail: impl fmt::Display) -> Self {
+        Self::Operational(detail.to_string())
+    }
+
     pub fn into_failure(self) -> CompilationFailure {
         self.into()
     }
