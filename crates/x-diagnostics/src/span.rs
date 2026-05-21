@@ -12,3 +12,9 @@ pub struct Span {
     pub start: usize,
     pub end: usize,
 }
+
+impl Span {
+    pub fn is_empty(&self) -> bool {
+        self.end <= self.start
+    }
+}
