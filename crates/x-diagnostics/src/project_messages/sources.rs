@@ -1,6 +1,22 @@
 use super::*;
 
 impl ProjectError {
+    pub fn manifest_toml_parse(
+        path: impl fmt::Display,
+        position: ManifestPosition,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!(
+            "invalid manifest TOML at {}:{line}:{column} (byte {byte})\nnote: {error}",
+            path,
+            line = position.line,
+            column = position.column,
+            byte = position.byte
+        ))
+        .with_code(ProjectDiagnostic::ManifestTomlParse.code())
+        .into_failure()
+    }
+
     pub fn module_depth_limit(
         module_name: impl fmt::Display,
         maximum_module_depth: impl fmt::Display,
