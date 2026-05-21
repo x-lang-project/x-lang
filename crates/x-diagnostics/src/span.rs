@@ -14,6 +14,18 @@ pub struct Span {
 }
 
 impl Span {
+    pub fn join(first_value: Span, second_value: Span) -> Option<Self> {
+        if first_value.source != second_value.source {
+            return None;
+        }
+
+        Some(Self {
+            source: first_value.source,
+            start: first_value.start.min(second_value.start),
+            end: first_value.end.max(second_value.end),
+        })
+    }
+
     pub fn is_empty(&self) -> bool {
         self.end <= self.start
     }
