@@ -14,6 +14,14 @@ pub struct Span {
 }
 
 impl Span {
+    pub fn single(source: SourceIdentifier, position: usize) -> Self {
+        Self {
+            source,
+            start: position,
+            end: position.saturating_add(1),
+        }
+    }
+
     pub fn join(first_value: Span, second_value: Span) -> Option<Self> {
         if first_value.source != second_value.source {
             return None;
