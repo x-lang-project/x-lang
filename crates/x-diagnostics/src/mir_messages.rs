@@ -1,5 +1,10 @@
 use crate::Error;
 
+pub fn checked_nominal_method_required() -> String {
+    Error::new("nominal methods require a checked declaration and explicit receiver contract")
+        .render_detail()
+}
+
 pub fn catch_argument_count() -> String {
     Error::new("catch requires exactly a throwing call and fallback").render_detail()
 }
@@ -13,6 +18,13 @@ pub fn missing_function_return(name: &str) -> String {
 
 pub fn tuple_binding_arity() -> String {
     Error::new("tuple binding requires a checked tuple layout with matching arity").render_detail()
+}
+
+pub fn unsupported_static_initializer(name: &str) -> String {
+    Error::new(format!(
+        "static `{name}` initialiser requires a supported constant representation"
+    ))
+    .render_detail()
 }
 
 pub fn tuple_binding_layout() -> String {
