@@ -1,8 +1,26 @@
 use super::*;
 
 impl ProjectError {
+    pub fn os_string_required(
+        path: impl fmt::Display,
+        key: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("os.{key} in {path} must be a string"))
+            .with_code(ProjectDiagnostic::OsConfiguration.code())
+            .into_failure()
+    }
+
     pub fn emulator_table_required(path: impl fmt::Display) -> CompilationFailure {
         Error::new(format!("[qemu] in {path} must be a table"))
+            .with_code(ProjectDiagnostic::EmulatorConfiguration.code())
+            .into_failure()
+    }
+
+    pub fn emulator_string_required(
+        path: impl fmt::Display,
+        key: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("qemu.{key} in {path} must be a string"))
             .with_code(ProjectDiagnostic::EmulatorConfiguration.code())
             .into_failure()
     }
