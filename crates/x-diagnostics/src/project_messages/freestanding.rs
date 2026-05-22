@@ -1,6 +1,51 @@
 use super::*;
 
 impl ProjectError {
+    pub fn os_build_section_required(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "an [os] project in {path} requires [build] with freestanding = true"
+        ))
+        .with_code(ProjectDiagnostic::BuildConfiguration.code())
+        .into_failure()
+    }
+
+    pub fn build_table_required(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("[build] in {path} must be a table"))
+            .with_code(ProjectDiagnostic::BuildConfiguration.code())
+            .into_failure()
+    }
+
+    pub fn build_boolean_required(
+        path: impl fmt::Display,
+        key: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("build.{key} in {path} must be a boolean"))
+            .with_code(ProjectDiagnostic::BuildConfiguration.code())
+            .into_failure()
+    }
+
+    pub fn build_optimization_invalid(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "build.optimization in {path} must be an integer from 0 through 3"
+        ))
+        .with_code(ProjectDiagnostic::BuildConfiguration.code())
+        .into_failure()
+    }
+
+    pub fn freestanding_required(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "an [os] project in {path} requires build.freestanding = true"
+        ))
+        .with_code(ProjectDiagnostic::BuildConfiguration.code())
+        .into_failure()
+    }
+
+    pub fn os_table_required(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("[os] in {path} must be a table"))
+            .with_code(ProjectDiagnostic::OsConfiguration.code())
+            .into_failure()
+    }
+
     pub fn os_path_escapes_package(
         path: impl fmt::Display,
         key: impl fmt::Display,
@@ -45,6 +90,21 @@ impl ProjectError {
     ) -> CompilationFailure {
         Error::new(format!("qemu.{key} in {path} must be a string"))
             .with_code(ProjectDiagnostic::EmulatorConfiguration.code())
+            .into_failure()
+    }
+
+    pub fn target_table(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("[target] in {path} must be a table"))
+            .with_code(ProjectDiagnostic::TargetTable.code())
+            .into_failure()
+    }
+
+    pub fn target_unsupported(
+        path: impl fmt::Display,
+        triple: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("target triple `{triple}` in {path} is unsupported"))
+            .with_code(ProjectDiagnostic::TargetUnsupported.code())
             .into_failure()
     }
 
