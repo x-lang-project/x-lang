@@ -1,5 +1,9 @@
 use crate::Error;
 
+pub fn catch_argument_count() -> String {
+    Error::new("catch requires exactly a throwing call and fallback").render_detail()
+}
+
 pub fn missing_function_return(name: &str) -> String {
     Error::new(format!(
         "function `{name}` can finish without returning its declared value"
