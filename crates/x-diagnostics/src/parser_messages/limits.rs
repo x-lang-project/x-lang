@@ -42,3 +42,21 @@ impl fmt::Display for SourceLimitError {
         }
     }
 }
+
+impl SourceLimitError {
+    pub fn diagnostic(&self) -> ParserDiagnostic {
+        match self {
+            Self::SourceTooLarge { .. } => ParserDiagnostic::SourceTooLarge,
+            Self::NestingTooDeep { .. } => ParserDiagnostic::NestingTooDeep,
+            Self::NumericLiteralTooLarge { .. } => ParserDiagnostic::NumericLiteralTooLarge,
+            Self::StringLiteralTooLarge { .. } => ParserDiagnostic::StringLiteralTooLarge,
+            Self::NonFiniteFloat { .. } => ParserDiagnostic::NonFiniteFloat,
+            Self::IntegerOutOfRange { .. } => ParserDiagnostic::IntegerOutOfRange,
+            Self::TooManyTokens { .. } => ParserDiagnostic::TooManyTokens,
+            Self::TokenTooLarge { .. } => ParserDiagnostic::TokenTooLarge,
+            Self::PrefixChainTooDeep { .. } => ParserDiagnostic::PrefixChainTooDeep,
+            Self::ScannerDidNotAdvance { .. } => ParserDiagnostic::ScannerDidNotAdvance,
+            Self::DelimiterPrefixTooDeep { .. } => ParserDiagnostic::DelimiterPrefixTooDeep,
+        }
+    }
+}
