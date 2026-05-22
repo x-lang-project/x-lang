@@ -1,1 +1,32 @@
 use super::*;
+
+impl ProjectError {
+    pub fn unknown_manifest_field(
+        path: impl fmt::Display,
+        section: impl fmt::Display,
+        key: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("unknown `{section}.{key}` field in {path}"))
+            .with_code(ProjectDiagnostic::UnknownManifestField.code())
+            .into_failure()
+    }
+
+    pub fn manifest_string_field(
+        path: impl fmt::Display,
+        section: impl fmt::Display,
+        key: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("`{section}.{key}` in {path} must be a string"))
+            .with_code(ProjectDiagnostic::ManifestStringField.code())
+            .into_failure()
+    }
+
+    pub fn required_manifest_field(
+        path: impl fmt::Display,
+        field: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("`{field}` is required in {path}"))
+            .with_code(ProjectDiagnostic::RequiredManifestField.code())
+            .into_failure()
+    }
+}
