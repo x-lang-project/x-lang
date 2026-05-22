@@ -106,4 +106,10 @@ impl ProjectDiagnostic {
             Self::PackageImportAmbiguous => "XPR0002",
         }
     }
+
+    pub fn into_failure(self, detail: impl fmt::Display) -> CompilationFailure {
+        Error::new(detail.to_string())
+            .with_code(self.code())
+            .into_failure()
+    }
 }
