@@ -1,6 +1,12 @@
 use super::*;
 
 impl ProjectError {
+    pub fn emulator_table_required(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("[qemu] in {path} must be a table"))
+            .with_code(ProjectDiagnostic::EmulatorConfiguration.code())
+            .into_failure()
+    }
+
     pub fn unknown_manifest_field(
         path: impl fmt::Display,
         section: impl fmt::Display,
