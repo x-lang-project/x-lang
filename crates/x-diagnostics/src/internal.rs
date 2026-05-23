@@ -36,4 +36,10 @@ impl InternalDiagnostic {
             Self::ManifestExecutableMissing => "manifest build",
         }
     }
+
+    pub fn into_failure(self, detail: impl fmt::Display) -> CompilationFailure {
+        Error::new(detail.to_string())
+            .with_code(self.code())
+            .into_internal_failure(self.stage())
+    }
 }
