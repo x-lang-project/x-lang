@@ -1,5 +1,10 @@
 use crate::Error;
 
+pub fn statement_aware_match_required() -> String {
+    Error::new("matches require statement-aware lowering and resolved variant layouts")
+        .render_detail()
+}
+
 pub fn checked_nominal_method_required() -> String {
     Error::new("nominal methods require a checked declaration and explicit receiver contract")
         .render_detail()
@@ -14,6 +19,11 @@ pub fn missing_function_return(name: &str) -> String {
         "function `{name}` can finish without returning its declared value"
     ))
     .render_detail()
+}
+
+pub fn resolved_match_layout_required() -> String {
+    Error::new("refutable matches require a resolved discriminant and variant layout")
+        .render_detail()
 }
 
 pub fn tuple_binding_arity() -> String {
