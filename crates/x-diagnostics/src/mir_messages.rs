@@ -1,5 +1,12 @@
 use crate::Error;
 
+pub fn invariant_reference_context_required(detail: &str) -> String {
+    Error::new(format!(
+        "owner-dependent references require retained local mutation context for invariant enforcement: {detail}"
+    ))
+    .render_detail()
+}
+
 pub fn statement_aware_match_required() -> String {
     Error::new("matches require statement-aware lowering and resolved variant layouts")
         .render_detail()
