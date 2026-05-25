@@ -6,6 +6,10 @@ pub enum FailureKind {
     Internal,
 }
 impl FailureKind {
+    pub fn from_diagnostic(diagnostic: &Diagnostic) -> Self {
+        Self::from_code(diagnostic.code.as_deref().unwrap_or(cli::OPERATIONAL_CODE))
+    }
+
     pub(super) fn from_code(code: &str) -> Self {
         if code.starts_with("ICE-") {
             Self::Internal
