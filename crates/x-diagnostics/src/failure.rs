@@ -60,6 +60,10 @@ impl CompilationFailure {
         failure
     }
 
+    pub fn as_diagnostic(&self) -> &Diagnostic {
+        &self.0.diagnostic
+    }
+
     pub fn with_note(mut self, note: impl Into<String>) -> Self {
         self.0.diagnostic.notes.push(note.into());
         self
