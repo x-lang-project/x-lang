@@ -79,3 +79,10 @@ fn render_unknown_identifier_explanation() -> String {
     ]
     .join("\n")
 }
+
+pub fn known_error_codes() -> Vec<&'static str> {
+    explanations()
+        .iter()
+        .map(|entry| entry.detail.code)
+        .collect()
+}
