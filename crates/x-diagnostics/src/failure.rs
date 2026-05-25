@@ -52,6 +52,24 @@ impl CompilationFailure {
         Self(Box::new(data))
     }
 
+    pub fn stage(
+        source: &str,
+        path: impl AsRef<Path>,
+        identity: StageDiagnostic<'_>,
+        error: impl ToString,
+    ) -> Self {
+        Self::diagnostic(
+            source,
+            path,
+            stage_error_diagnostic(
+                identity.stage,
+                identity.code,
+                error,
+                source_span_for_diagnostic(SourceIdentifier(0), source),
+            ),
+        )
+    }
+
     pub(crate) fn from_internal_error(diagnostic: Diagnostic, stage: String) -> Self {
         let mut failure = Self::from_error(diagnostic);
         failure.0.kind = FailureKind::Internal;
