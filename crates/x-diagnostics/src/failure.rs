@@ -90,6 +90,10 @@ impl CompilationFailure {
         self.0.source = Some((path.as_ref().into(), source.into()));
         self
     }
+
+    pub fn contains(&self, text: &str) -> bool {
+        self.to_string().contains(text)
+    }
 }
 
 impl From<Diagnostic> for CompilationFailure {
