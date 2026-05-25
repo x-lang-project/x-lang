@@ -60,6 +60,10 @@ impl CompilationFailure {
         failure
     }
 
+    pub fn kind(&self) -> FailureKind {
+        self.0.kind
+    }
+
     pub fn code(&self) -> &str {
         &self.0.code
     }
