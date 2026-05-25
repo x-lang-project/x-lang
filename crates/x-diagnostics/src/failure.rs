@@ -70,6 +70,14 @@ impl CompilationFailure {
         self
     }
 
+    pub fn with_source_if_missing(self, source: &str, path: impl AsRef<Path>) -> Self {
+        if self.0.source.is_some() {
+            self
+        } else {
+            self.with_source(source, path)
+        }
+    }
+
     pub fn with_source(mut self, source: &str, path: impl AsRef<Path>) -> Self {
         if self.0.kind == FailureKind::Source && self.0.diagnostic.labels.is_empty() {
             let span = self
