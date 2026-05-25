@@ -14,6 +14,10 @@ pub enum InternalDiagnostic {
 }
 
 impl InternalDiagnostic {
+    pub fn missing_manifest_executable() -> CompilationFailure {
+        Self::ManifestExecutableMissing.into_failure("no executable")
+    }
+
     pub const fn code(self) -> &'static str {
         match self {
             Self::SourceDeclarationMismatch => "ICE-SOURCE-0001",
