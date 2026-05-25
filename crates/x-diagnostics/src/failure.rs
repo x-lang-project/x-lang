@@ -60,6 +60,10 @@ impl CompilationFailure {
         failure
     }
 
+    pub fn code(&self) -> &str {
+        &self.0.code
+    }
+
     pub fn as_diagnostic(&self) -> &Diagnostic {
         &self.0.diagnostic
     }
