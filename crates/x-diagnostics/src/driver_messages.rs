@@ -25,6 +25,23 @@ impl fmt::Display for OsBuildStage<'_> {
 pub struct DriverError;
 
 impl DriverError {
+    pub fn project_object_directory(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!(
+            "Failed to create object output directory {path}: {error}"
+        ))
+        .with_code(OperationalDiagnostic::ProjectObjectDirectory.code())
+        .into_failure()
+    }
+
+    pub fn project_object_path_encoding() -> CompilationFailure {
+        Error::new("Invalid object file path")
+            .with_code(OperationalDiagnostic::ProjectObjectPathEncoding.code())
+            .into_failure()
+    }
+
     pub fn manifest_package_missing(path: impl fmt::Display) -> CompilationFailure {
         Error::new(format!(
             "Manifest {path} missing required [package] section"
@@ -78,6 +95,66 @@ impl DriverError {
     pub fn manifest_os_path(key: &str) -> CompilationFailure {
         Error::new(format!("os.{key} is required and must be a string"))
             .with_code(OperationalDiagnostic::ManifestOsPath.code())
+            .into_failure()
+    }
+
+    pub fn project_input_not_found(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("Path does not exist: {path}"))
+            .with_code(OperationalDiagnostic::ProjectInputNotFound.code())
+            .into_failure()
+    }
+
+    pub fn project_directory_read(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to read directory {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectDirectoryRead.code())
+            .into_failure()
+    }
+
+    pub fn project_directory_entry_read(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to read directory entry in {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectDirectoryEntryRead.code())
+            .into_failure()
+    }
+
+    pub fn project_input_inspection(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to inspect {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectInputInspection.code())
+            .into_failure()
+    }
+
+    pub fn project_parent_directory(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to create {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectParentDirectory.code())
+            .into_failure()
+    }
+
+    pub fn project_source_directory(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to create {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectSourceDirectory.code())
+            .into_failure()
+    }
+
+    pub fn project_file_write(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to write {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectFileWrite.code())
             .into_failure()
     }
 
