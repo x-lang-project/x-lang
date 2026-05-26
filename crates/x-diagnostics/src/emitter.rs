@@ -25,6 +25,16 @@ pub enum DiagnosticStyle {
 }
 
 impl DiagnosticStyle {
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "compact" => Some(Self::Compact),
+            "rich" => Some(Self::Rich),
+            "ascii" => Some(Self::Ascii),
+            "unicode" => Some(Self::Unicode),
+            _ => None,
+        }
+    }
+
     fn uses_unicode(self) -> bool {
         matches!(self, Self::Rich | Self::Unicode)
     }
@@ -39,6 +49,17 @@ pub enum ColourChoice {
     Auto,
     Always,
     Never,
+}
+
+impl ColourChoice {
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "auto" => Some(Self::Auto),
+            "always" => Some(Self::Always),
+            "never" => Some(Self::Never),
+            _ => None,
+        }
+    }
 }
 
 pub struct Emitter {
