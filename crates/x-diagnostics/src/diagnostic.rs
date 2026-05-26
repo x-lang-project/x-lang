@@ -124,6 +124,11 @@ impl Diagnostic {
         self
     }
 
+    pub fn with_suggestion(mut self, text: Suggestion) -> Self {
+        self.suggestions.push(text);
+        self
+    }
+
     pub fn with_fact(mut self, fact: DiagnosticFact) -> Self {
         self.facts.push(fact);
         self
