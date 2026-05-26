@@ -124,6 +124,24 @@ impl Emitter {
 
         Ok(())
     }
+
+    pub fn emit_all(
+        &self,
+        database: &FileDatabase,
+        diags: &[Diagnostic],
+        mut writer: impl Write,
+    ) -> io::Result<()> {
+        let mut summary = DiagnosticSummary::default();
+
+        for diagnostic in diags {
+            self.emit(database, diagnostic, &mut writer)?;
+            summary.record(diagnostic);
+        }
+
+        summary.emit(self.use_colour, &mut writer)?;
+
+        Ok(())
+    }
 }
 
 mod colour;
