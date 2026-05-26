@@ -22,6 +22,11 @@ pub struct Suggestion {
 }
 
 impl Suggestion {
+    pub fn applicability(mut self, first_value: Applicability) -> Self {
+        self.applicability = first_value;
+        self
+    }
+
     pub fn edit(mut self, span: Span, replacement: impl Into<String>) -> Self {
         self.edits.push(SpanEdit {
             span,
