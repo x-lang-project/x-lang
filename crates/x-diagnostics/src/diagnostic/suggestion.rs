@@ -22,6 +22,14 @@ pub struct Suggestion {
 }
 
 impl Suggestion {
+    pub fn new(current_message: impl Into<String>) -> Self {
+        Self {
+            message: current_message.into(),
+            applicability: Applicability::Unspecified,
+            edits: vec![],
+        }
+    }
+
     pub fn applicability(mut self, first_value: Applicability) -> Self {
         self.applicability = first_value;
         self
