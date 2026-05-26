@@ -25,6 +25,11 @@ impl fmt::Display for OsBuildStage<'_> {
 pub struct DriverError;
 
 impl DriverError {
+    pub fn jit_project_configuration() -> CompilationFailure {
+        crate::CliError::operational("--jit requires a hosted project without custom link inputs")
+            .into_failure()
+    }
+
     pub fn project_object_directory(
         path: impl fmt::Display,
         error: impl fmt::Display,
@@ -131,6 +136,20 @@ impl DriverError {
             .into_failure()
     }
 
+    pub fn project_destination_exists(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("Destination already exists: {path}"))
+            .with_code(OperationalDiagnostic::ProjectDestinationExists.code())
+            .into_failure()
+    }
+
+    pub fn project_name_invalid(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "Project directory name must use only ASCII letters, digits, `_`, or `-`: {path}"
+        ))
+        .with_code(OperationalDiagnostic::ProjectNameInvalid.code())
+        .into_failure()
+    }
+
     pub fn project_parent_directory(
         path: impl fmt::Display,
         error: impl fmt::Display,
@@ -138,6 +157,27 @@ impl DriverError {
         Error::new(format!("Failed to create {path}: {error}"))
             .with_code(OperationalDiagnostic::ProjectParentDirectory.code())
             .into_failure()
+    }
+
+    pub fn project_destination_create(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("Failed to create {path}: {error}"))
+            .with_code(OperationalDiagnostic::ProjectDestinationCreate.code())
+            .into_failure()
+    }
+
+    pub fn project_rollback(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+        cleanup_error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!(
+            "{error}; also failed to remove incomplete project {path}: {cleanup_error}"
+        ))
+        .with_code(OperationalDiagnostic::ProjectRollback.code())
+        .into_failure()
     }
 
     pub fn project_source_directory(
