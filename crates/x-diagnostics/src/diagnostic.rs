@@ -138,4 +138,8 @@ impl Diagnostic {
         self.json_payload = Some(payload);
         self
     }
+
+    pub fn is_error(&self) -> bool {
+        matches!(self.severity, Severity::Error)
+    }
 }
