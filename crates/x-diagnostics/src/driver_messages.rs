@@ -24,4 +24,10 @@ impl fmt::Display for OsBuildStage<'_> {
 
 pub struct DriverError;
 
+impl DriverError {
+    pub fn iso_tool_unavailable(path: impl fmt::Display) -> String {
+        Error::new(format!("warning: grub-mkrescue is unavailable; kernel remains directly bootable by QEMU: {path}")).render_detail()
+    }
+}
+
 mod os;
