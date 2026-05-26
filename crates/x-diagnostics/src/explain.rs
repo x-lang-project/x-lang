@@ -45,6 +45,44 @@ fn explanation_entry(code: &str) -> Option<&'static ExplanationEntry> {
         .find(|entry| entry.detail.code.eq_ignore_ascii_case(code))
 }
 
+pub fn render_error_explanation(code: &str) -> Option<String> {
+    let entry = explanation_entry(code)?;
+
+    match entry.render {
+        ExplanationRender::UnknownIdentifier => {
+            return Some(render_unknown_identifier_explanation());
+        }
+        ExplanationRender::Standard => {}
+    }
+
+    let explanation = entry.detail;
+
+    let mut output = String::new();
+    output.push_str(&format!("{}: {}\n", explanation.code, explanation.title));
+    output.push_str(explanation.summary);
+    output.push('\n');
+
+    if !explanation.facts.is_empty() {
+        output.push_str("\nDetails:\n");
+
+        for fact in explanation.facts {
+            output.push_str("  - ");
+            output.push_str(fact);
+            output.push('\n');
+        }
+    }
+
+    if !explanation.fixes.is_empty() {
+        output.push_str("\nPossible fixes:\n");
+
+        for (index, fix) in explanation.fixes.iter().enumerate() {
+            output.push_str(&format!("  {}. {}\n", index + 1, fix));
+        }
+    }
+
+    Some(output.trim_end().to_string())
+}
+
 fn render_unknown_identifier_explanation() -> String {
     [
         "E0006: unknown identifier",
