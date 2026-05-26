@@ -45,6 +45,10 @@ fn explanation_entry(code: &str) -> Option<&'static ExplanationEntry> {
         .find(|entry| entry.detail.code.eq_ignore_ascii_case(code))
 }
 
+pub fn explain_error(code: &str) -> Option<ErrorExplanation> {
+    explanation_entry(code).map(|entry| entry.detail)
+}
+
 pub fn render_error_explanation(code: &str) -> Option<String> {
     let entry = explanation_entry(code)?;
 
