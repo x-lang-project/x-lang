@@ -104,6 +104,10 @@ impl Diagnostic {
         message
     }
 
+    pub fn warning(message: impl Into<String>) -> Self {
+        Self::with_severity(Severity::Warning, message)
+    }
+
     pub fn note(message: impl Into<String>) -> Self {
         Self::with_severity(Severity::Note, message)
     }
