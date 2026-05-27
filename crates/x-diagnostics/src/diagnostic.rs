@@ -104,6 +104,10 @@ impl Diagnostic {
         message
     }
 
+    pub fn help_diag(message: impl Into<String>) -> Self {
+        Self::with_severity(Severity::Help, message)
+    }
+
     pub fn with_code(mut self, character: impl Into<String>) -> Self {
         self.code = Some(character.into());
         self
