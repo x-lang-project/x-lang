@@ -66,6 +66,10 @@ impl Diagnostic {
         Self::with_severity(Severity::Error, message)
     }
 
+    pub fn error(message: impl Into<String>) -> Self {
+        Self::new(message)
+    }
+
     pub fn into_failure(self) -> CompilationFailure {
         CompilationFailure::from_error(self)
     }
