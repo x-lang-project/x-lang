@@ -1,5 +1,12 @@
 use super::*;
 
+pub fn cheri_parallel_loop(function: &str) -> String {
+    Error::new(format!(
+        "CHERI target does not support parallel loops in `{function}`"
+    ))
+    .render_detail()
+}
+
 pub fn size_expression_in_function(function: &str) -> String {
     Error::new(format!("size expression in `{function}`")).render_detail()
 }
