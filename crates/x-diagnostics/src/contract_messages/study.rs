@@ -1,5 +1,23 @@
 use super::*;
 
+pub fn cheri_structure_layout(struct_name: &str, layout: impl Debug) -> String {
+    Error::new(format!(
+        "CHERI target requires AoS layout for structure `{struct_name}`, found {layout:?}"
+    ))
+    .render_detail()
+}
+
+pub fn cheri_generic_structure(struct_name: &str) -> String {
+    Error::new(format!(
+        "CHERI target requires a concrete structure for `{struct_name}`"
+    ))
+    .render_detail()
+}
+
+pub fn field_field_of_structure_value(field: &str, struct_name: &str) -> String {
+    Error::new(format!("field `{field}` of structure `{struct_name}`")).render_detail()
+}
+
 pub fn cheri_trait_implementation(trait_name: &str) -> String {
     Error::new(format!(
         "CHERI target does not support trait implementation `{trait_name}`"
