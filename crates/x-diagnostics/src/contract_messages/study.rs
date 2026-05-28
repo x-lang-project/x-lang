@@ -1,5 +1,9 @@
 use super::*;
 
+pub fn managed_string_in_context(context: &str) -> String {
+    Error::new(format!("managed string in {context}")).render_detail()
+}
+
 pub fn tuple_in_context(context: &str) -> String {
     Error::new(format!("tuple in {context}")).render_detail()
 }
