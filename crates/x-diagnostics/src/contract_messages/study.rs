@@ -1,7 +1,15 @@
 use super::*;
 
+pub fn dynamic_slice_in_context(context: &str) -> String {
+    Error::new(format!("dynamic slice in {context}")).render_detail()
+}
+
 pub fn managed_string_in_context(context: &str) -> String {
     Error::new(format!("managed string in {context}")).render_detail()
+}
+
+pub fn raw_pointer_in_context(context: &str) -> String {
+    Error::new(format!("raw pointer in {context}")).render_detail()
 }
 
 pub fn tuple_in_context(context: &str) -> String {
@@ -11,6 +19,17 @@ pub fn tuple_in_context(context: &str) -> String {
 pub fn cheri_parallel_loop(function: &str) -> String {
     Error::new(format!(
         "CHERI target does not support parallel loops in `{function}`"
+    ))
+    .render_detail()
+}
+
+pub fn pointer_arithmetic_in_function_function(function: &str) -> String {
+    Error::new(format!("pointer arithmetic in function `{function}`")).render_detail()
+}
+
+pub fn cast_to_pointer_or_safe_reference_in_function_function(function: &str) -> String {
+    Error::new(format!(
+        "cast to pointer or safe reference in function `{function}`"
     ))
     .render_detail()
 }
