@@ -1,5 +1,16 @@
 use super::*;
 
+pub fn cheri_trait_implementation(trait_name: &str) -> String {
+    Error::new(format!(
+        "CHERI target does not support trait implementation `{trait_name}`"
+    ))
+    .render_detail()
+}
+
+pub fn cheri_static(name: &str) -> String {
+    Error::new(format!("CHERI target does not support static `{name}`")).render_detail()
+}
+
 pub fn dynamic_slice_in_context(context: &str) -> String {
     Error::new(format!("dynamic slice in {context}")).render_detail()
 }
@@ -14,6 +25,18 @@ pub fn raw_pointer_in_context(context: &str) -> String {
 
 pub fn tuple_in_context(context: &str) -> String {
     Error::new(format!("tuple in {context}")).render_detail()
+}
+
+pub fn simd_value_in_context(context: &str) -> String {
+    Error::new(format!("SIMD value in {context}")).render_detail()
+}
+
+pub fn unresolved_generic_type_in_context(context: &str) -> String {
+    Error::new(format!("unresolved generic type in {context}")).render_detail()
+}
+
+pub fn unresolved_type_in_context(context: &str) -> String {
+    Error::new(format!("unresolved type in {context}")).render_detail()
 }
 
 pub fn cheri_parallel_loop(function: &str) -> String {
