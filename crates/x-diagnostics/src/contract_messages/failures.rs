@@ -1,5 +1,26 @@
 use super::*;
 
+pub fn memoized_function_impure(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::MemoizedFunctionImpure
+        .into_failure(memoise_function_name_must_also_be_pure(name))
+}
+
+pub fn memoized_function_throws(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::MemoizedFunctionThrows
+        .into_failure(memoise_function_name_cannot_throw(name))
+}
+
+pub fn memoized_multi_function(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::MemoizedMultiFunction
+        .into_failure(memoise_and_multi_cannot_be_combined_on_name(name))
+}
+
+pub fn memoized_function_non_scalar(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::MemoizedFunctionNonScalar.into_failure(
+        memoise_function_name_requires_scalar_numeric_boolean_or_char_parameters_and_return(name),
+    )
+}
+
 pub fn multi_function_dispatch_missing(name: &str) -> CompilationFailure {
     OperationalDiagnostic::MultiFunctionDispatchMissing
         .into_failure(multi_function_name_requires_a_non_static_dispatch_parameter(name))
