@@ -1,5 +1,36 @@
 use super::*;
 
+pub fn parallel_body_unsupported() -> CompilationFailure {
+    OperationalDiagnostic::ParallelBodyUnsupported
+        .into_failure(x_contract_parallel_parallel_range_body_must_be_exactly_one_direct_worker())
+}
+
+pub fn parallel_worker_input_invalid() -> CompilationFailure {
+    OperationalDiagnostic::ParallelWorkerInputInvalid
+        .into_failure(parallel_worker_must_receive_the_loop_variable_first())
+}
+
+pub fn parallel_worker_unknown(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::ParallelWorkerUnknown
+        .into_failure(parallel_worker_name_is_not_a_known_function(name))
+}
+
+pub fn parallel_worker_signature_invalid(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::ParallelWorkerSignatureInvalid
+        .into_failure(parallel_worker_name_must_be_a_pure_non_throwing_function_with_first(name))
+}
+
+pub fn parallel_capture_unsupported() -> CompilationFailure {
+    OperationalDiagnostic::ParallelCaptureUnsupported.into_failure(
+        x_contract_parallel_captures_must_be_invariant_scalar_values_or_transitively_read(),
+    )
+}
+
+pub fn parallel_foreach_unsupported() -> CompilationFailure {
+    OperationalDiagnostic::ParallelForeachUnsupported
+        .into_failure(parallel_foreach_is_not_executable_use_a_range_worker())
+}
+
 pub fn object_output_directory(
     output_directory: impl Display,
     error: impl Display,
