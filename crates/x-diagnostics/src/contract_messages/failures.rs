@@ -7,3 +7,13 @@ pub enum ContractValidationPhase {
     Optimisation,
     ManifestLowering,
 }
+
+impl ContractValidationPhase {
+    pub fn note(self) -> &'static str {
+        match self {
+            Self::Lowering => "contract validation failed before lowering",
+            Self::Optimisation => "optimiser contract validation failed before optimisation",
+            Self::ManifestLowering => "contract validation failed before manifest lowering",
+        }
+    }
+}
