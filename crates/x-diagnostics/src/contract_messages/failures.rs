@@ -1,5 +1,9 @@
 use super::*;
 
+pub fn pure_function_throws(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::PureFunctionThrows.into_failure(pure_function_name_cannot_throw(name))
+}
+
 pub fn memoized_function_impure(name: &str) -> CompilationFailure {
     OperationalDiagnostic::MemoizedFunctionImpure
         .into_failure(memoise_function_name_must_also_be_pure(name))
@@ -24,6 +28,10 @@ pub fn memoized_function_non_scalar(name: &str) -> CompilationFailure {
 pub fn multi_function_dispatch_missing(name: &str) -> CompilationFailure {
     OperationalDiagnostic::MultiFunctionDispatchMissing
         .into_failure(multi_function_name_requires_a_non_static_dispatch_parameter(name))
+}
+
+pub fn struct_invariant_unsupported(struct_name: &str) -> CompilationFailure {
+    OperationalDiagnostic::StructInvariantUnsupported.into_failure(x_contract_invariant_struct_invariant_for_value_cannot_contain_calls_assignments_dereferences(struct_name))
 }
 
 pub fn parallel_body_unsupported() -> CompilationFailure {
