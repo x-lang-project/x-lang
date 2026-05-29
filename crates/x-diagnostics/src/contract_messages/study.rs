@@ -1,5 +1,12 @@
 use super::*;
 
+pub fn cheri_throwing_function(name: &str) -> String {
+    Error::new(format!(
+        "CHERI target does not support throwing function `{name}`"
+    ))
+    .render_detail()
+}
+
 pub fn cheri_structure_layout(struct_name: &str, layout: impl Debug) -> String {
     Error::new(format!(
         "CHERI target requires AoS layout for structure `{struct_name}`, found {layout:?}"
