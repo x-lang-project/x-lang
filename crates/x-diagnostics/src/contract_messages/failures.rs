@@ -1,5 +1,10 @@
 use super::*;
 
+pub fn source_declaration_mismatch() -> CompilationFailure {
+    InternalDiagnostic::SourceDeclarationMismatch
+        .into_failure(source_declaration_metadata_does_not_match_the_parsed_module())
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ContractValidationPhase {
     #[default]
