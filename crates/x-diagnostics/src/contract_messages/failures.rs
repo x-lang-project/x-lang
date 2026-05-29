@@ -1,5 +1,10 @@
 use super::*;
 
+pub fn multi_function_dispatch_missing(name: &str) -> CompilationFailure {
+    OperationalDiagnostic::MultiFunctionDispatchMissing
+        .into_failure(multi_function_name_requires_a_non_static_dispatch_parameter(name))
+}
+
 pub fn parallel_body_unsupported() -> CompilationFailure {
     OperationalDiagnostic::ParallelBodyUnsupported
         .into_failure(x_contract_parallel_parallel_range_body_must_be_exactly_one_direct_worker())
@@ -29,6 +34,11 @@ pub fn parallel_capture_unsupported() -> CompilationFailure {
 pub fn parallel_foreach_unsupported() -> CompilationFailure {
     OperationalDiagnostic::ParallelForeachUnsupported
         .into_failure(parallel_foreach_is_not_executable_use_a_range_worker())
+}
+
+pub fn become_not_final() -> CompilationFailure {
+    OperationalDiagnostic::BecomeNotFinal
+        .into_failure(become_must_be_the_final_statement_in_its_block())
 }
 
 pub fn object_output_directory(
