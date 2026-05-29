@@ -1,5 +1,10 @@
 use super::*;
 
+pub fn cheri_unsupported_construct(detail: &str) -> CompilationFailure {
+    OperationalDiagnostic::CheriUnsupportedConstruct
+        .into_failure(format!("unsupported CHERI input: {detail}"))
+}
+
 pub fn pure_function_throws(name: &str) -> CompilationFailure {
     OperationalDiagnostic::PureFunctionThrows.into_failure(pure_function_name_cannot_throw(name))
 }
@@ -68,6 +73,11 @@ pub fn parallel_foreach_unsupported() -> CompilationFailure {
 pub fn become_not_final() -> CompilationFailure {
     OperationalDiagnostic::BecomeNotFinal
         .into_failure(become_must_be_the_final_statement_in_its_block())
+}
+
+pub fn cheri_certified_build_required() -> CompilationFailure {
+    OperationalDiagnostic::CheriCertifiedBuildRequired
+        .into_failure(use_x_cheri_build_the_ordinary_llvm_object_path_cannot_certify_the())
 }
 
 pub fn object_output_directory(
