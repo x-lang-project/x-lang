@@ -7,6 +7,12 @@ use crate::{CompilationFailure, OperationalDiagnostic};
 pub struct CliDiagnostic;
 
 impl CliDiagnostic {
+    pub fn package_entry_missing(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("{path} has no package.entry"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
     pub fn panic_identifier(hash: u64) -> String {
         format!("ICE-{hash:016X}")
     }
