@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn struct_value_field_field(struct_name: impl Display, field: impl Display) -> String {
+    Error::new(format!("struct `{struct_name}` field `{field}`")).render_detail()
+}
+
 pub fn mir_validation_missing_entry_block(function: impl Display) -> String {
     Error::new(format!("function `{function}` has no entry block 0"))
         .with_code("M1001")
