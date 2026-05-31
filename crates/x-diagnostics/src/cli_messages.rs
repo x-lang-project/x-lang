@@ -7,6 +7,12 @@ use crate::{CompilationFailure, OperationalDiagnostic};
 pub struct CliDiagnostic;
 
 impl CliDiagnostic {
+    pub fn clock_before_epoch(error: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("system clock is before the Unix epoch: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
     pub fn probe_directory_create(
         path: impl fmt::Display,
         error: impl fmt::Display,
