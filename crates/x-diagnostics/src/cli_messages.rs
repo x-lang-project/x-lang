@@ -7,6 +7,21 @@ use crate::{CompilationFailure, OperationalDiagnostic};
 pub struct CliDiagnostic;
 
 impl CliDiagnostic {
+    pub fn clang_query(path: impl fmt::Display, error: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("failed to query {path}: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn clang_version(
+        status: impl fmt::Display,
+        stderr: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("clang --version failed with {status}: {stderr}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
     pub fn doctor_tools_missing(tools: impl fmt::Display) -> CompilationFailure {
         Error::new(format!(
             "doctor found missing or incompatible required tools: {tools}"
@@ -30,6 +45,15 @@ impl CliDiagnostic {
             .into_failure()
     }
 
+    pub fn openmp_compiler_start(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("failed to start {path}: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
     pub fn openmp_input_missing() -> CompilationFailure {
         Error::new("failed to open the OpenMP compiler probe input")
             .with_code(cli::OPERATIONAL_CODE)
@@ -42,6 +66,32 @@ impl CliDiagnostic {
         ))
         .with_code(cli::OPERATIONAL_CODE)
         .into_failure()
+    }
+
+    pub fn openmp_compiler_wait(error: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "failed to wait for the OpenMP compiler probe: {error}"
+        ))
+        .with_code(cli::OPERATIONAL_CODE)
+        .into_failure()
+    }
+
+    pub fn openmp_compile(stderr: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("Clang could not compile and link OpenMP: {stderr}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn openmp_probe_run(error: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("failed to run the linked OpenMP probe: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn openmp_probe_exit(status: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("linked OpenMP probe exited with {status}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
     }
 
     pub fn probe_directory_remove(
@@ -112,6 +162,13 @@ impl CliDiagnostic {
 
     pub fn non_string_panic_payload() -> &'static str {
         "non-string panic payload"
+    }
+
+    pub fn logging_initialization(error: impl fmt::Display) -> String {
+        Error::new(format!("compiler logging initialisation failed: {error}"))
+            .with_code("ICE-LOGGING-0001")
+            .with_note("report the full command, environment, and `x --version`")
+            .render_plain()
     }
 }
 
