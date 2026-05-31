@@ -7,6 +7,14 @@ use crate::{CompilationFailure, OperationalDiagnostic};
 pub struct CliDiagnostic;
 
 impl CliDiagnostic {
+    pub fn doctor_tools_missing(tools: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "doctor found missing or incompatible required tools: {tools}"
+        ))
+        .with_code(cli::OPERATIONAL_CODE)
+        .into_failure()
+    }
+
     pub fn clock_before_epoch(error: impl fmt::Display) -> CompilationFailure {
         Error::new(format!("system clock is before the Unix epoch: {error}"))
             .with_code(cli::OPERATIONAL_CODE)
@@ -45,6 +53,12 @@ impl CliDiagnostic {
             .into_failure()
     }
 
+    pub fn command_missing() -> CompilationFailure {
+        Error::new("a command is required")
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
     pub fn source_input_invalid(path: impl fmt::Display) -> CompilationFailure {
         Error::new(format!("{path} is not an X source or x.toml project"))
             .with_code(cli::OPERATIONAL_CODE)
@@ -53,6 +67,30 @@ impl CliDiagnostic {
 
     pub fn package_entry_missing(path: impl fmt::Display) -> CompilationFailure {
         Error::new(format!("{path} has no package.entry"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn executable_locate(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("failed to locate executable {path}: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn executable_run(path: impl fmt::Display, error: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("failed to run {path}: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn executable_exit(
+        path: impl fmt::Display,
+        status: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("{path} exited with {status}"))
             .with_code(cli::OPERATIONAL_CODE)
             .into_failure()
     }
