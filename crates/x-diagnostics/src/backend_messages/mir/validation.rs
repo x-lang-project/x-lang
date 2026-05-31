@@ -2,6 +2,44 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn mir_validation_missing_entry_block(function: impl Display) -> String {
+    Error::new(format!("function `{function}` has no entry block 0"))
+        .with_code("M1001")
+        .render_detail()
+}
+
+pub fn mir_validation_local_identity_mismatch(
+    function: impl Display,
+    key: impl Display,
+    declared: impl Display,
+) -> String {
+    Error::new(format!(
+        "function `{function}` local map key {key} disagrees with declaration {declared}"
+    ))
+    .with_code("M1004")
+    .render_detail()
+}
+
+pub fn mir_validation_missing_terminator(function: impl Display, block: impl Display) -> String {
+    Error::new(format!(
+        "function `{function}` block {block} has no terminator"
+    ))
+    .with_code("M1005")
+    .render_detail()
+}
+
+pub fn mir_validation_missing_target_block(
+    function: impl Display,
+    block: impl Display,
+    target: impl Display,
+) -> String {
+    Error::new(format!(
+        "function `{function}` block {block} targets missing block {target}"
+    ))
+    .with_code("M1006")
+    .render_detail()
+}
+
 pub fn mir_validation_non_finite_float(function: impl Display, block: impl Display) -> String {
     Error::new(format!(
         "function `{function}` block {block} contains a non-finite float constant"
