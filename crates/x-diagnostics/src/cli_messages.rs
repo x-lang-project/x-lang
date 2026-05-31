@@ -7,6 +7,44 @@ use crate::{CompilationFailure, OperationalDiagnostic};
 pub struct CliDiagnostic;
 
 impl CliDiagnostic {
+    pub fn probe_directory_create(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("failed to create probe directory {path}: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn openmp_input_missing() -> CompilationFailure {
+        Error::new("failed to open the OpenMP compiler probe input")
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn openmp_input_write(error: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!(
+            "failed to write the OpenMP compiler probe: {error}"
+        ))
+        .with_code(cli::OPERATIONAL_CODE)
+        .into_failure()
+    }
+
+    pub fn probe_directory_remove(
+        path: impl fmt::Display,
+        error: impl fmt::Display,
+    ) -> CompilationFailure {
+        Error::new(format!("failed to remove probe directory {path}: {error}"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
+    pub fn source_input_invalid(path: impl fmt::Display) -> CompilationFailure {
+        Error::new(format!("{path} is not an X source or x.toml project"))
+            .with_code(cli::OPERATIONAL_CODE)
+            .into_failure()
+    }
+
     pub fn package_entry_missing(path: impl fmt::Display) -> CompilationFailure {
         Error::new(format!("{path} has no package.entry"))
             .with_code(cli::OPERATIONAL_CODE)
