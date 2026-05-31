@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn static_name(name: impl Display) -> String {
+    Error::new(format!("static `{name}`")).render_detail()
+}
+
 pub fn struct_value_field_field(struct_name: impl Display, field: impl Display) -> String {
     Error::new(format!("struct `{struct_name}` field `{field}`")).render_detail()
 }
@@ -41,6 +45,26 @@ pub fn mir_validation_missing_target_block(
         "function `{function}` block {block} targets missing block {target}"
     ))
     .with_code("M1006")
+    .render_detail()
+}
+
+pub fn mir_validation_missing_local(
+    function: impl Display,
+    block: impl Display,
+    local: impl Display,
+) -> String {
+    Error::new(format!(
+        "function `{function}` block {block} references missing local {local}"
+    ))
+    .with_code("M1007")
+    .render_detail()
+}
+
+pub fn mir_validation_unresolved_type(context: impl Display, value_type: impl Debug) -> String {
+    Error::new(format!(
+        "`{context}` contains unresolved type `{value_type:?}`"
+    ))
+    .with_code("M1008")
     .render_detail()
 }
 
