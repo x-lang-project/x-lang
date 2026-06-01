@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn payload_binding_arity_exceeds_tuple_fields() -> String {
+    Error::new("payload binding arity exceeds tuple fields").render_detail()
+}
+
 pub fn control_flow_evaluation_is_not_implemented_inside_shape(shape: impl Debug) -> String {
     Error::new(format!(
         "control-flow evaluation is not implemented inside {shape:?}"
@@ -16,6 +20,14 @@ pub fn array_repetition_length_must_remain_a_compile_time_integer_through_mir_lo
 
 pub fn array_repetition_length_must_be_non_negative_and_fit_usize() -> String {
     Error::new("array repetition length must be non-negative and fit usize").render_detail()
+}
+
+pub fn tuple_pattern_requires_a_tuple() -> String {
+    Error::new("tuple pattern requires a tuple").render_detail()
+}
+
+pub fn tuple_pattern_arity_mismatch() -> String {
+    Error::new("tuple pattern arity mismatch").render_detail()
 }
 
 pub fn expected_an_irrefutable_pattern() -> String {
