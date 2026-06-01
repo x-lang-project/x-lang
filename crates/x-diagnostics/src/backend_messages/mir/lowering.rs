@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn field_object_is_not_a_place_operand_other(other: impl Debug) -> String {
+    Error::new(format!("field object is not a place operand: {other:?}")).render_detail()
+}
+
 pub fn postfix_requires_a_direct_throwing_call() -> String {
     Error::new("postfix `?` requires a direct throwing call").render_detail()
 }
@@ -52,6 +56,10 @@ pub fn catch_fallback_integer_overflows() -> String {
 
 pub fn catch_fallback_must_already_be_evaluated() -> String {
     Error::new("catch fallback must already be evaluated").render_detail()
+}
+
+pub fn some_constructor_lost_its_validated_argument() -> String {
+    Error::new("Some constructor lost its validated argument").render_detail()
 }
 
 pub fn control_flow_evaluation_is_not_implemented_inside_shape(shape: impl Debug) -> String {
