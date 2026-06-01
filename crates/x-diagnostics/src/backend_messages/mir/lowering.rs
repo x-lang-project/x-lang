@@ -2,6 +2,15 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn array_repetition_length_must_remain_a_compile_time_integer_through_mir_lowering() -> String {
+    Error::new("array repetition length must remain a compile-time integer through MIR lowering")
+        .render_detail()
+}
+
+pub fn serial_range_requires_integer_bounds() -> String {
+    Error::new("range loops require integer bounds").render_detail()
+}
+
 pub fn parallel_range_body_must_be_one_direct_worker_call() -> String {
     Error::new("parallel range body must be one direct worker call").render_detail()
 }
