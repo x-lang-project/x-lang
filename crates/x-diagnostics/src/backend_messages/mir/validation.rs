@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn function_name_parameter_index(name: impl Display, index: impl Display) -> String {
+    Error::new(format!("function `{name}` parameter {index}")).render_detail()
+}
+
 pub fn function_name_return_type(name: impl Display) -> String {
     Error::new(format!("function `{name}` return type")).render_detail()
 }
@@ -39,6 +43,10 @@ pub fn function_function_block_value_global(function: impl Display, block: impl 
 
 pub fn function_function_block_value_place(function: impl Display, block: impl Display) -> String {
     Error::new(format!("function `{function}` block {block} place")).render_detail()
+}
+
+pub fn function_function_block_value_index(function: impl Display, block: impl Display) -> String {
+    Error::new(format!("function `{function}` block {block} index")).render_detail()
 }
 
 pub fn mir_validation_missing_entry_block(function: impl Display) -> String {
