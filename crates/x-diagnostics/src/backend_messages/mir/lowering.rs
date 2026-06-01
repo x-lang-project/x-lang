@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn postfix_requires_a_direct_throwing_call() -> String {
+    Error::new("postfix `?` requires a direct throwing call").render_detail()
+}
+
 pub fn if_expression_lowering_requires_expression_valued_branches() -> String {
     Error::new("if expression lowering requires expression-valued branches").render_detail()
 }
@@ -28,6 +32,26 @@ pub fn match_expression_lowering_is_not_implemented_for_this_shape_arms(
 
 pub fn payload_binding_arity_exceeds_tuple_fields() -> String {
     Error::new("payload binding arity exceeds tuple fields").render_detail()
+}
+
+pub fn catch_is_missing_its_throwing_call() -> String {
+    Error::new("catch is missing its throwing call").render_detail()
+}
+
+pub fn catch_is_missing_its_fallback_value() -> String {
+    Error::new("catch is missing its fallback value").render_detail()
+}
+
+pub fn catch_requires_a_direct_throwing_call() -> String {
+    Error::new("catch requires a direct throwing call").render_detail()
+}
+
+pub fn catch_fallback_integer_overflows() -> String {
+    Error::new("catch fallback integer overflows").render_detail()
+}
+
+pub fn catch_fallback_must_already_be_evaluated() -> String {
+    Error::new("catch fallback must already be evaluated").render_detail()
 }
 
 pub fn control_flow_evaluation_is_not_implemented_inside_shape(shape: impl Debug) -> String {
@@ -60,6 +84,10 @@ pub fn expected_an_irrefutable_pattern() -> String {
 
 pub fn match_statement_has_no_arms() -> String {
     Error::new("match statement has no arms").render_detail()
+}
+
+pub fn internal_call_index_did_not_identify_a_try_or_catch_call() -> String {
+    Error::new("internal call index did not identify a try or catch call").render_detail()
 }
 
 pub fn serial_range_requires_integer_bounds() -> String {
