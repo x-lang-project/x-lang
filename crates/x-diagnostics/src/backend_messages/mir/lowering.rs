@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn deref_source_is_not_a_place_operand_other(other: impl Debug) -> String {
+    Error::new(format!("deref source is not a place operand: {other:?}")).render_detail()
+}
+
 pub fn array_base_is_not_a_place_operand_other(other: impl Debug) -> String {
     Error::new(format!("array base is not a place operand: {other:?}")).render_detail()
 }
@@ -70,6 +74,17 @@ pub fn some_constructor_lost_its_validated_argument() -> String {
     Error::new("Some constructor lost its validated argument").render_detail()
 }
 
+pub fn expression_is_not_addressable_other(other: impl Debug) -> String {
+    Error::new(format!("expression is not addressable: {other:?}")).render_detail()
+}
+
+pub fn deref_source_is_not_a_resolvable_place_operand_other(other: impl Debug) -> String {
+    Error::new(format!(
+        "deref source is not a resolvable place operand: {other:?}"
+    ))
+    .render_detail()
+}
+
 pub fn context_is_not_a_resolvable_place_operand_other(
     context: impl Display,
     other: impl Debug,
@@ -114,6 +129,17 @@ pub fn lower_match_statement_called_for_a_non_match_expression() -> String {
 
 pub fn match_statement_has_no_arms() -> String {
     Error::new("match statement has no arms").render_detail()
+}
+
+pub fn assignment_destination_is_not_addressable_other(other: impl Debug) -> String {
+    Error::new(format!(
+        "assignment destination is not addressable: {other:?}"
+    ))
+    .render_detail()
+}
+
+pub fn internal_call_index_did_not_identify_an_assignment() -> String {
+    Error::new("internal call index did not identify an assignment").render_detail()
 }
 
 pub fn internal_call_index_did_not_identify_a_try_or_catch_call() -> String {
