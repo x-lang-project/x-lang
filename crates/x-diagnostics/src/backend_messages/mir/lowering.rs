@@ -2,8 +2,16 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn array_base_is_not_a_place_operand_other(other: impl Debug) -> String {
+    Error::new(format!("array base is not a place operand: {other:?}")).render_detail()
+}
+
 pub fn field_object_is_not_a_place_operand_other(other: impl Debug) -> String {
     Error::new(format!("field object is not a place operand: {other:?}")).render_detail()
+}
+
+pub fn postfix_did_not_lower_to_a_direct_function_call() -> String {
+    Error::new("postfix `?` did not lower to a direct function call").render_detail()
 }
 
 pub fn postfix_requires_a_direct_throwing_call() -> String {
@@ -62,6 +70,16 @@ pub fn some_constructor_lost_its_validated_argument() -> String {
     Error::new("Some constructor lost its validated argument").render_detail()
 }
 
+pub fn context_is_not_a_resolvable_place_operand_other(
+    context: impl Display,
+    other: impl Debug,
+) -> String {
+    Error::new(format!(
+        "{context} is not a resolvable place operand: {other:?}"
+    ))
+    .render_detail()
+}
+
 pub fn control_flow_evaluation_is_not_implemented_inside_shape(shape: impl Debug) -> String {
     Error::new(format!(
         "control-flow evaluation is not implemented inside {shape:?}"
@@ -88,6 +106,10 @@ pub fn tuple_pattern_arity_mismatch() -> String {
 
 pub fn expected_an_irrefutable_pattern() -> String {
     Error::new("expected an irrefutable pattern").render_detail()
+}
+
+pub fn lower_match_statement_called_for_a_non_match_expression() -> String {
+    Error::new("lower_match_statement called for a non-match expression").render_detail()
 }
 
 pub fn match_statement_has_no_arms() -> String {
@@ -120,6 +142,10 @@ pub fn break_is_only_executable_inside_a_loop() -> String {
 
 pub fn continue_is_only_executable_inside_a_loop() -> String {
     Error::new("`continue` is only executable inside a loop").render_detail()
+}
+
+pub fn become_requires_a_direct_function_call() -> String {
+    Error::new("`become` requires a direct function call").render_detail()
 }
 
 pub fn expected_if_expression() -> String {
