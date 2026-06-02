@@ -1,5 +1,9 @@
 use crate::Error;
 
+pub fn print_requires_declared_value_function() -> String {
+    Error::new("print returns void; a value result requires a declared function").render_detail()
+}
+
 pub fn dangling_requires_resolved_pointer_element() -> String {
     Error::new("dangling requires a resolved pointer element type").render_detail()
 }
