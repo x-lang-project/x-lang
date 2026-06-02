@@ -2,6 +2,15 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn generated_function_function_name_failed_llvm_verification(
+    function_name: impl Display,
+) -> String {
+    Error::new(format!(
+        "generated function `{function_name}` failed LLVM verification"
+    ))
+    .render_detail()
+}
+
 pub fn global_name_has_unsized_array_type_fixed_storage_must_be_lowered_as(
     name: impl Display,
 ) -> String {
@@ -15,6 +24,14 @@ pub fn missing_execution_engine() -> String {
     Error::new("missing execution engine").render_detail()
 }
 
+pub fn no_executable_function_entries_located_inside_active_target_module_context() -> String {
+    Error::new("no executable functions in the LLVM module").render_detail()
+}
+
+pub fn function_name_is_not_valid_utf() -> String {
+    Error::new("Function name is not valid UTF-8").render_detail()
+}
+
 pub fn jit_entry_name_must_have_a_body_and_a_non_variadic_zero(name: impl Display) -> String {
     Error::new(format!(
         "JIT entry `{name}` must have a body and a non-variadic, zero-argument C ABI"
@@ -24,6 +41,13 @@ pub fn jit_entry_name_must_have_a_body_and_a_non_variadic_zero(name: impl Displa
 
 pub fn invalid_jit_module_error(error: impl Display) -> String {
     Error::new(format!("invalid JIT module: {error}")).render_detail()
+}
+
+pub fn unsupported_jit_return_type_for_name_other(name: impl Display, other: impl Debug) -> String {
+    Error::new(format!(
+        "Unsupported JIT return type for `{name}`: {other:?}"
+    ))
+    .render_detail()
 }
 
 pub fn module_verification_before_optimisation_failed_error(error: impl Display) -> String {
