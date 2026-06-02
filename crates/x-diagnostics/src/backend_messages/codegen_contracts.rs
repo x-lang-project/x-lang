@@ -1,5 +1,10 @@
 use crate::Error;
 
+pub fn aggregate_assignment_requires_declared_representation() -> String {
+    Error::new("aggregate assignment requires a value with its declared representation")
+        .render_detail()
+}
+
 pub fn call_requires_resolved_return_type(function: &str) -> String {
     Error::new(format!("{function} requires a resolved return type")).render_detail()
 }
@@ -47,6 +52,13 @@ pub fn become_requires_identical_abi(caller: &str, callee: &str) -> String {
 
 pub fn global_name_has_no_registered_declaration(name: &str) -> String {
     Error::new(format!("global {name} has no registered declaration")).render_detail()
+}
+
+pub fn struct_initializer_requires_all_declared_fields(name: &str) -> String {
+    Error::new(format!(
+        "struct initializer {name} requires every declared field exactly once"
+    ))
+    .render_detail()
 }
 
 pub fn slice_view_requires_explicit_identity_lifetime_and_mutability(name: &str) -> String {
