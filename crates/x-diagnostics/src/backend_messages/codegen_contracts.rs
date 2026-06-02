@@ -1,5 +1,13 @@
 use crate::Error;
 
+pub fn dangling_requires_resolved_pointer_element() -> String {
+    Error::new("dangling requires a resolved pointer element type").render_detail()
+}
+
+pub fn is_null_requires_typed_pointer() -> String {
+    Error::new("is_null requires a typed pointer").render_detail()
+}
+
 pub fn incompatible_overflow_intrinsic_declaration(symbol: &str) -> String {
     Error::new(format!(
         "incompatible overflow intrinsic declaration: {symbol}"
@@ -7,6 +15,20 @@ pub fn incompatible_overflow_intrinsic_declaration(symbol: &str) -> String {
     .render_detail()
 }
 
+pub fn call_requires_resolved_pointer_element(function: &str) -> String {
+    Error::new(format!(
+        "{function} requires a resolved pointer element type"
+    ))
+    .render_detail()
+}
+
 pub fn global_name_has_no_registered_declaration(name: &str) -> String {
     Error::new(format!("global {name} has no registered declaration")).render_detail()
+}
+
+pub fn slice_view_requires_explicit_identity_lifetime_and_mutability(name: &str) -> String {
+    Error::new(format!(
+        "{name} requires explicit view or iterator identity, lifetime, and mutability metadata"
+    ))
+    .render_detail()
 }
