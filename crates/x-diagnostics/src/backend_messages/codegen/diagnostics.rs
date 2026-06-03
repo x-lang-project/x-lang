@@ -2,6 +2,34 @@ use std::fmt::{Debug, Display};
 
 use crate::{Diagnostic, Error, Label, Span};
 
+pub fn codegen_builder_error(error: impl Debug, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "LLVM builder failed",
+        "ICE-C0001",
+        span,
+        format!("{error:?}"),
+    )
+}
+
+pub fn codegen_type_not_found(name: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated type has no registered LLVM layout",
+        "ICE-C0002",
+        span,
+        format!("`{name}` was not registered in this module"),
+    )
+}
+
+pub fn codegen_unsupported_type(value_type: impl Debug, span: Span) -> Diagnostic {
+    Error::new("unsupported backend type")
+        .with_code("C0003")
+        .with_label(Label::primary(
+            span,
+            format!("`{value_type:?}` cannot be represented in LLVM"),
+        ))
+        .with_help("lower this type before code generation or add backend support")
+}
+
 pub fn codegen_function_signature_missing(name: impl Display, span: Span) -> Diagnostic {
     internal_codegen_diagnostic(
         "validated call has no backend signature",
@@ -26,6 +54,15 @@ pub fn codegen_missing_entry_block(span: Span) -> Diagnostic {
         "ICE-C0006",
         span,
         "MIR function has no block 0",
+    )
+}
+
+pub fn codegen_missing_local_allocation(identifier: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated MIR local has no backend allocation",
+        "ICE-C0007",
+        span,
+        format!("local `{identifier}` was used before stack allocation"),
     )
 }
 
@@ -68,6 +105,16 @@ pub fn codegen_unsupported_cast(to: impl Debug, span: Span) -> Diagnostic {
         .with_help("insert a supported intermediate cast")
 }
 
+pub fn codegen_type_has_no_size(value_type: impl Debug, span: Span) -> Diagnostic {
+    Error::new("type has no backend size")
+        .with_code("C0012")
+        .with_label(Label::primary(
+            span,
+            format!("`{value_type:?}` has no known size"),
+        ))
+        .with_help("use a sized type or define its layout before code generation")
+}
+
 pub fn codegen_missing_callee_symbol(name: impl Display, span: Span) -> Diagnostic {
     internal_codegen_diagnostic(
         "validated call has no backend callee symbol",
@@ -75,6 +122,24 @@ pub fn codegen_missing_callee_symbol(name: impl Display, span: Span) -> Diagnost
         span,
         format!("`{name}` was not resolved"),
     )
+}
+
+pub fn codegen_jit_execution_failure(name: impl Display, span: Span) -> Diagnostic {
+    Error::new("JIT execution failed")
+        .with_code("C0015")
+        .with_label(Label::primary(span, format!("could not execute `{name}`")))
+        .with_help("check that the entry function exists and has a supported signature")
+}
+
+pub fn codegen_llvm_internal_error(detail: impl Into<String>, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic("LLVM backend invariant failed", "ICE-C0016", span, detail)
+}
+
+pub fn codegen_jit_initialization_failure(detail: impl Into<String>, span: Span) -> Diagnostic {
+    Error::new("LLVM JIT initialisation failed")
+        .with_code("C0017")
+        .with_label(Label::primary(span, detail))
+        .with_help("run `x doctor` to verify the installed LLVM toolchain")
 }
 
 pub fn codegen_missing_mir_block(block: impl Display, span: Span) -> Diagnostic {
@@ -99,6 +164,15 @@ pub fn codegen_llvm_verification_failure(detail: impl Into<String>, span: Span) 
     internal_codegen_diagnostic(
         "generated LLVM IR failed verification",
         "ICE-C0020",
+        span,
+        detail,
+    )
+}
+
+pub fn codegen_invalid_mir(detail: impl Into<String>, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "invalid MIR reached code generation",
+        "ICE-C0021",
         span,
         detail,
     )
