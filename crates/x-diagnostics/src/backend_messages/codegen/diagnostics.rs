@@ -2,6 +2,15 @@ use std::fmt::{Debug, Display};
 
 use crate::{Diagnostic, Error, Label, Span};
 
+pub fn codegen_function_signature_missing(name: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated call has no backend signature",
+        "ICE-C0004",
+        span,
+        format!("`{name}` has no registered signature"),
+    )
+}
+
 pub fn codegen_missing_terminator(block: impl Display, span: Span) -> Diagnostic {
     internal_codegen_diagnostic(
         "validated MIR block has no terminator",
@@ -17,6 +26,15 @@ pub fn codegen_missing_entry_block(span: Span) -> Diagnostic {
         "ICE-C0006",
         span,
         "MIR function has no block 0",
+    )
+}
+
+pub fn codegen_missing_hardware_argument(position: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated hardware call has no backend argument",
+        "ICE-C0008",
+        span,
+        format!("argument {position} is unavailable"),
     )
 }
 
@@ -48,6 +66,15 @@ pub fn codegen_unsupported_cast(to: impl Debug, span: Span) -> Diagnostic {
             format!("cannot cast to `{to:?}` in the backend"),
         ))
         .with_help("insert a supported intermediate cast")
+}
+
+pub fn codegen_missing_callee_symbol(name: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated call has no backend callee symbol",
+        "ICE-C0013",
+        span,
+        format!("`{name}` was not resolved"),
+    )
 }
 
 pub fn codegen_missing_mir_block(block: impl Display, span: Span) -> Diagnostic {
