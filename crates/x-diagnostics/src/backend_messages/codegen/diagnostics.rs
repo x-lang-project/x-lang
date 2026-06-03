@@ -2,6 +2,24 @@ use std::fmt::{Debug, Display};
 
 use crate::{Diagnostic, Error, Label, Span};
 
+pub fn codegen_missing_terminator(block: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated MIR block has no terminator",
+        "ICE-C0005",
+        span,
+        format!("MIR block {block} has no terminator"),
+    )
+}
+
+pub fn codegen_missing_entry_block(span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated MIR function has no entry block",
+        "ICE-C0006",
+        span,
+        "MIR function has no block 0",
+    )
+}
+
 pub fn codegen_unsupported_operator(operator: impl Debug, span: Span) -> Diagnostic {
     Error::new("unsupported operator")
         .with_code("C0009")
@@ -30,6 +48,24 @@ pub fn codegen_unsupported_cast(to: impl Debug, span: Span) -> Diagnostic {
             format!("cannot cast to `{to:?}` in the backend"),
         ))
         .with_help("insert a supported intermediate cast")
+}
+
+pub fn codegen_missing_mir_block(block: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated MIR references a missing block",
+        "ICE-C0018",
+        span,
+        format!("MIR block {block} is absent"),
+    )
+}
+
+pub fn codegen_missing_llvm_block(block: impl Display, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "validated MIR block has no LLVM mapping",
+        "ICE-C0019",
+        span,
+        format!("MIR block {block} has no LLVM block"),
+    )
 }
 
 pub fn codegen_llvm_verification_failure(detail: impl Into<String>, span: Span) -> Diagnostic {
