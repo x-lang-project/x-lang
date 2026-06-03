@@ -2,6 +2,15 @@ use std::fmt::{Debug, Display};
 
 use crate::{Diagnostic, Error, Label, Span};
 
+pub fn codegen_llvm_verification_failure(detail: impl Into<String>, span: Span) -> Diagnostic {
+    internal_codegen_diagnostic(
+        "generated LLVM IR failed verification",
+        "ICE-C0020",
+        span,
+        detail,
+    )
+}
+
 fn internal_codegen_diagnostic(
     message: impl Into<String>,
     code: &'static str,
