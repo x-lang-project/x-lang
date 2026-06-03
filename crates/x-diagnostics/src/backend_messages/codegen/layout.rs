@@ -2,6 +2,27 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn option_has_no_discriminant_preserving_executable_abi_yet() -> String {
+    Error::new("Option has no discriminant-preserving executable ABI yet").render_detail()
+}
+
+pub fn result_has_no_discriminant_preserving_executable_abi_yet() -> String {
+    Error::new("Result has no discriminant-preserving executable ABI yet").render_detail()
+}
+
+pub fn mem_layout() -> String {
+    Error::new("mem::Layout").render_detail()
+}
+
+pub fn type_name_has_no_discriminant_preserving_executable_abi_yet(
+    type_name: impl Display,
+) -> String {
+    Error::new(format!(
+        "{type_name} has no discriminant-preserving executable ABI yet"
+    ))
+    .render_detail()
+}
+
 pub fn unknown_field_field_in_structure_name(field: impl Display, name: impl Display) -> String {
     Error::new(format!("unknown field `{field}` in structure `{name}`")).render_detail()
 }
@@ -109,6 +130,10 @@ pub fn soa_element_element_index_is_not_a_struct_value(element_index: impl Displ
 
 pub fn cheri_target_data_layout_is_not_valid_utf() -> String {
     Error::new("CHERI target data layout is not valid UTF-8").render_detail()
+}
+
+pub fn cannot_create_a_bounded_safe_reference_to_a_zero_sized_object() -> String {
+    Error::new("cannot create a bounded safe reference to a zero-sized object").render_detail()
 }
 
 pub fn cheri_bounds_intrinsic_returned_no_capability() -> String {
