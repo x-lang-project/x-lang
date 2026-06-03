@@ -2,6 +2,36 @@ use std::fmt::{Debug, Display};
 
 use crate::{Diagnostic, Error, Label, Span};
 
+pub fn codegen_unsupported_operator(operator: impl Debug, span: Span) -> Diagnostic {
+    Error::new("unsupported operator")
+        .with_code("C0009")
+        .with_label(Label::primary(
+            span,
+            format!("`{operator:?}` is not supported for these operand types"),
+        ))
+        .with_help("add an explicit cast or avoid this operator combination")
+}
+
+pub fn codegen_unsupported_unary_operator(operator: impl Debug, span: Span) -> Diagnostic {
+    Error::new("unsupported unary operator")
+        .with_code("C0010")
+        .with_label(Label::primary(
+            span,
+            format!("`{operator:?}` is not supported here"),
+        ))
+        .with_help("rewrite the expression or add backend support")
+}
+
+pub fn codegen_unsupported_cast(to: impl Debug, span: Span) -> Diagnostic {
+    Error::new("unsupported cast")
+        .with_code("C0011")
+        .with_label(Label::primary(
+            span,
+            format!("cannot cast to `{to:?}` in the backend"),
+        ))
+        .with_help("insert a supported intermediate cast")
+}
+
 pub fn codegen_llvm_verification_failure(detail: impl Into<String>, span: Span) -> Diagnostic {
     internal_codegen_diagnostic(
         "generated LLVM IR failed verification",
