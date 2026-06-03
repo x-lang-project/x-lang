@@ -2,6 +2,16 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn type_mismatch_invariant_violated_before_operator_emission_value_vs_value(
+    left_type: impl Debug,
+    right_type: impl Debug,
+) -> String {
+    Error::new(format!(
+        "operand types differ before code generation: {left_type:?} vs {right_type:?}"
+    ))
+    .render_detail()
+}
+
 pub fn generated_function_function_name_failed_llvm_verification(
     function_name: impl Display,
 ) -> String {
