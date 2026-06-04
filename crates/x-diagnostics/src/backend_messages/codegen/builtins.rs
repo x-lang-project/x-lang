@@ -2,6 +2,33 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn parallel_worker_worker_must_have_the_exact_signature_i_i(worker: impl Display) -> String {
+    Error::new(format!(
+        "parallel worker `{worker}` must have the exact signature (i32) -> i32"
+    ))
+    .render_detail()
+}
+
+pub fn unsupported_parallel_capture_type() -> String {
+    Error::new("unsupported parallel capture type").render_detail()
+}
+
+pub fn missing_parallel_worker_parameter() -> String {
+    Error::new("missing parallel worker parameter").render_detail()
+}
+
+pub fn missing_callback_index() -> String {
+    Error::new("missing callback index").render_detail()
+}
+
+pub fn missing_callback_context() -> String {
+    Error::new("missing callback context").render_detail()
+}
+
+pub fn parallel_worker_returned_void() -> String {
+    Error::new("parallel worker returned void").render_detail()
+}
+
 pub fn unresolved_operand_context_match_fallback_execution_path_error_other(
     other: impl Debug,
 ) -> String {
@@ -110,4 +137,8 @@ pub fn leaf_cannot_execute_until_sum_types_preserve_their_discriminant(
 
 pub fn slice_equality_predicate_is_missing_its_comparison_value() -> String {
     Error::new("slice equality predicate is missing its comparison value").render_detail()
+}
+
+pub fn slice_callback_lowering_unsupported(function: impl Display) -> String {
+    Error::new(format!("callback lowering is unsupported for `{function}`")).render_detail()
 }
