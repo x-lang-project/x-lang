@@ -2,6 +2,13 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn print_does_not_support_value_of_type_type(value_type: impl Debug) -> String {
+    Error::new(format!(
+        "print does not support value of type {value_type:?}"
+    ))
+    .render_detail()
+}
+
 pub fn pointer_assert_aligned_has_no_declared_source_level_contract_or_backend_implementation()
 -> String {
     Error::new("ptr::assert_aligned has no executable backend implementation").render_detail()
