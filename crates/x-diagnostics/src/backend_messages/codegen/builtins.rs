@@ -2,6 +2,13 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn function_requires_exactly_one_compile_time_field_token(function: impl Display) -> String {
+    Error::new(format!(
+        "`{function}` requires exactly one compile-time field token"
+    ))
+    .render_detail()
+}
+
 pub fn leaf_expects_a_vec_receiver(leaf: impl Display) -> String {
     Error::new(format!("{leaf} expects a Vec receiver")).render_detail()
 }
