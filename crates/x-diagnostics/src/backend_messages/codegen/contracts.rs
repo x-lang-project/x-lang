@@ -2,6 +2,36 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn struct_invariant_for_struct_name_did_not_lower_to_boolean(
+    struct_name: impl Display,
+) -> String {
+    Error::new(format!(
+        "struct invariant for `{struct_name}` did not lower to bool"
+    ))
+    .render_detail()
+}
+
+pub fn invariant_has_no_insertion_block() -> String {
+    Error::new("invariant has no insertion block").render_detail()
+}
+
+pub fn invariant_has_no_containing_function() -> String {
+    Error::new("invariant has no containing function").render_detail()
+}
+
+pub fn invariant_right_has_no_insertion_block() -> String {
+    Error::new("invariant RHS has no insertion block").render_detail()
+}
+
+pub fn struct_invariant_contains_an_unsupported_executable_expression_value(
+    expression: impl Debug,
+) -> String {
+    Error::new(format!(
+        "struct invariant contains an unsupported executable expression: {expression:?}"
+    ))
+    .render_detail()
+}
+
 pub fn memoised_return_slot_is_missing() -> String {
     Error::new("memoised return slot is missing").render_detail()
 }
