@@ -2,6 +2,11 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn pointer_assert_aligned_has_no_declared_source_level_contract_or_backend_implementation()
+-> String {
+    Error::new("ptr::assert_aligned has no executable backend implementation").render_detail()
+}
+
 pub fn function_requires_exactly_one_compile_time_field_token(function: impl Display) -> String {
     Error::new(format!(
         "`{function}` requires exactly one compile-time field token"
