@@ -2,6 +2,34 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_float_bitwise() -> String {
+    Error::new("float bitwise").render_detail()
+}
+
+pub fn c_emission_float_operator() -> String {
+    Error::new("float operator").render_detail()
+}
+
+pub fn c_emission_helper_operation_is_missing() -> String {
+    Error::new("helper operation is missing").render_detail()
+}
+
+pub fn c_emission_helper_signedness_is_missing() -> String {
+    Error::new("helper signedness is missing").render_detail()
+}
+
+pub fn c_emission_helper_width_is_invalid() -> String {
+    Error::new("helper width is invalid").render_detail()
+}
+
+pub fn c_emission_helper_width_is_missing() -> String {
+    Error::new("helper width is missing").render_detail()
+}
+
+pub fn c_emission_integer_literal_width_is_missing() -> String {
+    Error::new("integer literal width is missing").render_detail()
+}
+
 pub fn c_emission_missing_reachable_block() -> String {
     Error::new("missing reachable block").render_detail()
 }
@@ -22,6 +50,14 @@ pub fn c_emission_non_source_throwing_call() -> String {
     Error::new("non-source throwing call").render_detail()
 }
 
+pub fn c_emission_nonfinite_literal() -> String {
+    Error::new("nonfinite literal").render_detail()
+}
+
+pub fn c_emission_noninteger_switch() -> String {
+    Error::new("noninteger switch").render_detail()
+}
+
 pub fn c_emission_nonnumeric_tuple_field() -> String {
     Error::new("nonnumeric tuple field").render_detail()
 }
@@ -32,6 +68,10 @@ pub fn c_emission_nonscalar_memoise_key() -> String {
 
 pub fn c_emission_nonscalar_or_throwing_memoise_result() -> String {
     Error::new("nonscalar or throwing memoise result").render_detail()
+}
+
+pub fn c_emission_numeric_value_width_is_missing() -> String {
+    Error::new("numeric value width is missing").render_detail()
 }
 
 pub fn c_emission_parallel_statement() -> String {
@@ -66,6 +106,10 @@ pub fn c_emission_tuple_target_layout() -> String {
     Error::new("tuple target layout").render_detail()
 }
 
+pub fn c_emission_unary_effect() -> String {
+    Error::new("unary effect").render_detail()
+}
+
 pub fn c_emission_unbounded_memoise_capacity() -> String {
     Error::new("unbounded memoise capacity").render_detail()
 }
@@ -88,4 +132,12 @@ pub fn c_emission_unsupported_memoise_contract() -> String {
 
 pub fn c_emission_void_catch_destination() -> String {
     Error::new("void catch destination").render_detail()
+}
+
+pub fn c_emission_write_to_string_element() -> String {
+    Error::new("write to string element").render_detail()
+}
+
+pub fn c_emission_unsupported_conversion(value: impl Debug, target: impl Debug) -> String {
+    Error::new(format!("unsupported conversion {value:?}->{target:?}")).render_detail()
 }
