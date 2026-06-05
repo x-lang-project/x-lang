@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_ambiguous_builtin() -> String {
+    Error::new("ambiguous builtin").render_detail()
+}
+
 pub fn c_emission_array_initializer_arity() -> String {
     Error::new("array initialiser arity").render_detail()
 }
@@ -16,6 +20,10 @@ pub fn c_emission_c_source_formatting_failed() -> String {
 
 pub fn c_emission_call_arity() -> String {
     Error::new("call arity").render_detail()
+}
+
+pub fn c_emission_dynamic_array_layout() -> String {
+    Error::new("dynamic array layout").render_detail()
 }
 
 pub fn c_emission_float_bitwise() -> String {
@@ -110,6 +118,10 @@ pub fn c_emission_registered_function_is_missing() -> String {
     Error::new("registered function is missing").render_detail()
 }
 
+pub fn c_emission_static_declaration() -> String {
+    Error::new("static declaration").render_detail()
+}
+
 pub fn c_emission_struct_runtime_invariant() -> String {
     Error::new("struct runtime invariant").render_detail()
 }
@@ -166,6 +178,10 @@ pub fn c_emission_unreachable_terminator() -> String {
     Error::new("unreachable terminator").render_detail()
 }
 
+pub fn c_emission_unsupported_main_abi() -> String {
+    Error::new("unsupported main ABI").render_detail()
+}
+
 pub fn c_emission_unsupported_memoise_contract() -> String {
     Error::new("unsupported memoise contract").render_detail()
 }
@@ -178,18 +194,50 @@ pub fn c_emission_write_to_string_element() -> String {
     Error::new("write to string element").render_detail()
 }
 
+pub fn c_emission_builtin(value: impl Debug) -> String {
+    Error::new(format!("builtin {value:?}")).render_detail()
+}
+
 pub fn c_emission_duplicate_function_symbol(value: impl Display) -> String {
     Error::new(format!("duplicate function symbol {value}")).render_detail()
+}
+
+pub fn c_emission_export_name(value: impl Display) -> String {
+    Error::new(format!("export name {value}")).render_detail()
+}
+
+pub fn c_emission_exported_abi_function(value: impl Display) -> String {
+    Error::new(format!("exported ABI function {value}")).render_detail()
 }
 
 pub fn c_emission_external_call(value: impl Display) -> String {
     Error::new(format!("external call {value}")).render_detail()
 }
 
+pub fn c_emission_external_function(value: impl Display) -> String {
+    Error::new(format!("external function {value}")).render_detail()
+}
+
 pub fn c_emission_function_signature_body_mismatch_for(value: impl Display) -> String {
     Error::new(format!("function signature/body mismatch for {value}")).render_detail()
 }
 
+pub fn c_emission_unresolved(value: impl Display) -> String {
+    Error::new(format!("unresolved {value}")).render_detail()
+}
+
 pub fn c_emission_unsupported_conversion(value: impl Debug, target: impl Debug) -> String {
     Error::new(format!("unsupported conversion {value:?}->{target:?}")).render_detail()
+}
+
+pub fn c_emission_unsupported_place(value: impl Debug) -> String {
+    Error::new(format!("unsupported place {value:?}")).render_detail()
+}
+
+pub fn c_emission_unsupported_rvalue(value: impl Debug) -> String {
+    Error::new(format!("unsupported rvalue {value:?}")).render_detail()
+}
+
+pub fn c_emission_unsupported_type(value: impl Debug) -> String {
+    Error::new(format!("unsupported type {value:?}")).render_detail()
 }
