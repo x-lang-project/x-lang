@@ -2,8 +2,20 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_array_initializer_arity() -> String {
+    Error::new("array initialiser arity").render_detail()
+}
+
+pub fn c_emission_builtin_arity() -> String {
+    Error::new("builtin arity").render_detail()
+}
+
 pub fn c_emission_c_source_formatting_failed() -> String {
     Error::new("C source formatting failed").render_detail()
+}
+
+pub fn c_emission_call_arity() -> String {
+    Error::new("call arity").render_detail()
 }
 
 pub fn c_emission_float_bitwise() -> String {
@@ -50,6 +62,14 @@ pub fn c_emission_missing_throwing_callee() -> String {
     Error::new("missing throwing callee").render_detail()
 }
 
+pub fn c_emission_non_self_or_contract_tailcall() -> String {
+    Error::new("non-self or contract tailcall").render_detail()
+}
+
+pub fn c_emission_non_source_tailcall() -> String {
+    Error::new("non-source tailcall").render_detail()
+}
+
 pub fn c_emission_non_source_throwing_call() -> String {
     Error::new("non-source throwing call").render_detail()
 }
@@ -82,8 +102,20 @@ pub fn c_emission_parallel_statement() -> String {
     Error::new("parallel statement").render_detail()
 }
 
+pub fn c_emission_registered_function_body_is_missing() -> String {
+    Error::new("registered function body is missing").render_detail()
+}
+
+pub fn c_emission_registered_function_is_missing() -> String {
+    Error::new("registered function is missing").render_detail()
+}
+
 pub fn c_emission_struct_runtime_invariant() -> String {
     Error::new("struct runtime invariant").render_detail()
+}
+
+pub fn c_emission_tailcall_arity() -> String {
+    Error::new("tailcall arity").render_detail()
 }
 
 pub fn c_emission_throw_outside_throws_body() -> String {
@@ -108,6 +140,10 @@ pub fn c_emission_tuple_field_bounds() -> String {
 
 pub fn c_emission_tuple_target_layout() -> String {
     Error::new("tuple target layout").render_detail()
+}
+
+pub fn c_emission_type_operand() -> String {
+    Error::new("type operand").render_detail()
 }
 
 pub fn c_emission_unary_effect() -> String {
@@ -140,6 +176,18 @@ pub fn c_emission_void_catch_destination() -> String {
 
 pub fn c_emission_write_to_string_element() -> String {
     Error::new("write to string element").render_detail()
+}
+
+pub fn c_emission_duplicate_function_symbol(value: impl Display) -> String {
+    Error::new(format!("duplicate function symbol {value}")).render_detail()
+}
+
+pub fn c_emission_external_call(value: impl Display) -> String {
+    Error::new(format!("external call {value}")).render_detail()
+}
+
+pub fn c_emission_function_signature_body_mismatch_for(value: impl Display) -> String {
+    Error::new(format!("function signature/body mismatch for {value}")).render_detail()
 }
 
 pub fn c_emission_unsupported_conversion(value: impl Debug, target: impl Debug) -> String {
