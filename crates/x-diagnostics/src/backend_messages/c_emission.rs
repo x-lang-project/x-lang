@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_c_source_formatting_failed() -> String {
+    Error::new("C source formatting failed").render_detail()
+}
+
 pub fn c_emission_float_bitwise() -> String {
     Error::new("float bitwise").render_detail()
 }
