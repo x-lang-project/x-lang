@@ -2,6 +2,14 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_missing_throwing_callee() -> String {
+    Error::new("missing throwing callee").render_detail()
+}
+
+pub fn c_emission_non_source_throwing_call() -> String {
+    Error::new("non-source throwing call").render_detail()
+}
+
 pub fn c_emission_nonnumeric_tuple_field() -> String {
     Error::new("nonnumeric tuple field").render_detail()
 }
@@ -22,6 +30,18 @@ pub fn c_emission_struct_runtime_invariant() -> String {
     Error::new("struct runtime invariant").render_detail()
 }
 
+pub fn c_emission_throw_outside_throws_body() -> String {
+    Error::new("throw outside throws body").render_detail()
+}
+
+pub fn c_emission_throws_callee_contract_arity() -> String {
+    Error::new("throws callee contract/arity").render_detail()
+}
+
+pub fn c_emission_try_outside_throws_body() -> String {
+    Error::new("try outside throws body").render_detail()
+}
+
 pub fn c_emission_tuple_arity() -> String {
     Error::new("tuple arity").render_detail()
 }
@@ -38,10 +58,18 @@ pub fn c_emission_unbounded_memoise_capacity() -> String {
     Error::new("unbounded memoise capacity").render_detail()
 }
 
+pub fn c_emission_unchecked_throwing_call() -> String {
+    Error::new("unchecked throwing call").render_detail()
+}
+
 pub fn c_emission_unknown_nonmemoise_call_contract() -> String {
     Error::new("unknown nonmemoise call contract").render_detail()
 }
 
 pub fn c_emission_unsupported_memoise_contract() -> String {
     Error::new("unsupported memoise contract").render_detail()
+}
+
+pub fn c_emission_void_catch_destination() -> String {
+    Error::new("void catch destination").render_detail()
 }
