@@ -2,6 +2,18 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_missing_reachable_block() -> String {
+    Error::new("missing reachable block").render_detail()
+}
+
+pub fn c_emission_missing_reachable_terminator() -> String {
+    Error::new("missing reachable terminator").render_detail()
+}
+
+pub fn c_emission_missing_terminator() -> String {
+    Error::new("missing terminator").render_detail()
+}
+
 pub fn c_emission_missing_throwing_callee() -> String {
     Error::new("missing throwing callee").render_detail()
 }
@@ -64,6 +76,10 @@ pub fn c_emission_unchecked_throwing_call() -> String {
 
 pub fn c_emission_unknown_nonmemoise_call_contract() -> String {
     Error::new("unknown nonmemoise call contract").render_detail()
+}
+
+pub fn c_emission_unreachable_terminator() -> String {
+    Error::new("unreachable terminator").render_detail()
 }
 
 pub fn c_emission_unsupported_memoise_contract() -> String {
