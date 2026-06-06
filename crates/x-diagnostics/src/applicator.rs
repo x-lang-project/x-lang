@@ -12,6 +12,11 @@ pub struct AppliedFile {
     pub edits_skipped: usize,
 }
 
+/// Reject invalid suggestions and all suggestions touching a file with conflicting edits.
+pub fn apply_machine_applicable(database: &FileDatabase, diags: &[Diagnostic]) -> Vec<AppliedFile> {
+    EditPlan::prepare(database, diags).apply(database)
+}
+
 impl EditPlan<'_> {
     fn apply(self, database: &FileDatabase) -> Vec<AppliedFile> {
         let mut results = Vec::new();
