@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_address_of_string_element() -> String {
+    Error::new("address of string element").render_detail()
+}
+
 pub fn c_emission_aggregate_type_classification_changed() -> String {
     Error::new("aggregate type classification changed").render_detail()
 }
@@ -84,6 +88,10 @@ pub fn c_emission_missing_terminator() -> String {
 
 pub fn c_emission_missing_throwing_callee() -> String {
     Error::new("missing throwing callee").render_detail()
+}
+
+pub fn c_emission_mixed_floating_pointer_operands() -> String {
+    Error::new("mixed floating/pointer operands").render_detail()
 }
 
 pub fn c_emission_non_self_or_contract_tailcall() -> String {
@@ -198,6 +206,10 @@ pub fn c_emission_unbounded_memoise_capacity() -> String {
     Error::new("unbounded memoise capacity").render_detail()
 }
 
+pub fn c_emission_unbounded_pointer_index() -> String {
+    Error::new("unbounded pointer index").render_detail()
+}
+
 pub fn c_emission_unchecked_throwing_call() -> String {
     Error::new("unchecked throwing call").render_detail()
 }
@@ -220,6 +232,10 @@ pub fn c_emission_unknown_struct_initializer() -> String {
 
 pub fn c_emission_unreachable_terminator() -> String {
     Error::new("unreachable terminator").render_detail()
+}
+
+pub fn c_emission_unresolved_index_layout() -> String {
+    Error::new("unresolved index layout").render_detail()
 }
 
 pub fn c_emission_unsupported_main_abi() -> String {
