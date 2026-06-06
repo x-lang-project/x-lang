@@ -2,6 +2,10 @@ use std::fmt::{Debug, Display};
 
 use crate::Error;
 
+pub fn c_emission_aggregate_type_classification_changed() -> String {
+    Error::new("aggregate type classification changed").render_detail()
+}
+
 pub fn c_emission_ambiguous_builtin() -> String {
     Error::new("ambiguous builtin").render_detail()
 }
@@ -26,12 +30,20 @@ pub fn c_emission_dynamic_array_layout() -> String {
     Error::new("dynamic array layout").render_detail()
 }
 
+pub fn c_emission_field_on_nonaggregate() -> String {
+    Error::new("field on nonaggregate").render_detail()
+}
+
 pub fn c_emission_float_bitwise() -> String {
     Error::new("float bitwise").render_detail()
 }
 
 pub fn c_emission_float_operator() -> String {
     Error::new("float operator").render_detail()
+}
+
+pub fn c_emission_generic_record_definition() -> String {
+    Error::new("generic record definition").render_detail()
 }
 
 pub fn c_emission_helper_operation_is_missing() -> String {
@@ -62,6 +74,10 @@ pub fn c_emission_missing_reachable_terminator() -> String {
     Error::new("missing reachable terminator").render_detail()
 }
 
+pub fn c_emission_missing_record_definition() -> String {
+    Error::new("missing record definition").render_detail()
+}
+
 pub fn c_emission_missing_terminator() -> String {
     Error::new("missing terminator").render_detail()
 }
@@ -80,6 +96,10 @@ pub fn c_emission_non_source_tailcall() -> String {
 
 pub fn c_emission_non_source_throwing_call() -> String {
     Error::new("non-source throwing call").render_detail()
+}
+
+pub fn c_emission_nonaos_layout() -> String {
+    Error::new("nonAoS layout").render_detail()
 }
 
 pub fn c_emission_nonfinite_literal() -> String {
@@ -110,12 +130,24 @@ pub fn c_emission_parallel_statement() -> String {
     Error::new("parallel statement").render_detail()
 }
 
+pub fn c_emission_partial_struct_initializer() -> String {
+    Error::new("partial struct initialiser").render_detail()
+}
+
+pub fn c_emission_recursive_value_aggregate_layout() -> String {
+    Error::new("recursive value aggregate layout").render_detail()
+}
+
 pub fn c_emission_registered_function_body_is_missing() -> String {
     Error::new("registered function body is missing").render_detail()
 }
 
 pub fn c_emission_registered_function_is_missing() -> String {
     Error::new("registered function is missing").render_detail()
+}
+
+pub fn c_emission_sizeof_aggregate() -> String {
+    Error::new("sizeof aggregate").render_detail()
 }
 
 pub fn c_emission_static_declaration() -> String {
@@ -170,8 +202,20 @@ pub fn c_emission_unchecked_throwing_call() -> String {
     Error::new("unchecked throwing call").render_detail()
 }
 
+pub fn c_emission_unknown_field() -> String {
+    Error::new("unknown field").render_detail()
+}
+
 pub fn c_emission_unknown_nonmemoise_call_contract() -> String {
     Error::new("unknown nonmemoise call contract").render_detail()
+}
+
+pub fn c_emission_unknown_record_field() -> String {
+    Error::new("unknown record field").render_detail()
+}
+
+pub fn c_emission_unknown_struct_initializer() -> String {
+    Error::new("unknown struct initialiser").render_detail()
 }
 
 pub fn c_emission_unreachable_terminator() -> String {
@@ -220,6 +264,10 @@ pub fn c_emission_external_function(value: impl Display) -> String {
 
 pub fn c_emission_function_signature_body_mismatch_for(value: impl Display) -> String {
     Error::new(format!("function signature/body mismatch for {value}")).render_detail()
+}
+
+pub fn c_emission_unknown_record(value: impl Display) -> String {
+    Error::new(format!("unknown record {value}")).render_detail()
 }
 
 pub fn c_emission_unresolved(value: impl Display) -> String {
