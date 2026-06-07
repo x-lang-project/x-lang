@@ -82,10 +82,67 @@ impl error::Error for AliveError {
     }
 }
 
+pub fn tool_query(tool_path: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::ToolQuery,
+        Error::new(format!("failed to query {tool_path}: {error}")).with_code("A0001"),
+        error,
+    )
+}
+
+pub fn wsl_tool_query(distro: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::WslToolQuery,
+        Error::new(format!(
+            "failed to query alive-tv through WSL {distro}: {error}"
+        ))
+        .with_code("A0001"),
+        error,
+    )
+}
+
+pub fn version_query_failure(status: impl Display, stderr: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::VersionQueryFailure,
+        Error::new(format!(
+            "alive-tv --version failed with status {status}: {stderr}"
+        ))
+        .with_code("A0001"),
+    )
+}
+
+pub fn version_unparseable(text: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::VersionUnparseable,
+        Error::new(format!(
+            "alive-tv did not report a parseable LLVM version: {text}"
+        ))
+        .with_code("A0002"),
+    )
+}
+
 pub fn version_mismatch(actual: impl Display, required_llvm_version: impl Display) -> AliveError {
     AliveError::new(
         AliveFailureKind::VersionMismatch,
         Error::new(format!("alive-tv uses LLVM {actual}, but X requires LLVM {required_llvm_version}; rebuild Alive2 against the pinned LLVM toolchain")).with_code("A0003"),
+    )
+}
+
+pub fn tool_launch(tool_path: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::ToolLaunch,
+        Error::new(format!("Failed to run {tool_path}: {error}")),
+        error,
+    )
+}
+
+pub fn wsl_tool_launch(distro: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::WslToolLaunch,
+        Error::new(format!(
+            "Failed to run alive-tv through WSL {distro}: {error}"
+        )),
+        error,
     )
 }
 
