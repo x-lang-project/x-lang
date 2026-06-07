@@ -1,5 +1,48 @@
 use super::*;
 
+pub fn ir_normalizer(error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::IrNormalizer,
+        Error::new(format!("failed to construct Alive2 IR normaliser: {error}")),
+        error,
+    )
+}
+
+pub fn borrow_normalizer(error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::BorrowNormalizer,
+        Error::new(format!(
+            "failed to construct borrow attribute normaliser: {error}"
+        )),
+        error,
+    )
+}
+
+pub fn attribute_normalizer(error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::AttributeNormalizer,
+        Error::new(format!(
+            "failed to construct Alive2 attribute normaliser: {error}"
+        )),
+        error,
+    )
+}
+
+pub fn logging(error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::Logging,
+        Error::new(format!("failed to initialise logging: {error}")),
+        error,
+    )
+}
+
+pub fn optimizer_probe(output: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::OptimizerProbe,
+        Error::new(format!("LLVM O0-to-O3 optimiser probe failed:\n{output}")).with_code("A0004"),
+    )
+}
+
 pub fn example_enumeration(error: impl error::Error + 'static) -> AliveError {
     AliveError::caused(
         AliveFailureKind::ExampleEnumeration,
@@ -18,6 +61,49 @@ pub fn compile_original(
             "Failed to compile keyword-enabled source {source_path}: {error}"
         )),
         error,
+    )
+}
+
+pub fn parse_comparison(
+    source_path: impl Display,
+    failure: impl error::Error + 'static,
+) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::ParseComparison,
+        Error::new(format!(
+            "Failed to parse stripped comparison {source_path}: {failure}"
+        )),
+        failure,
+    )
+}
+
+pub fn compile_comparison(
+    keyword_tag: impl Display,
+    source_path: impl Display,
+    error: impl error::Error + 'static,
+) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::CompileComparison,
+        Error::new(format!(
+            "Failed to compile source without {keyword_tag} at {source_path}: {error}"
+        )),
+        error,
+    )
+}
+
+pub fn verification(source_path: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::Verification,
+        Error::new(format!(
+            "Alive2 verification failed for {source_path}. Re-run with --keep-going to continue."
+        )),
+    )
+}
+
+pub fn comparisons_failed(failed: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::ComparisonsFailed,
+        Error::new(format!("{failed} comparison(s) failed")),
     )
 }
 
@@ -60,5 +146,21 @@ pub fn examples_missing(path: impl Display) -> AliveError {
     AliveError::new(
         AliveFailureKind::ExamplesMissing,
         Error::new(format!("Examples directory not found: {path}")),
+    )
+}
+
+pub fn tool_missing() -> AliveError {
+    AliveError::new(
+        AliveFailureKind::ToolMissing,
+        Error::new(
+            "alive-tv was not found. Pass --alive-tv, set X_ALIVE_TV/ALIVE_TV, install it on PATH, or use --emit-only.",
+        ),
+    )
+}
+
+pub fn no_comparisons(path: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::NoComparisons,
+        Error::new(format!("No .x files selected in {path}")),
     )
 }
