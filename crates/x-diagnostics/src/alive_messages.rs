@@ -82,5 +82,12 @@ impl error::Error for AliveError {
     }
 }
 
+pub fn version_mismatch(actual: impl Display, required_llvm_version: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::VersionMismatch,
+        Error::new(format!("alive-tv uses LLVM {actual}, but X requires LLVM {required_llvm_version}; rebuild Alive2 against the pinned LLVM toolchain")).with_code("A0003"),
+    )
+}
+
 mod preparation;
 pub use preparation::*;
