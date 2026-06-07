@@ -82,6 +82,34 @@ impl error::Error for AliveError {
     }
 }
 
+pub fn path_resolve(source_path: impl Display, failure: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::PathResolve,
+        Error::new(format!("Failed to canonicalize {source_path}: {failure}")),
+        failure,
+    )
+}
+
+pub fn wsl_path_launch(
+    source_path: impl Display,
+    failure: impl error::Error + 'static,
+) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::WslPathLaunch,
+        Error::new(format!(
+            "Failed to invoke wslpath for {source_path}: {failure}"
+        )),
+        failure,
+    )
+}
+
+pub fn wsl_path_failure(source_path: impl Display, stderr: impl Display) -> AliveError {
+    AliveError::new(
+        AliveFailureKind::WslPathFailure,
+        Error::new(format!("wslpath failed for {source_path}:\n{stderr}")),
+    )
+}
+
 pub fn tool_query(tool_path: impl Display, error: impl error::Error + 'static) -> AliveError {
     AliveError::caused(
         AliveFailureKind::ToolQuery,
