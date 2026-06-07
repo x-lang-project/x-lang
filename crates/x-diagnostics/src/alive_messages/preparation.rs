@@ -1,5 +1,21 @@
 use super::*;
 
+pub fn directory_create(directory: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::DirectoryCreate,
+        Error::new(format!("Failed to create dir {directory}: {error}")),
+        error,
+    )
+}
+
+pub fn file_write(path: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::FileWrite,
+        Error::new(format!("Failed to write {path}: {error}")),
+        error,
+    )
+}
+
 pub fn ir_normalizer(error: impl error::Error + 'static) -> AliveError {
     AliveError::caused(
         AliveFailureKind::IrNormalizer,
@@ -47,6 +63,14 @@ pub fn example_enumeration(error: impl error::Error + 'static) -> AliveError {
     AliveError::caused(
         AliveFailureKind::ExampleEnumeration,
         Error::new(format!("Failed to enumerate examples: {error}")),
+        error,
+    )
+}
+
+pub fn file_read(path: impl Display, error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::FileRead,
+        Error::new(format!("Failed to read {path}: {error}")),
         error,
     )
 }
@@ -111,6 +135,14 @@ pub fn unclosed_block(start: impl Display) -> AliveError {
     AliveError::new(
         AliveFailureKind::UnclosedBlock,
         Error::new(format!("Unclosed comparison block at byte {start}")),
+    )
+}
+
+pub fn invalid_transformed_source(error: impl error::Error + 'static) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::InvalidTransformedSource,
+        Error::new(format!("Invalid transformed source: {error}")),
+        error,
     )
 }
 
