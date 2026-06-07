@@ -62,6 +62,27 @@ impl AliveError {
             cause: Some(Box::new(cause)),
         }
     }
+
+    pub fn kind(&self) -> AliveFailureKind {
+        self.kind
+    }
+
+    pub fn code(&self) -> Option<&str> {
+        self.message
+            .code
+            .as_deref()
+            .or_else(|| self.compilation_failure().map(CompilationFailure::code))
+    }
+
+    pub fn compilation_failure(&self) -> Option<&CompilationFailure> {
+        let cause = self.cause.as_deref()?;
+
+        cause.downcast_ref::<CompilationFailure>().or_else(|| {
+            cause
+                .downcast_ref::<Self>()
+                .and_then(Self::compilation_failure)
+        })
+    }
 }
 
 impl Display for AliveError {
@@ -80,6 +101,14 @@ impl error::Error for AliveError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         self.cause.as_deref()
     }
+}
+
+pub fn compilation(error: CompilationFailure) -> AliveError {
+    AliveError::caused(
+        AliveFailureKind::Compilation,
+        Error::new(error.to_string()),
+        error,
+    )
 }
 
 pub fn path_resolve(source_path: impl Display, failure: impl error::Error + 'static) -> AliveError {
