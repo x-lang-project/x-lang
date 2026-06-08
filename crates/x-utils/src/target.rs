@@ -28,6 +28,12 @@ impl ProductTarget {
         }
     }
 
+    pub fn parse(triple: &str) -> Option<Self> {
+        [Self::WindowsMsvc, Self::LinuxGnu, Self::FreestandingX86]
+            .into_iter()
+            .find(|target| target.triple() == triple)
+    }
+
     pub const fn is_hosted(self) -> bool {
         matches!(self, Self::WindowsMsvc | Self::LinuxGnu)
     }
