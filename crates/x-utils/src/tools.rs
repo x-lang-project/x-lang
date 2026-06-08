@@ -16,3 +16,25 @@ pub fn executable_name(name: &str) -> String {
         name.into()
     }
 }
+
+pub fn find_in_path(program: &str, path: &OsStr) -> Option<PathBuf> {
+    let configured = Path::new(program);
+
+    if configured.is_absolute() || configured.components().count() > 1 {
+        return configured.is_file().then(|| configured.to_path_buf());
+    }
+
+    let names = [program.to_string(), executable_name(program)];
+
+    for directory in env::split_paths(path) {
+        for name in &names {
+            let candidate = directory.join(name);
+
+            if candidate.is_file() {
+                return Some(candidate);
+            }
+        }
+    }
+
+    None
+}
