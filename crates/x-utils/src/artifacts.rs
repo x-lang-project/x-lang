@@ -13,6 +13,16 @@ pub enum ArtifactPlatform {
     Windows,
 }
 
+impl ArtifactPlatform {
+    pub const fn host() -> Self {
+        if cfg!(windows) {
+            Self::Windows
+        } else {
+            Self::Unix
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ArtifactPaths {
     base: PathBuf,
