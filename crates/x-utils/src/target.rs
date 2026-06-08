@@ -27,6 +27,10 @@ impl ProductTarget {
             Self::FreestandingX86 => "i386-unknown-none-elf",
         }
     }
+
+    pub const fn is_hosted(self) -> bool {
+        matches!(self, Self::WindowsMsvc | Self::LinuxGnu)
+    }
 }
 
 pub struct CheriPurecap;
