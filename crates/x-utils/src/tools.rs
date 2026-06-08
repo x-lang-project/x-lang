@@ -17,6 +17,10 @@ pub fn executable_name(name: &str) -> String {
     }
 }
 
+pub fn find_on_path(program: &str) -> Option<PathBuf> {
+    find_in_path(program, &env::var_os("PATH")?)
+}
+
 pub fn find_in_path(program: &str, path: &OsStr) -> Option<PathBuf> {
     let configured = Path::new(program);
 
