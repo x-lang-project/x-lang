@@ -42,3 +42,7 @@ pub fn find_in_path(program: &str, path: &OsStr) -> Option<PathBuf> {
 
     None
 }
+
+pub fn resolve_program(program: &str) -> PathBuf {
+    find_on_path(program).unwrap_or_else(|| PathBuf::from(program))
+}
