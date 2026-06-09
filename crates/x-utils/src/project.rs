@@ -8,3 +8,7 @@ pub fn manifest_in(directory: &Path) -> Option<PathBuf> {
 
     path.is_file().then_some(path)
 }
+
+pub fn find_project_manifest(start: &Path) -> Option<PathBuf> {
+    start.ancestors().find_map(manifest_in)
+}
