@@ -61,6 +61,21 @@ impl CheriPurecap {
 }
 
 impl<'a> TargetSpec<'a> {
+    pub fn parse(triple: &'a str) -> Option<Self> {
+        let architecture = match triple.split('-').next()? {
+            "i386" | "i486" | "i586" | "i686" => Architecture::X86,
+            "x86_64" => Architecture::X86_64,
+            "riscv32" => Architecture::RiscV32,
+            "riscv64" => Architecture::RiscV64,
+            _ => return None,
+        };
+
+        Some(Self {
+            triple,
+            architecture,
+        })
+    }
+
     pub fn is_host_product(self) -> bool {
         ProductTarget::parse(self.triple).is_some_and(ProductTarget::is_hosted)
     }
