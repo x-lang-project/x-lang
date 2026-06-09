@@ -58,6 +58,16 @@ impl CheriPurecap {
     pub const ABI: &str = "l64pc128d";
     pub const DATA_LAYOUT: &str =
         "e-m:e-p200:128:128-i64:64-i128:128-n32:64-S128-A200-P200-G200-ni:200";
+
+    pub fn compiler_arguments() -> Vec<String> {
+        vec![
+            "-target".into(),
+            Self::TRIPLE.into(),
+            format!("-march={}", Self::ARCH),
+            format!("-mabi={}", Self::ABI),
+            "-mno-relax".into(),
+        ]
+    }
 }
 
 impl<'a> TargetSpec<'a> {
