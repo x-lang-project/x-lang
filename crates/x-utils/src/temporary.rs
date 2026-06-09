@@ -51,6 +51,18 @@ pub struct TemporaryFile {
 }
 
 impl TemporaryFile {
+    pub fn write_and_sync(&mut self, bytes: &[u8]) -> io::Result<()> {
+        use io::Write;
+
+        let file = self
+            .file
+            .as_mut()
+            .ok_or_else(|| TemporaryFileError::Closed.into_io_error())?;
+        file.write_all(bytes)?;
+
+        file.sync_all()
+    }
+
     pub fn install(mut self, destination: &Path) -> io::Result<()> {
         // Windows requires closing the file before rename or cleanup.
         drop(self.file.take());
