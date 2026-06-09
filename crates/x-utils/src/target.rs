@@ -59,3 +59,15 @@ impl CheriPurecap {
     pub const DATA_LAYOUT: &str =
         "e-m:e-p200:128:128-i64:64-i128:128-n32:64-S128-A200-P200-G200-ni:200";
 }
+
+impl<'a> TargetSpec<'a> {
+    pub fn compiler_arguments(self) -> Vec<String> {
+        let mut arguments = vec![format!("--target={}", self.triple)];
+
+        if self.architecture == Architecture::X86 {
+            arguments.push("-m32".into());
+        }
+
+        arguments
+    }
+}
