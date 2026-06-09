@@ -61,6 +61,10 @@ impl CheriPurecap {
 }
 
 impl<'a> TargetSpec<'a> {
+    pub fn is_host_product(self) -> bool {
+        ProductTarget::parse(self.triple).is_some_and(ProductTarget::is_hosted)
+    }
+
     pub fn is_os_product(self) -> bool {
         ProductTarget::parse(self.triple) == Some(ProductTarget::FreestandingX86)
     }
