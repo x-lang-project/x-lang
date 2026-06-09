@@ -51,6 +51,10 @@ pub struct TemporaryFile {
 }
 
 impl TemporaryFile {
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
     pub fn write_and_sync(&mut self, bytes: &[u8]) -> io::Result<()> {
         use io::Write;
 
