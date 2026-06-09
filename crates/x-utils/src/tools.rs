@@ -17,6 +17,14 @@ pub fn executable_name(name: &str) -> String {
     }
 }
 
+pub fn llvm_program(name: &str) -> PathBuf {
+    let name = executable_name(name);
+
+    env::var_os(LLVM_PREFIX_ENV)
+        .map(|prefix| PathBuf::from(prefix).join("bin").join(&name))
+        .unwrap_or_else(|| PathBuf::from(name))
+}
+
 pub fn find_on_path(program: &str) -> Option<PathBuf> {
     find_in_path(program, &env::var_os("PATH")?)
 }
