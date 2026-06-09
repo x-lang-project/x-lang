@@ -61,6 +61,10 @@ impl CheriPurecap {
 }
 
 impl<'a> TargetSpec<'a> {
+    pub fn is_os_product(self) -> bool {
+        ProductTarget::parse(self.triple) == Some(ProductTarget::FreestandingX86)
+    }
+
     pub fn compiler_arguments(self) -> Vec<String> {
         let mut arguments = vec![format!("--target={}", self.triple)];
 
