@@ -51,6 +51,26 @@ pub struct TemporaryFile {
 }
 
 impl TemporaryFile {
+    pub fn create(directory: &Path, label: &str) -> io::Result<Self> {
+        for _ in 0..MAX_NAME_ATTEMPTS {
+            let sequence = NEXT_FILE.fetch_add(1, Ordering::Relaxed);
+            let path = directory.join(format!(".{label}.{}.{sequence}.tmp", process::id()));
+
+            match OpenOptions::new().create_new(true).write(true).open(&path) {
+                Ok(file) => {
+                    return Ok(Self {
+                        path,
+                        file: Some(file),
+                    });
+                }
+                Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+                Err(error) => return Err(error),
+            }
+        }
+
+        Err(TemporaryFileError::NamesExhausted.into_io_error())
+    }
+
     pub fn path(&self) -> &Path {
         &self.path
     }
