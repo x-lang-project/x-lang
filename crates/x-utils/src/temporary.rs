@@ -50,6 +50,15 @@ pub struct TemporaryFile {
     file: Option<File>,
 }
 
+impl TemporaryFile {
+    pub fn install(mut self, destination: &Path) -> io::Result<()> {
+        // Windows requires closing the file before rename or cleanup.
+        drop(self.file.take());
+
+        fs::rename(&self.path, destination)
+    }
+}
+
 impl Drop for TemporaryFile {
     fn drop(&mut self) {
         drop(self.file.take());
