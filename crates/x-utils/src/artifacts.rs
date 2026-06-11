@@ -30,6 +30,11 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    /// A generated module name is complete, even when it contains dots.
+    pub fn generated_object(&self) -> PathBuf {
+        self.append_extension(OBJECT_EXTENSION)
+    }
+
     pub fn generated_ir(&self) -> PathBuf {
         self.append_extension(IR_EXTENSION)
     }
