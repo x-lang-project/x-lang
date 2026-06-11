@@ -35,6 +35,28 @@ impl error::Error for InitialisationError {}
 
 pub use tracing::{Level, debug, error, info, span, trace, warn};
 
+pub fn log_diagnostic(diag: &Diagnostic) {
+    let sev = diag.severity.name();
+    macro_rules! emit {
+        ($level:expr) => { tracing::event!(
+        target: "x.diagnostic",
+        $level,
+        severity = sev,
+        code = diag.code.as_deref().unwrap_or(""),
+        message = diag.message,
+        labels = diag.labels.len(),
+        notes = diag.notes.len(),
+        help = diag.help.as_deref().unwrap_or(""),
+        suggestions = ?suggestion_summaries(diag)
+        ) };
+    }
+    match diag.severity {
+        Severity::Error => emit!(tracing::Level::ERROR),
+        Severity::Warning => emit!(tracing::Level::WARN),
+        Severity::Note | Severity::Help => emit!(tracing::Level::INFO),
+    }
+}
+
 // Disabled trace events must not format suggestions or allocate.
 fn suggestion_summaries(diag: &Diagnostic) -> Vec<String> {
     diag.suggestions
