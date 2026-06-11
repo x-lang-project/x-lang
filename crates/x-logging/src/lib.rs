@@ -35,6 +35,29 @@ impl error::Error for InitialisationError {}
 
 pub use tracing::{Level, debug, error, info, span, trace, warn};
 
+pub fn initialise() -> Result<(), InitialisationError> {
+    INIT.get_or_init(|| {
+        let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("warn"));
+        #[cfg(feature = "json")]
+        return fmt()
+            .with_writer(io::stderr)
+            .with_env_filter(filter)
+            .json()
+            .flatten_event(true)
+            .try_init()
+            .map_err(|error| InitialisationError(ToolingError::json_log_subscriber(error)));
+        #[cfg(not(feature = "json"))]
+        return fmt()
+            .with_writer(io::stderr)
+            .with_env_filter(filter)
+            .with_target(true)
+            .with_level(true)
+            .try_init()
+            .map_err(|error| InitialisationError(ToolingError::log_subscriber(error)));
+    })
+    .clone()
+}
+
 pub fn log_diagnostic(diag: &Diagnostic) {
     let sev = diag.severity.name();
     macro_rules! emit {
