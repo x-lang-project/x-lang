@@ -1,0 +1,28 @@
+[package]
+name = "x-logging"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lib]
+test = true
+doctest = true
+name = "x_logging"
+path = "src/lib.rs"
+
+[dependencies]
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = [
+  "fmt",
+  "env-filter",
+  "ansi",
+] }
+
+x-diagnostics = { workspace = true }
+
+[features]
+json = ["tracing-subscriber/json"]
