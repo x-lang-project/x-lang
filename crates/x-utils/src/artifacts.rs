@@ -30,6 +30,10 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    pub fn generated_ir(&self) -> PathBuf {
+        self.append_extension(IR_EXTENSION)
+    }
+
     fn append_extension(&self, extension: &str) -> PathBuf {
         let mut name = self.base.as_os_str().to_os_string();
         name.push(".");
