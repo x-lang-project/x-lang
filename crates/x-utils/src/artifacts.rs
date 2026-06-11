@@ -30,6 +30,13 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    pub fn new(base: impl AsRef<Path>) -> Self {
+        Self {
+            base: base.as_ref().into(),
+            platform: ArtifactPlatform::host(),
+        }
+    }
+
     pub fn for_platform(mut self, platform: ArtifactPlatform) -> Self {
         self.platform = platform;
         self
