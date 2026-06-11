@@ -30,6 +30,10 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    pub fn object(&self) -> PathBuf {
+        self.base.with_extension(OBJECT_EXTENSION)
+    }
+
     pub fn ir(&self) -> PathBuf {
         self.base.with_extension(IR_EXTENSION)
     }
