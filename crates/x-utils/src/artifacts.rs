@@ -30,6 +30,11 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    pub fn for_platform(mut self, platform: ArtifactPlatform) -> Self {
+        self.platform = platform;
+        self
+    }
+
     pub fn executable(&self) -> PathBuf {
         let already_executable = self
             .base
