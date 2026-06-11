@@ -18,6 +18,13 @@ pub mod target;
 pub mod temporary;
 pub mod tools;
 
+pub fn sanitize_symbol(value: &str) -> String {
+    value
+        .chars()
+        .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { '_' })
+        .collect()
+}
+
 const FNV1A_OFFSET: u64 = 0xcbf29ce484222325;
 const FNV1A_PRIME: u64 = 0x100000001b3;
 
