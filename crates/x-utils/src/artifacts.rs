@@ -30,6 +30,15 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    /// An explicit output extension belongs to the caller.
+    pub fn executable_override(&self) -> PathBuf {
+        if self.platform == ArtifactPlatform::Windows && self.base.extension().is_none() {
+            self.base.with_extension(EXECUTABLE_EXTENSION)
+        } else {
+            self.base.clone()
+        }
+    }
+
     pub fn object(&self) -> PathBuf {
         self.base.with_extension(OBJECT_EXTENSION)
     }
