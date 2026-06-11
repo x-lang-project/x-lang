@@ -30,6 +30,24 @@ pub struct ArtifactPaths {
 }
 
 impl ArtifactPaths {
+    pub fn executable(&self) -> PathBuf {
+        let already_executable = self
+            .base
+            .as_os_str()
+            .to_string_lossy()
+            .to_ascii_lowercase()
+            .ends_with(EXECUTABLE_SUFFIX);
+
+        if self.platform == ArtifactPlatform::Windows && !already_executable {
+            let mut name = self.base.as_os_str().to_os_string();
+            name.push(EXECUTABLE_SUFFIX);
+
+            PathBuf::from(name)
+        } else {
+            self.base.clone()
+        }
+    }
+
     /// An explicit output extension belongs to the caller.
     pub fn executable_override(&self) -> PathBuf {
         if self.platform == ArtifactPlatform::Windows && self.base.extension().is_none() {
