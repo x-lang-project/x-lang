@@ -37,4 +37,15 @@ impl ArtifactPaths {
 
         PathBuf::from(name)
     }
+
+    pub fn archived_ir(&self, optimisation: u8) -> PathBuf {
+        let mut name = OsString::from(
+            self.base
+                .file_stem()
+                .unwrap_or_else(|| ffi::OsStr::new("output")),
+        );
+        name.push(format!("_0{optimisation}.{IR_EXTENSION}"));
+
+        self.base.parent().unwrap_or(Path::new(".")).join(name)
+    }
 }
