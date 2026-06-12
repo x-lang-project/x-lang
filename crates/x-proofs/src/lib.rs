@@ -45,6 +45,12 @@ pub struct RegistrationReport {
     pub trusted_assumptions: usize,
 }
 
+impl RegistrationReport {
+    pub fn is_fully_registered(self) -> bool {
+        self.pending == 0 && self.mismatched == 0 && self.trusted_assumptions == 0
+    }
+}
+
 pub fn match_obligation_fingerprint(
     obligation: &ProofObligation,
     fingerprint: impl AsRef<str>,
