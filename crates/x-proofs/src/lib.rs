@@ -35,6 +35,21 @@ impl ProofRegistry {
             .find(|artifact| artifact.obligation_identifier == obligation.identifier)
             .map(|artifact| &artifact.status)
     }
+
+    pub fn registration_report(&self, obligations: &[ProofObligation]) -> RegistrationReport {
+        let mut report = RegistrationReport::default();
+
+        for obligation in obligations {
+            match self.recorded_status(obligation) {
+                None | Some(ProofStatus::Pending) => report.pending += 1,
+                Some(ProofStatus::FingerprintMatch) => report.matched += 1,
+                Some(ProofStatus::FingerprintMismatch(_)) => report.mismatched += 1,
+                Some(ProofStatus::TrustedAssumption(_)) => report.trusted_assumptions += 1,
+            }
+        }
+
+        report
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
