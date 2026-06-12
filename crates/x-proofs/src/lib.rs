@@ -45,6 +45,24 @@ pub struct RegistrationReport {
     pub trusted_assumptions: usize,
 }
 
+pub fn match_obligation_fingerprint(
+    obligation: &ProofObligation,
+    fingerprint: impl AsRef<str>,
+) -> ProofArtifact {
+    let fingerprint = fingerprint.as_ref();
+    let expected = stable_identifier(&obligation.subject, &obligation.predicate);
+
+    ProofArtifact {
+        obligation_identifier: obligation.identifier.clone(),
+        status: if fingerprint == expected {
+            ProofStatus::FingerprintMatch
+        } else {
+            ProofStatus::FingerprintMismatch("fingerprint does not match obligation".to_string())
+        },
+        fingerprint: Some(fingerprint.to_string()),
+    }
+}
+
 pub fn stable_identifier(subject: &str, predicate: &str) -> String {
     let mut hash = 0xcbf29ce484222325u64;
 
