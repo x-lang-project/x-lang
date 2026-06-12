@@ -44,3 +44,20 @@ pub struct RegistrationReport {
     pub mismatched: usize,
     pub trusted_assumptions: usize,
 }
+
+pub fn stable_identifier(subject: &str, predicate: &str) -> String {
+    let mut hash = 0xcbf29ce484222325u64;
+
+    for part in [subject, predicate] {
+        for byte in (part.len() as u64)
+            .to_le_bytes()
+            .into_iter()
+            .chain(part.bytes())
+        {
+            hash ^= u64::from(byte);
+            hash = hash.wrapping_mul(0x100000001b3);
+        }
+    }
+
+    format!("{hash:016x}")
+}
