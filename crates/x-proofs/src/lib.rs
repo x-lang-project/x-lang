@@ -28,6 +28,12 @@ pub struct ProofRegistry {
 }
 
 impl ProofRegistry {
+    pub fn status_for(&self, obligation: &ProofObligation) -> ProofStatus {
+        self.recorded_status(obligation)
+            .cloned()
+            .unwrap_or(ProofStatus::Pending)
+    }
+
     fn recorded_status(&self, obligation: &ProofObligation) -> Option<&ProofStatus> {
         self.artifacts
             .iter()
