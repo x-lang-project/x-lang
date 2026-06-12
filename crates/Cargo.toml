@@ -12,6 +12,7 @@ members = [
   "x-diagnostics",
   "x-utils",
   "x-logging",
+  "x-proofs",
 ]
 
 [workspace.dependencies]

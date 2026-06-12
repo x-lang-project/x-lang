@@ -1,0 +1,15 @@
+[package]
+name = "x-proofs"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+
+[lib]
+test = true
+doctest = true

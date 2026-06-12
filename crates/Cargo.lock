@@ -310,6 +310,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-proofs"
+version = "1.0.0"
+
+[[package]]
 name = "x-utils"
 version = "1.0.0"
 dependencies = [
