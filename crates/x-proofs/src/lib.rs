@@ -28,6 +28,10 @@ pub struct ProofRegistry {
 }
 
 impl ProofRegistry {
+    pub fn record(&mut self, artifact: ProofArtifact) {
+        self.artifacts.push(artifact);
+    }
+
     pub fn status_for(&self, obligation: &ProofObligation) -> ProofStatus {
         self.recorded_status(obligation)
             .cloned()
