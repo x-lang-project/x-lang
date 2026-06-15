@@ -7,6 +7,20 @@ pub struct ProofObligation {
     pub predicate: String,
 }
 
+impl ProofObligation {
+    pub fn new(subject: impl Into<String>, predicate: impl Into<String>) -> Self {
+        let subject = subject.into();
+        let predicate = predicate.into();
+        let identifier = stable_identifier(&subject, &predicate);
+
+        Self {
+            identifier,
+            subject,
+            predicate,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProofStatus {
     Pending,
