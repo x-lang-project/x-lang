@@ -28,6 +28,10 @@ pub struct ProofRegistry {
 }
 
 impl ProofRegistry {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn record(&mut self, artifact: ProofArtifact) {
         self.artifacts.push(artifact);
     }
