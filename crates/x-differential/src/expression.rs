@@ -56,6 +56,26 @@ pub enum BooleanOperator {
     Or,
 }
 
+impl Expression {
+    /// Evaluate left to right; intermediate values must fit i32.
+    #[must_use]
+    pub fn evaluate(&self) -> i32 {
+        match self {
+            Self::Value(value) => *value,
+            Self::Binary {
+                operator,
+                left,
+                right,
+            } => {
+                let left = left.evaluate();
+                let right = right.evaluate();
+
+                operator.evaluate(left, right)
+            }
+        }
+    }
+}
+
 impl fmt::Display for Expression {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
