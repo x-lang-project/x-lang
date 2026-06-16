@@ -93,6 +93,28 @@ impl Generator {
         }
     }
 
+    /// Comparisons contain depth-two integer trees in addition to the Boolean depth.
+    pub fn boolean_expression(&mut self, depth: u8) -> BooleanExpression {
+        if depth == 0 {
+            return self.boolean_value();
+        }
+
+        match self.next() % 4 {
+            0 => self.boolean_value(),
+            1 => self.comparison(),
+            2 => BooleanExpression::Not(Box::new(self.boolean_expression(depth - 1))),
+            _ => BooleanExpression::Binary {
+                operator: if self.next() & 1 == 0 {
+                    BooleanOperator::And
+                } else {
+                    BooleanOperator::Or
+                },
+                left: Box::new(self.boolean_expression(depth - 1)),
+                right: Box::new(self.boolean_expression(depth - 1)),
+            },
+        }
+    }
+
     pub fn stateful_case(&mut self) -> StatefulCase {
         let values = array::from_fn(|_| self.value());
         let continue_after = (self.next() % (values.len() - 1) as u32 + 1) as usize;
