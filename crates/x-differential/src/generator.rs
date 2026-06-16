@@ -16,6 +16,11 @@ const COMPARISON_DEPTH: u8 = 2;
 pub struct Generator(u64);
 
 impl Generator {
+    #[must_use]
+    pub const fn new(seed: u64) -> Self {
+        Self(seed)
+    }
+
     fn next(&mut self) -> u32 {
         self.0 ^= self.0 << 13;
         self.0 ^= self.0 >> 7;
