@@ -74,6 +74,11 @@ impl Expression {
             }
         }
     }
+
+    #[must_use]
+    pub fn render(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl fmt::Display for Expression {
