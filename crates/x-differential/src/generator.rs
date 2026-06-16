@@ -92,4 +92,17 @@ impl Generator {
             right: Box::new(self.expression(COMPARISON_DEPTH)),
         }
     }
+
+    pub fn stateful_case(&mut self) -> StatefulCase {
+        let values = array::from_fn(|_| self.value());
+        let continue_after = (self.next() % (values.len() - 1) as u32 + 1) as usize;
+        let break_after =
+            continue_after + (self.next() % (values.len() - continue_after) as u32 + 1) as usize;
+
+        StatefulCase {
+            values,
+            continue_after,
+            break_after,
+        }
+    }
 }
