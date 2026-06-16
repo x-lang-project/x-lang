@@ -126,6 +126,32 @@ impl Operator {
 
 impl BooleanExpression {
     #[must_use]
+    pub fn evaluate(&self) -> bool {
+        match self {
+            Self::Value(value) => *value,
+            Self::Comparison {
+                operator,
+                left,
+                right,
+            } => {
+                let left = left.evaluate();
+                let right = right.evaluate();
+
+                operator.evaluate(left, right)
+            }
+            Self::Not(expression) => !expression.evaluate(),
+            Self::Binary {
+                operator,
+                left,
+                right,
+            } => match operator {
+                BooleanOperator::And => left.evaluate() && right.evaluate(),
+                BooleanOperator::Or => left.evaluate() || right.evaluate(),
+            },
+        }
+    }
+
+    #[must_use]
     pub fn render(&self) -> String {
         self.to_string()
     }
