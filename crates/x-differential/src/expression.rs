@@ -124,6 +124,13 @@ impl Operator {
     }
 }
 
+impl BooleanExpression {
+    #[must_use]
+    pub fn render(&self) -> String {
+        self.to_string()
+    }
+}
+
 impl fmt::Display for BooleanExpression {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
