@@ -40,6 +40,10 @@ impl Source {
         })
     }
 
+    pub fn find(&self, pattern: &str) -> Option<usize> {
+        self.masked.find(pattern)
+    }
+
     pub fn line_offset(&self, line: usize) -> usize {
         if line <= 1 {
             return 0;
