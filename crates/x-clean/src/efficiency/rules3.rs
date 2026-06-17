@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-flush-in-loop",
+        pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.flush\\("),
+        title: "Flushing in a loop",
+        description: "A loop flushes its writer.",
+        positive: "fn f() { for item in items { writer.flush(); } }",
+        negative: "fn f() { for item in items { writer.write_all(item); } writer.flush(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-process-in-loop",
         pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?Command::new\\("),
         title: "Starting processes in a loop",
