@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-process-in-loop",
+        pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?Command::new\\("),
+        title: "Starting processes in a loop",
+        description: "A loop starts child processes.",
+        positive: "fn f() { for item in items { Command::new(program).status(); } }",
+        negative: "fn f() { Command::new(program).status(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-metadata-then-open",
         pattern: Detector::Tokens("(?:fs::metadata\\((\\w+)\\)[^;]*;)[^{}]*?File::open\\(\\1\\)"),
         title: "Metadata lookup before opening",
