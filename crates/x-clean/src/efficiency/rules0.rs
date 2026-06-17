@@ -1,0 +1,28 @@
+use super::{Detector, Spec};
+
+pub(super) const SPECS: &[Spec] = &[
+    Spec {
+        identifier: "buffered-write-flush-policy",
+        pattern: Detector::Ast,
+        title: "Buffered writer dropped without observable flush handling",
+        description: "BufWriter construction and write-shaped call in a block without explicit flush",
+        positive: "fn f() { let mut w = BufWriter::new(file); w.write_all(data); }",
+        negative: "fn f() { let mut w = BufWriter::new(file); w.flush(); }",
+    },
+    Spec {
+        identifier: "clone-before-move",
+        pattern: Detector::Ast,
+        title: "Clone before last use",
+        description: "Local cloned at its final lexical occurrence; move legality is not proven",
+        positive: "fn f() { let value = input; consume(value.clone()); }",
+        negative: "fn f() { let value = input; consume(value.clone()); consume(value); }",
+    },
+    Spec {
+        identifier: "collect-length-only",
+        pattern: Detector::Ast,
+        title: "Collection used only for length",
+        description: "Explicit Vec collection is immediately queried for length",
+        positive: "fn f() { values.collect::<Vec<_>>().len(); }",
+        negative: "fn f() { values.count(); }",
+    },
+];

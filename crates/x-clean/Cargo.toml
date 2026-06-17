@@ -1,0 +1,20 @@
+[package]
+name = "x-clean"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+x-diagnostics.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+regex.workspace = true
+walkdir.workspace = true
+syn.workspace = true
+quote.workspace = true
+proc-macro2.workspace = true

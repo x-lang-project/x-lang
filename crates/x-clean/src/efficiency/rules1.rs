@@ -1,0 +1,60 @@
+use super::{Detector, Spec};
+
+pub(super) const SPECS: &[Spec] = &[
+    Spec {
+        identifier: "linear-membership-loop",
+        pattern: Detector::Ast,
+        title: "Repeated linear membership checks",
+        description: "Contains on an explicitly Vec-shaped binding inside a loop; workload cost is unresolved",
+        positive: "fn f() { let other = Vec::<i32>::new(); for item in values { other.contains(&item); } }",
+        negative: "fn f() { let found = values.contains(&item); }",
+    },
+    Spec {
+        identifier: "lock-held-await",
+        pattern: Detector::Ast,
+        title: "Synchronisation guard across await",
+        description: "Lock/read/write-shaped local before await with no explicit drop in this block",
+        positive: "async fn f() { let guard = mutex.lock().unwrap(); work().await; consume(guard); }",
+        negative: "async fn f() { let guard = mutex.lock().unwrap(); drop(guard); work().await; }",
+    },
+    Spec {
+        identifier: "nested-lock-order",
+        pattern: Detector::Ast,
+        title: "Inconsistent acquisition order",
+        description: "Two lock identities acquired in opposing orders across call paths",
+        positive: "fn f() { let a = first.lock(); let b = second.lock(); } fn g() { let b = second.lock(); let a = first.lock(); }",
+        negative: "fn f() { let a = first.lock(); let b = second.lock(); } fn g() { let a = first.lock(); let b = second.lock(); }",
+    },
+    Spec {
+        identifier: "raw-pointer-lifetime",
+        pattern: Detector::Ast,
+        title: "Raw pointer escapes owner lifetime",
+        description: "Tail pointer method call on a local binding; owner lifetime requires review",
+        positive: "fn f() -> *const u8 { let value = Vec::<u8>::new(); value.as_ptr() }",
+        negative: "fn f() -> Vec<u8> { let value = Vec::<u8>::new(); value }",
+    },
+    Spec {
+        identifier: "redundant-borrow-layers",
+        pattern: Detector::Ast,
+        title: "Unnecessary reference/deref chains",
+        description: "Nested reference expressions such as &&value; expected reference depth requires review",
+        positive: "fn f() { consume(&&value); }",
+        negative: "fn f() { consume(&value); }",
+    },
+    Spec {
+        identifier: "regex-in-loop",
+        pattern: Detector::Ast,
+        title: "Regex construction in loop",
+        description: "Literal regex constructor inside an actual loop; invariant compilation may be cached",
+        positive: "fn f() { for item in items { Regex::new(\"pattern\"); } }",
+        negative: "fn f() { let regex = Regex::new(pattern); for item in items { regex.is_match(item); } }",
+    },
+    Spec {
+        identifier: "regex-per-call-literal",
+        pattern: Detector::Ast,
+        title: "Repeated compilation of literal regex",
+        description: "Regex constructor receives a literal in executable AST",
+        positive: "fn f() { Regex::new(\"pattern\"); }",
+        negative: "fn f() { Regex::new(pattern); }",
+    },
+];

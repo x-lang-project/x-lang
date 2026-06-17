@@ -1,0 +1,191 @@
+pub(super) fn rules() -> Vec<crate::Rule> {
+    vec![
+        crate::Rule {
+            identifier: r####"inconsistent-role-vocabulary"####,
+            title: r####"Naming clarity / inconsistent-role-vocabulary"####,
+            description: r####"Adjacent APIs use different names for a configured domain concept."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){let source_file=1;let input_file=2;}"####,
+            negative: r####"fn demo(){let source_file=1;}"####,
+        },
+        crate::Rule {
+            identifier: r####"local-binding-density"####,
+            title: r####"Complexity and cohesion / local-binding-density"####,
+            description: r####"A function has many local bindings."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){let value0=0;let value1=1;let value2=2;let value3=3;let value4=4;let value5=5;let value6=6;let value7=7;let value8=8;let value9=9;let value10=10;let value11=11;let value12=12;let value13=13;let value14=14;let value15=15;}"####,
+            negative: r####"fn demo(){let value0=0;let value1=1;let value2=2;let value3=3;let value4=4;let value5=5;let value6=6;let value7=7;let value8=8;let value9=9;let value10=10;let value11=11;let value12=12;let value13=13;let value14=14;}"####,
+        },
+        crate::Rule {
+            identifier: r####"loop-control-exit-density"####,
+            title: r####"Control flow / loop-control-exit-density"####,
+            description: r####"A loop has many exit or continue sites."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){loop{if a{break;}if b{continue;}if c{return;}if d{break;}}}"####,
+            negative: r####"fn demo(){loop{if a{break;}if b{continue;}if c{return;}}}"####,
+        },
+        crate::Rule {
+            identifier: r####"match-arm-count-outlier"####,
+            title: r####"Control flow / match-arm-count-outlier"####,
+            description: r####"A match has many arms."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){match value{0=>run(), 1=>run(), 2=>run(), 3=>run(), 4=>run(), 5=>run(), 6=>run(), 7=>run(), 8=>run(), 9=>run(), 10=>run(), 11=>run(), 12=>run(), 13=>run(), 14=>run(), 15=>run(), 16=>run(), 17=>run(), 18=>run(), 19=>run(), _=>stop()}}"####,
+            negative: r####"fn demo(){match value{0=>run(), 1=>run(), 2=>run(), 3=>run(), 4=>run(), 5=>run(), 6=>run(), 7=>run(), 8=>run(), 9=>run(), 10=>run(), 11=>run(), 12=>run(), 13=>run(), 14=>run(), 15=>run(), 16=>run(), 17=>run(), _=>stop()}}"####,
+        },
+        crate::Rule {
+            identifier: r####"multi-purpose-helper-fanout"####,
+            title: r####"Complexity and cohesion / multi-purpose-helper-fanout"####,
+            description: r####"A helper calls several unrelated modules or has loosely connected stages."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){alpha::run();beta::run();gamma::run();delta::run();epsilon::run();zeta::run();}"####,
+            negative: r####"fn demo(){alpha::run();beta::run();gamma::run();delta::run();epsilon::run();}"####,
+        },
+        crate::Rule {
+            identifier: r####"mutable-role-drift"####,
+            title: r####"Naming clarity / mutable-role-drift"####,
+            description: r####"A mutable binding receives values from several stages without changing its name."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){let mut value=begin();value=parse();value=validate();value=render();}"####,
+            negative: r####"fn demo(){let mut value=begin();value=parse();value=validate();}"####,
+        },
+        crate::Rule {
+            identifier: r####"name-type-disagreement"####,
+            title: r####"Naming clarity / name-type-disagreement"####,
+            description: r####"A binding name conflicts with its explicit type annotation."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){let source_path:u32=12;}"####,
+            negative: r####"fn demo(){let source_path:String=String::new();}"####,
+        },
+        crate::Rule {
+            identifier: r####"negative-boolean-name"####,
+            title: r####"Naming clarity / negative-boolean-name"####,
+            description: r####"A Boolean name carries a negation that callers negate again."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){if !not_ready{run();}}"####,
+            negative: r####"fn demo(){if !ready{run();}}"####,
+        },
+        crate::Rule {
+            identifier: r####"nested-single-option-match"####,
+            title: r####"Control flow / nested-single-option-match"####,
+            description: r####"Nested Option/Result matches forward the same failure."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){match first{Some(x)=>match second{Some(y)=>run(),None=>stop()},None=>stop()}}"####,
+            negative: r####"fn demo(){match first{Some(x)=>run(),None=>stop()}}"####,
+        },
+        crate::Rule {
+            identifier: r####"opaque-numbered-name"####,
+            title: r####"Naming clarity / opaque-numbered-name"####,
+            description: r####"Related names differ only by numeric suffixes."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){let value1=1;let value2=2;}"####,
+            negative: r####"fn demo(){let value1=1;let other=2;}"####,
+        },
+        crate::Rule {
+            identifier: r####"orphaned-item-reference"####,
+            title: r####"Comments and documentation / orphaned-item-reference"####,
+            description: r####"A local rustdoc target is absent from the selected scope."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"/// See [missing](crate::Missing).
+fn demo(){}"####,
+            negative: r####"/// See [demo](crate::demo).
+fn demo(){}"####,
+        },
+        crate::Rule {
+            identifier: r####"parallel-match-dispatch"####,
+            title: r####"Duplication / parallel-match-dispatch"####,
+            description: r####"Matches over the same enum repeat their pattern groups."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn first(){match value{A=>one(),B=>two(),C=>three()}}fn second(){match value{A=>red(),B=>blue(),C=>green()}}"####,
+            negative: r####"fn first(){match value{A=>one(),B=>two(),C=>three()}}fn second(){match value{A=>red(),B=>blue(),D=>green()}}"####,
+        },
+        crate::Rule {
+            identifier: r####"public-item-undocumented"####,
+            title: r####"Comments and documentation / public-item-undocumented"####,
+            description: r####"A public item lacks attached rustdoc."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"pub fn demo(){}"####,
+            negative: r####"/// Executes the command.
+pub fn demo(){}"####,
+        },
+        crate::Rule {
+            identifier: r####"redundant-owner-name"####,
+            title: r####"Naming clarity / redundant-owner-name"####,
+            description: r####"A method repeats its owning type or module name."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"struct Resolver;impl Resolver{fn resolve_resolver(&self){}}"####,
+            negative: r####"struct Resolver;impl Resolver{fn resolve(&self){}}"####,
+        },
+        crate::Rule {
+            identifier: r####"repeated-complex-expression"####,
+            title: r####"Duplication / repeated-complex-expression"####,
+            description: r####"A function repeats the same substantial expression."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){very_long_owner.construct_path(long_source_directory, long_destination_directory);very_long_owner.construct_path(long_source_directory, long_destination_directory);}"####,
+            negative: r####"fn demo(){very_long_owner.construct_path(long_source_directory, long_destination_directory);very_long_owner.construct_path(other_source_directory, other_destination_directory);}"####,
+        },
+        crate::Rule {
+            identifier: r####"repeated-condition-in-branch-chain"####,
+            title: r####"Control flow / repeated-condition-in-branch-chain"####,
+            description: r####"An if/else-if chain repeats the same condition syntax."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){if first{one();}else if second{two();}else if first{three();}}"####,
+            negative: r####"fn demo(){if first{one();}else if second{two();}else if third{three();}}"####,
+        },
+        crate::Rule {
+            identifier: r####"single-iteration-loop-shape"####,
+            title: r####"Control flow / single-iteration-loop-shape"####,
+            description: r####"Every reachable loop path exits before repeating."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(){loop{run();break;}}"####,
+            negative: r####"fn demo(){loop{run();continue;}}"####,
+        },
+        crate::Rule {
+            identifier: r####"stale-parameter-doc-name"####,
+            title: r####"Comments and documentation / stale-parameter-doc-name"####,
+            description: r####"Structured parameter docs name a parameter absent from the signature."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"/// # Arguments
+/// - `previous`: the value.
+fn demo(current:u32){}"####,
+            negative: r####"/// # Arguments
+/// - `current`: the value.
+fn demo(current:u32){}"####,
+        },
+        crate::Rule {
+            identifier: r####"undocumented-behavior-branch"####,
+            title: r####"Comments and documentation / undocumented-behaviour-branch"####,
+            description: r####"Public docs omit explicitly constructed errors or configurable behaviour."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"/// Performs an operation.
+pub fn demo()->Result<(),Error>{Err(Error)}"####,
+            negative: r####"/// Performs an operation.
+/// # Errors
+/// Fails if the operation cannot run.
+pub fn demo()->Result<(),Error>{Err(Error)}"####,
+        },
+        crate::Rule {
+            identifier: r####"unnecessary-pass-through-wrapper"####,
+            title: r####"Complexity and cohesion / unnecessary-pass-through-wrapper"####,
+            description: r####"A private helper forwards unchanged arguments without validation or adaptation."####,
+            analysis: r####"Rust syntax, binding names, literals and attached rustdoc"####,
+            positive: r####"fn demo(value:u32){forward(value)}"####,
+            negative: r####"fn demo(value:u32){forward(value+1)}"####,
+        },
+        crate::Rule {
+            identifier: r####"clarity-extra-raw-name"####,
+            title: r####"Raw escaped identifier"####,
+            description: r####"Raw escaped identifier."####,
+            analysis: r####"Rust syntax and rustdoc"####,
+            positive: r####"fn demo(){let r#type=1;}"####,
+            negative: r####"fn demo(){let kind=1;}"####,
+        },
+        crate::Rule {
+            identifier: r####"clarity-extra-unicode-name"####,
+            title: r####"Non-ASCII identifier"####,
+            description: r####"Non-ASCII identifier."####,
+            analysis: r####"Rust syntax and rustdoc"####,
+            positive: r####"fn demo(){let café=1;}"####,
+            negative: r####"fn demo(){let cafe=1;}"####,
+        },
+    ]
+}
