@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-metadata-then-open",
+        pattern: Detector::Tokens("(?:fs::metadata\\((\\w+)\\)[^;]*;)[^{}]*?File::open\\(\\1\\)"),
+        title: "Metadata lookup before opening",
+        description: "File metadata is queried before opening the file.",
+        positive: "fn f() { std::fs::metadata(path); File::open(path); }",
+        negative: "fn f() { std::fs::metadata(path); File::open(other); }",
+    },
+    Spec {
         identifier: "efficiency-extra-read-entire-for-lines",
         pattern: Detector::Tokens("fs::read_to_string\\([^;]*\\)\\.lines\\("),
         title: "Reading a whole file for lines",
