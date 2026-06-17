@@ -25,4 +25,12 @@ pub(super) const SPECS: &[Spec] = &[
         positive: "fn f() { let text = \"hello\".to_string(); }",
         negative: "fn f() { let text = \"hello\"; }",
     },
+    Spec {
+        identifier: "efficiency-extra-read-entire-for-lines",
+        pattern: Detector::Tokens("fs::read_to_string\\([^;]*\\)\\.lines\\("),
+        title: "Reading a whole file for lines",
+        description: "A file is read into memory before processing its lines.",
+        positive: "fn f() { std::fs::read_to_string(path).unwrap().lines(); }",
+        negative: "fn f() { reader.lines(); }",
+    },
 ];
