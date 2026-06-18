@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-boxed-vector",
+        pattern: Detector::Tokens("Box::new\\(Vec(?:::[^()]*)?::new\\(\\)\\)"),
+        title: "Boxed vector",
+        description: "A vector is allocated inside a Box.",
+        positive: "fn f() { let values = Box::new(Vec::new()); }",
+        negative: "fn f() { let values = Vec::new(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-mutex-arc-single-thread-shape",
         pattern: Detector::Tokens("Arc::new\\(Mutex::new\\("),
         title: "Shared mutex allocation",
