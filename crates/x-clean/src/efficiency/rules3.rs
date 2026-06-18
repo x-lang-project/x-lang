@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-capacity-zero",
+        pattern: Detector::Tokens("(?:Vec(?:::[^()]*)?|String)::with_capacity\\(0\\)"),
+        title: "Zero initial capacity",
+        description: "A vector is created with zero capacity.",
+        positive: "fn f() { let values = Vec::<u8>::with_capacity(0); }",
+        negative: "fn f() { let values = Vec::with_capacity(10); }",
+    },
+    Spec {
         identifier: "efficiency-extra-boxed-vector",
         pattern: Detector::Tokens("Box::new\\(Vec(?:::[^()]*)?::new\\(\\)\\)"),
         title: "Boxed vector",
