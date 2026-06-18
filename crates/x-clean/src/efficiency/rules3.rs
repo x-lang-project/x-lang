@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-mutex-arc-single-thread-shape",
+        pattern: Detector::Tokens("Arc::new\\(Mutex::new\\("),
+        title: "Shared mutex allocation",
+        description: "Arc::new wraps Mutex::new; sharing requirements are unresolved.",
+        positive: "fn f() { let shared = Arc::new(Mutex::new(value)); }",
+        negative: "fn f() { let shared = Arc::new(value); }",
+    },
+    Spec {
         identifier: "efficiency-extra-sleep-zero",
         pattern: Detector::Tokens(
             "(?:thread::sleep|tokio::time::sleep)\\(Duration::(?:from_millis|from_secs)\\(0\\)\\)",
