@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-sleep-zero",
+        pattern: Detector::Tokens(
+            "(?:thread::sleep|tokio::time::sleep)\\(Duration::(?:from_millis|from_secs)\\(0\\)\\)",
+        ),
+        title: "Zero-duration sleep",
+        description: "Sleep is called with a zero duration.",
+        positive: "fn f() { std::thread::sleep(Duration::from_millis(0)); }",
+        negative: "fn f() { std::thread::sleep(Duration::from_millis(1)); }",
+    },
+    Spec {
         identifier: "efficiency-extra-flush-in-loop",
         pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.flush\\("),
         title: "Flushing in a loop",
