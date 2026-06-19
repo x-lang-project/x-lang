@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-vec-remove-front-loop",
+        pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.remove\\(0\\)"),
+        title: "Removing vector fronts in a loop",
+        description: "A loop removes the first vector element.",
+        positive: "fn f() { while ready { values.remove(0); } }",
+        negative: "fn f() { while ready { values.pop(); } }",
+    },
+    Spec {
         identifier: "efficiency-extra-vec-insert-front-loop",
         pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.insert\\(0,"),
         title: "Inserting vector fronts in a loop",
