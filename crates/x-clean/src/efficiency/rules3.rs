@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-reserve-one-loop",
+        pattern: Detector::Tokens(
+            "(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.reserve(?:_exact)?\\(1\\)",
+        ),
+        title: "Repeated small reservations",
+        description: "A loop reserves one additional element.",
+        positive: "fn f() { for item in items { values.reserve_exact(1); } }",
+        negative: "fn f() { values.reserve(items.len()); for item in items { values.push(item); } }",
+    },
+    Spec {
         identifier: "efficiency-extra-capacity-zero",
         pattern: Detector::Tokens("(?:Vec(?:::[^()]*)?|String)::with_capacity\\(0\\)"),
         title: "Zero initial capacity",
