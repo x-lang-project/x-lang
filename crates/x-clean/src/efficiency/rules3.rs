@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-vec-insert-front-loop",
+        pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.insert\\(0,"),
+        title: "Inserting vector fronts in a loop",
+        description: "A loop inserts at the start of a vector.",
+        positive: "fn f() { for item in items { values.insert(0,item); } }",
+        negative: "fn f() { for item in items { values.push(item); } }",
+    },
+    Spec {
         identifier: "efficiency-extra-reserve-one-loop",
         pattern: Detector::Tokens(
             "(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.reserve(?:_exact)?\\(1\\)",
