@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "efficiency-extra-chain-empty",
+        pattern: Detector::Tokens("\\.chain\\((?:std::)?iter::empty\\(\\)\\)"),
+        title: "Empty iterator chain",
+        description: "An iterator is chained with an empty iterator.",
+        positive: "fn f() { values.chain(std::iter::empty()); }",
+        negative: "fn f() { values.chain(other); }",
+    },
+    Spec {
         identifier: "efficiency-extra-format-only-value",
         pattern: Detector::Ast,
         title: "Formatting one value",
