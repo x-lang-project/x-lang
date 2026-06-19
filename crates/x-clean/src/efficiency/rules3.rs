@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let text = \"hello\"; }",
     },
     Spec {
+        identifier: "efficiency-extra-vec-clear-shrink-loop",
+        pattern: Detector::Tokens(
+            "(?:for[^{}]+|loop)\\{[^{}]*?\\.clear\\(\\);[^{}]*?\\.shrink_to_fit\\(",
+        ),
+        title: "Shrinking a cleared vector in a loop",
+        description: "A vector is cleared and shrunk inside a loop.",
+        positive: "fn f() { for item in items { values.clear(); values.shrink_to_fit(); } }",
+        negative: "fn f() { for item in items { values.clear(); } }",
+    },
+    Spec {
         identifier: "efficiency-extra-vec-remove-front-loop",
         pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.remove\\(0\\)"),
         title: "Removing vector fronts in a loop",
