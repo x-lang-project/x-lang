@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "efficiency-extra-skip-next",
+        pattern: Detector::Tokens("\\.skip\\([^()]+\\)\\.next\\("),
+        title: "Skipping before next",
+        description: "skip is followed by next.",
+        positive: "fn f() { values.skip(5).next(); }",
+        negative: "fn f() { values.nth(5); }",
+    },
+    Spec {
         identifier: "efficiency-extra-take-zero",
         pattern: Detector::Tokens("\\.take\\(0\\)"),
         title: "Empty iterator limit",
