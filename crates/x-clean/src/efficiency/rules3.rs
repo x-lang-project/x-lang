@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "efficiency-extra-step-by-one",
+        pattern: Detector::Tokens("\\.step_by\\(1\\)"),
+        title: "Iterator step of one",
+        description: "step_by is called with one.",
+        positive: "fn f() { values.step_by(1); }",
+        negative: "fn f() { values.step_by(2); }",
+    },
+    Spec {
         identifier: "efficiency-extra-chain-empty",
         pattern: Detector::Tokens("\\.chain\\((?:std::)?iter::empty\\(\\)\\)"),
         title: "Empty iterator chain",
