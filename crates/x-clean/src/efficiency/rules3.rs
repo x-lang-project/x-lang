@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "efficiency-extra-nth-zero",
+        pattern: Detector::Tokens("\\.nth\\(0\\)"),
+        title: "Zero-offset iterator access",
+        description: "nth is called with zero.",
+        positive: "fn f() { values.nth(0); }",
+        negative: "fn f() { values.next(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-skip-next",
         pattern: Detector::Tokens("\\.skip\\([^()]+\\)\\.next\\("),
         title: "Skipping before next",
