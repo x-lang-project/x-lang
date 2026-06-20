@@ -17,4 +17,12 @@ pub(super) const SPECS: &[Spec] = &[
         positive: "fn f() { consume(values[0]); }",
         negative: "fn f() { consume(values.get(0)); }",
     },
+    Spec {
+        identifier: "efficiency-extra-reverse-next",
+        pattern: Detector::Tokens("\\.rev\\(\\)\\.next\\("),
+        title: "Reversing before next",
+        description: "An iterator is reversed before reading one element.",
+        positive: "fn f() { values.rev().next(); }",
+        negative: "fn f() { values.next_back(); }",
+    },
 ];
