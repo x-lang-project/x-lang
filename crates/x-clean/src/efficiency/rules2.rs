@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-enumerate-discard-index",
+        pattern: Detector::Tokens("\\.enumerate\\(\\)\\.map\\(\\|\\(_,?(\\w+)\\)\\|\\1\\)"),
+        title: "Unused enumeration indices",
+        description: "Enumeration indices are discarded.",
+        positive: "fn f() { values.enumerate().map(|(_, item)| item); }",
+        negative: "fn f() { values.enumerate().map(|(index,item)| (index,item)); }",
+    },
+    Spec {
         identifier: "efficiency-extra-reverse-sort",
         pattern: Detector::Tokens("\\.sort(?:_unstable)?\\(\\);\\w+\\.reverse\\("),
         title: "Reversing sorted results",
