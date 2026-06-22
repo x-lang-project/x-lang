@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-map-identity",
+        pattern: Detector::Tokens("\\.map\\(\\|(\\w+)\\|\\1\\)"),
+        title: "Identity mapping",
+        description: "map returns each input unchanged.",
+        positive: "fn f() { values.map(|item| item); }",
+        negative: "fn f() { values.map(|item| transform(item)); }",
+    },
+    Spec {
         identifier: "efficiency-extra-enumerate-discard-index",
         pattern: Detector::Tokens("\\.enumerate\\(\\)\\.map\\(\\|\\(_,?(\\w+)\\)\\|\\1\\)"),
         title: "Unused enumeration indices",
