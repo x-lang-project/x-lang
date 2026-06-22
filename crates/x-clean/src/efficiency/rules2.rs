@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-collect-then-collect",
+        pattern: Detector::Tokens("\\.collect(?:::[^;()]*)?\\(\\)\\.into_iter\\(\\)\\.collect"),
+        title: "Repeated collection",
+        description: "A collected result is collected again.",
+        positive: "fn f() { values.collect::<Vec<_>>().into_iter().collect::<Vec<_>>(); }",
+        negative: "fn f() { values.collect::<Vec<_>>(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-filter-next",
         pattern: Detector::Tokens("\\.filter\\([^;]*\\)\\.next\\("),
         title: "Filtering before next",
