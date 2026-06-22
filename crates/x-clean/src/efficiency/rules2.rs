@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-filter-next",
+        pattern: Detector::Tokens("\\.filter\\([^;]*\\)\\.next\\("),
+        title: "Filtering before next",
+        description: "A filtered iterator is read with next.",
+        positive: "fn f() { values.filter(|x| predicate(x)).next(); }",
+        negative: "fn f() { values.find(|x| predicate(x)); }",
+    },
+    Spec {
         identifier: "efficiency-extra-map-flatten",
         pattern: Detector::Tokens("\\.map\\([^;]*\\)\\.flatten\\("),
         title: "Mapping before flatten",
