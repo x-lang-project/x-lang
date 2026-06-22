@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-map-flatten",
+        pattern: Detector::Tokens("\\.map\\([^;]*\\)\\.flatten\\("),
+        title: "Mapping before flatten",
+        description: "An iterator maps values before flattening them.",
+        positive: "fn f() { values.map(|x| expand(x)).flatten(); }",
+        negative: "fn f() { values.flat_map(|x| expand(x)); }",
+    },
+    Spec {
         identifier: "efficiency-extra-filter-map-identity",
         pattern: Detector::Tokens("\\.filter_map\\(\\|\\w+\\|\\w+\\)"),
         title: "Identity filter_map",
