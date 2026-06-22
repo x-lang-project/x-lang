@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-reverse-sort",
+        pattern: Detector::Tokens("\\.sort(?:_unstable)?\\(\\);\\w+\\.reverse\\("),
+        title: "Reversing sorted results",
+        description: "A sorted collection is reversed.",
+        positive: "fn f() { values.sort(); values.reverse(); }",
+        negative: "fn f() { values.sort_by(|a,b| b.cmp(a)); }",
+    },
+    Spec {
         identifier: "efficiency-extra-reverse-next",
         pattern: Detector::Tokens("\\.rev\\(\\)\\.next\\("),
         title: "Reversing before next",
