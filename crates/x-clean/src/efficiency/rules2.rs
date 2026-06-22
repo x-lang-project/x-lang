@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-filter-map-identity",
+        pattern: Detector::Tokens("\\.filter_map\\(\\|\\w+\\|\\w+\\)"),
+        title: "Identity filter_map",
+        description: "filter_map uses an identity function.",
+        positive: "fn f() { values.filter_map(|item| item); }",
+        negative: "fn f() { values.flatten(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-map-identity",
         pattern: Detector::Tokens("\\.map\\(\\|(\\w+)\\|\\1\\)"),
         title: "Identity mapping",
