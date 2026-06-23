@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-string-then-bytes",
+        pattern: Detector::Tokens("\\.to_string\\(\\)\\.into_bytes\\("),
+        title: "String allocation before byte access",
+        description: "A string is allocated before accessing its bytes.",
+        positive: "fn f() { value.to_string().into_bytes(); }",
+        negative: "fn f() { value.as_bytes(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-collect-then-collect",
         pattern: Detector::Tokens("\\.collect(?:::[^;()]*)?\\(\\)\\.into_iter\\(\\)\\.collect"),
         title: "Repeated collection",
