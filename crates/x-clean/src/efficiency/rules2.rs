@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "suspicious-bool-combination",
+        pattern: Detector::Tokens("(?:if|while)(\\w+)(?:&&\\1|\\|\\|!\\1)"),
+        title: "Repeated/complementary boolean predicates",
+        description: "Repeated conjunctions, tautological disjunctions, or incompatible comparisons of the same pure expression",
+        positive: "fn f() { if ready && ready {} }",
+        negative: "fn f() { if ready && valid {} }",
+    },
+    Spec {
         identifier: "transmute-layout-review",
         pattern: Detector::Tokens(
             "(?:transmute(?:_copy)?(?:::[^()]*)?|from_raw_parts(?:_mut)?)\\(",
