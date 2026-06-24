@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-clone-then-clone",
+        pattern: Detector::Tokens("\\.clone\\(\\)\\.clone\\("),
+        title: "Repeated cloning",
+        description: "A clone result is cloned again.",
+        positive: "fn f() { value.clone().clone(); }",
+        negative: "fn f() { value.clone(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-owned-then-owned",
         pattern: Detector::Tokens("\\.to_owned\\(\\)\\.to_owned\\("),
         title: "Repeated ownership conversion",
