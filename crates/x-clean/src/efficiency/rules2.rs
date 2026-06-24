@@ -2,6 +2,16 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "transmute-layout-review",
+        pattern: Detector::Tokens(
+            "(?:transmute(?:_copy)?(?:::[^()]*)?|from_raw_parts(?:_mut)?)\\(",
+        ),
+        title: "Layout reinterpretation hotspots",
+        description: "transmute/transmute_copy/from_raw_parts casts require layout/alignment review",
+        positive: "fn f() { unsafe { std::mem::transmute::<u32,f32>(value); } }",
+        negative: "fn f() { let float = f32::from_bits(value); }",
+    },
+    Spec {
         identifier: "unchecked-narrowing-cast",
         pattern: Detector::Tokens(
             "let(\\w+):(?:u64|u128|i64|i128|usize|isize)=[^;]+;[^{}]*?\\1as(?:u8|u16|u32|i8|i16|i32)",
