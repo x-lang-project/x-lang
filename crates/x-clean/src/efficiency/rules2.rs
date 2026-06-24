@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "string-concat-loop",
+        pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?(\\w+)=\\1\\+"),
+        title: "Repeated string concatenation in loop",
+        description: "Fresh String concatenation replaces accumulator each iteration",
+        positive: "fn f() { for part in parts { text = text + part; } }",
+        negative: "fn f() { for part in parts { text.push_str(part); } }",
+    },
+    Spec {
         identifier: "stringify-before-compare",
         pattern: Detector::Tokens(
             "\\.(?:to_string|to_owned)\\(\\)(?:==|!=)|\\.(?:to_string|to_owned)\\(\\)\\.(?:starts_with|ends_with)\\(",
