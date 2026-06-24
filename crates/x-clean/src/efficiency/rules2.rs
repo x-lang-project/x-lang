@@ -10,6 +10,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { // SAFETY: pointer is valid\n unsafe { operation(); } }",
     },
     Spec {
+        identifier: "vec-growth-known-size",
+        pattern: Detector::Tokens("letmut(\\w+)=Vec::new\\(\\);for[^{}]+\\{[^{}]*?\\1\\.push\\("),
+        title: "Vector growth with known upper bound",
+        description: "Empty vector populated by push inside a following simple loop",
+        positive: "fn f() { let mut result = Vec::new(); for item in items { result.push(item); } }",
+        negative: "fn f() { let mut result = Vec::with_capacity(items.len()); for item in items { result.push(item); } }",
+    },
+    Spec {
         identifier: "zero-length-index",
         pattern: Detector::Ast,
         title: "Index access without visible empty guard",
