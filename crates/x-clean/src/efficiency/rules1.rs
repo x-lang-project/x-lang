@@ -58,6 +58,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { Regex::new(pattern); }",
     },
     Spec {
+        identifier: "sort-for-extremum",
+        pattern: Detector::Tokens("(\\w+)\\.sort(?:_unstable)?\\(\\);\\1\\.(?:first|last)\\("),
+        title: "Sorting to obtain one minimum or maximum",
+        description: "Sort followed only by first/last on local collection",
+        positive: "fn f() { values.sort(); values.first(); }",
+        negative: "fn f() { values.iter().min(); }",
+    },
+    Spec {
         identifier: "spawn-without-reap",
         pattern: Detector::Tokens("let_=[^;]*\\.spawn\\("),
         title: "Child process started without visible wait/reap",
