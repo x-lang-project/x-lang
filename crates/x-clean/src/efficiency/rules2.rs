@@ -2,6 +2,16 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "stringify-before-compare",
+        pattern: Detector::Tokens(
+            "\\.(?:to_string|to_owned)\\(\\)(?:==|!=)|\\.(?:to_string|to_owned)\\(\\)\\.(?:starts_with|ends_with)\\(",
+        ),
+        title: "Allocation for string comparison",
+        description: "to_string/to_owned/format result used only in equality or prefix checks",
+        positive: "fn f() { if value.to_string() == target {} }",
+        negative: "fn f() { if value == target {} }",
+    },
+    Spec {
         identifier: "suspicious-bool-combination",
         pattern: Detector::Tokens("(?:if|while)(\\w+)(?:&&\\1|\\|\\|!\\1)"),
         title: "Repeated/complementary boolean predicates",
