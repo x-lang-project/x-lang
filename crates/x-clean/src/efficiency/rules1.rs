@@ -57,4 +57,12 @@ pub(super) const SPECS: &[Spec] = &[
         positive: "fn f() { Regex::new(\"pattern\"); }",
         negative: "fn f() { Regex::new(pattern); }",
     },
+    Spec {
+        identifier: "spawn-without-reap",
+        pattern: Detector::Tokens("let_=[^;]*\\.spawn\\("),
+        title: "Child process started without visible wait/reap",
+        description: "Spawn-shaped operation assigned to a discard binding",
+        positive: "fn f() { let _ = Command::new(program).spawn(); }",
+        negative: "fn f() { let mut child = Command::new(program).spawn(); child.wait(); }",
+    },
 ];
