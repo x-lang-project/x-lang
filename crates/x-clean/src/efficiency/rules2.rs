@@ -2,6 +2,16 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "unchecked-narrowing-cast",
+        pattern: Detector::Tokens(
+            "let(\\w+):(?:u64|u128|i64|i128|usize|isize)=[^;]+;[^{}]*?\\1as(?:u8|u16|u32|i8|i16|i32)",
+        ),
+        title: "Potentially lossy integer casts",
+        description: "as converts wider/signed integer into narrower/unsigned destination",
+        positive: "fn f() { let value: u64 = 5; let short = value as u8; }",
+        negative: "fn f() { let value: u64 = 5; let short = u8::try_from(value); }",
+    },
+    Spec {
         identifier: "unnecessary-owned-input",
         pattern: Detector::Tokens(
             "fn\\w+\\((\\w+):(?:String|Vec<[^>]+>|PathBuf)\\)[^{]*\\{\\1\\.(?:len|is_empty|as_str)\\(\\)\\}",
