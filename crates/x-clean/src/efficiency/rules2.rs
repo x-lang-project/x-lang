@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(values.get(0)); }",
     },
     Spec {
+        identifier: "efficiency-extra-owned-then-owned",
+        pattern: Detector::Tokens("\\.to_owned\\(\\)\\.to_owned\\("),
+        title: "Repeated ownership conversion",
+        description: "An owned value is converted to ownership again.",
+        positive: "fn f() { value.to_owned().to_owned(); }",
+        negative: "fn f() { value.to_owned(); }",
+    },
+    Spec {
         identifier: "efficiency-extra-string-then-bytes",
         pattern: Detector::Tokens("\\.to_string\\(\\)\\.into_bytes\\("),
         title: "String allocation before byte access",
