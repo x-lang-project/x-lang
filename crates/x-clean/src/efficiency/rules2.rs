@@ -2,6 +2,16 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "unnecessary-owned-input",
+        pattern: Detector::Tokens(
+            "fn\\w+\\((\\w+):(?:String|Vec<[^>]+>|PathBuf)\\)[^{]*\\{\\1\\.(?:len|is_empty|as_str)\\(\\)\\}",
+        ),
+        title: "Owned parameter used only by borrowing",
+        description: "Single owned input consumed only by a direct length/emptiness/string-view tail query",
+        positive: "fn f(value: String) -> usize { value.len() }",
+        negative: "fn f(value: &str) -> usize { value.len() }",
+    },
+    Spec {
         identifier: "unsafe-missing-contract",
         pattern: Detector::Ast,
         title: "Unsafe operation with no nearby safety rationale",
