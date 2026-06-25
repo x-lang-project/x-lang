@@ -58,6 +58,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { Regex::new(pattern); }",
     },
     Spec {
+        identifier: "skip-error-filter",
+        pattern: Detector::Tokens("\\.filter_map\\(\\|\\w+\\|\\w+\\.ok\\(\\)\\)"),
+        title: "Errors discarded by filter_map(Result::ok)",
+        description: "filter_map closure calls ok(), potentially dropping error information",
+        positive: "fn f() { values.filter_map(|result| result.ok()); }",
+        negative: "fn f() { values.collect::<Result<Vec<_>,_>>(); }",
+    },
+    Spec {
         identifier: "sort-for-extremum",
         pattern: Detector::Tokens("(\\w+)\\.sort(?:_unstable)?\\(\\);\\1\\.(?:first|last)\\("),
         title: "Sorting to obtain one minimum or maximum",
