@@ -58,6 +58,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { Regex::new(pattern); }",
     },
     Spec {
+        identifier: "repeated-string-rewrite",
+        pattern: Detector::Tokens(
+            "(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?(\\w+)=\\1\\.(?:replace|replacen|to_lowercase|to_uppercase)\\(",
+        ),
+        title: "Full string rewritten repeatedly",
+        description: "Loop repeatedly replaces, joins or rebuilds same String",
+        positive: "fn f() { for item in items { text = text.replace(from,to); } }",
+        negative: "fn f() { for item in items { other = text.replace(from,to); } }",
+    },
+    Spec {
         identifier: "saturating-range-hidden-error",
         pattern: Detector::Tokens(
             "(?:0\\.\\.[^;{}]*\\.(?:saturating|wrapping)_\\w+\\(|\\[[^\\]]*\\.(?:saturating|wrapping)_\\w+\\()",
