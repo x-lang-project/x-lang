@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "async fn f() { let guard = mutex.lock().unwrap(); drop(guard); work().await; }",
     },
     Spec {
+        identifier: "lossy-path-conversion",
+        pattern: Detector::Tokens("\\.to_string_lossy\\("),
+        title: "Filesystem identity converted lossily",
+        description: "to_string_lossy used before file lookup/key generation",
+        positive: "fn f() { let key = path.to_string_lossy(); }",
+        negative: "fn f() { let key = path.as_os_str(); }",
+    },
+    Spec {
         identifier: "manual-leak",
         pattern: Detector::Tokens("(?:mem::forget|Box::leak)\\("),
         title: "Intentional resource leak APIs",
