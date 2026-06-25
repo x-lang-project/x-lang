@@ -42,6 +42,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { consume(&value); }",
     },
     Spec {
+        identifier: "refcell-borrow-scope",
+        pattern: Detector::Tokens(
+            "let(\\w+)=\\w+\\.borrow(?:_mut)?\\(\\);[^{}]*?\\w+\\(\\);[^{}]*?\\1",
+        ),
+        title: "Dynamic borrow guard held across nested work",
+        description: "Borrow-shaped local remains lexically referenced after a callback-shaped call",
+        positive: "fn f() { let guard = cell.borrow_mut(); callback(); consume(guard); }",
+        negative: "fn f() { let guard = cell.borrow_mut(); consume(guard); callback(); }",
+    },
+    Spec {
         identifier: "regex-in-loop",
         pattern: Detector::Ast,
         title: "Regex construction in loop",
