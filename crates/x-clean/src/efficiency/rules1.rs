@@ -58,6 +58,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { Regex::new(pattern); }",
     },
     Spec {
+        identifier: "saturating-range-hidden-error",
+        pattern: Detector::Tokens(
+            "(?:0\\.\\.[^;{}]*\\.(?:saturating|wrapping)_\\w+\\(|\\[[^\\]]*\\.(?:saturating|wrapping)_\\w+\\()",
+        ),
+        title: "Arithmetic wrap/saturation masks invalid bounds",
+        description: "wrapping/saturating operation feeds range/index/allocation size",
+        positive: "fn f() { for i in 0..size.saturating_sub(1) {} }",
+        negative: "fn f() { for i in 0..size {} }",
+    },
+    Spec {
         identifier: "skip-error-filter",
         pattern: Detector::Tokens("\\.filter_map\\(\\|\\w+\\|\\w+\\.ok\\(\\)\\)"),
         title: "Errors discarded by filter_map(Result::ok)",
