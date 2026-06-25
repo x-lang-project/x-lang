@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let a = first.lock(); let b = second.lock(); } fn g() { let a = first.lock(); let b = second.lock(); }",
     },
     Spec {
+        identifier: "non-atomic-file-replace",
+        pattern: Detector::Tokens("(?:fs::write|File::create)\\("),
+        title: "Direct overwrite of durable state",
+        description: "fs::write or File::create call requires overwrite/atomicity policy review",
+        positive: "fn f() { std::fs::write(path,data); }",
+        negative: "fn f() { std::fs::rename(temp,path); }",
+    },
+    Spec {
         identifier: "raw-pointer-lifetime",
         pattern: Detector::Ast,
         title: "Raw pointer escapes owner lifetime",
