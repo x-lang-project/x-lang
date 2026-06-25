@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "async fn f() { let guard = mutex.lock().unwrap(); drop(guard); work().await; }",
     },
     Spec {
+        identifier: "manual-leak",
+        pattern: Detector::Tokens("(?:mem::forget|Box::leak)\\("),
+        title: "Intentional resource leak APIs",
+        description: "mem::forget or Box::leak without stated ownership reason",
+        positive: "fn f() { std::mem::forget(value); }",
+        negative: "fn f() { drop(value); }",
+    },
+    Spec {
         identifier: "manual-zip",
         pattern: Detector::DifferentCollections(
             "for(\\w+)in[^{}]+\\{[^{}]*?(\\w+)\\[\\1\\][^{}]*?(\\w+)\\[\\1\\]",
