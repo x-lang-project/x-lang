@@ -18,6 +18,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "async fn f() { let guard = mutex.lock().unwrap(); drop(guard); work().await; }",
     },
     Spec {
+        identifier: "lookup-then-index",
+        pattern: Detector::Tokens(
+            "(?:if!?)?(\\w+)\\.contains_key\\(&?(\\w+)\\)[^{}]*?\\{[^{}]*?\\1(?:\\[&?\\2\\]|\\.get\\(&?\\2\\))",
+        ),
+        title: "Repeated collection lookup",
+        description: "contains_key followed by index/get with same key",
+        positive: "fn f() { if map.contains_key(&key) { consume(map[&key]); } }",
+        negative: "fn f() { if map.contains_key(&key) { consume(other[&key]); } }",
+    },
+    Spec {
         identifier: "lookup-then-insert",
         pattern: Detector::Tokens(
             "(?:if!?)?(\\w+)\\.contains_key\\(&?(\\w+)\\)[^{}]*?\\{[^{}]*?\\1\\.insert\\(\\2,",
