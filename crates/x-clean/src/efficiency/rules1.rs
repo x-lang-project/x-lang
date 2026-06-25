@@ -18,6 +18,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "async fn f() { let guard = mutex.lock().unwrap(); drop(guard); work().await; }",
     },
     Spec {
+        identifier: "manual-zip",
+        pattern: Detector::DifferentCollections(
+            "for(\\w+)in[^{}]+\\{[^{}]*?(\\w+)\\[\\1\\][^{}]*?(\\w+)\\[\\1\\]",
+        ),
+        title: "Shared-index collection traversal",
+        description: "Same loop index used on two or more collections",
+        positive: "fn f() { for index in 0..n { consume(left[index],right[index]); } }",
+        negative: "fn f() { for index in 0..n { consume(left[index],right[other]); } }",
+    },
+    Spec {
         identifier: "nested-lock-order",
         pattern: Detector::Ast,
         title: "Inconsistent acquisition order",
