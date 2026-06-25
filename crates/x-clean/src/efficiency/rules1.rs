@@ -18,6 +18,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "async fn f() { let guard = mutex.lock().unwrap(); drop(guard); work().await; }",
     },
     Spec {
+        identifier: "lookup-then-insert",
+        pattern: Detector::Tokens(
+            "(?:if!?)?(\\w+)\\.contains_key\\(&?(\\w+)\\)[^{}]*?\\{[^{}]*?\\1\\.insert\\(\\2,",
+        ),
+        title: "Repeated map lookup for insertion",
+        description: "contains_key/get branch followed by insert of same key",
+        positive: "fn f() { if !map.contains_key(&key) { map.insert(key,value); } }",
+        negative: "fn f() { if !map.contains_key(&key) { map.insert(other,value); } }",
+    },
+    Spec {
         identifier: "lossy-path-conversion",
         pattern: Detector::Tokens("\\.to_string_lossy\\("),
         title: "Filesystem identity converted lossily",
