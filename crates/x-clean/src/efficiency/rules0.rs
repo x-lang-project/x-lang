@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "error-to-default",
+        pattern: Detector::Tokens(
+            "\\.unwrap_or(?:_default\\(\\)|\\((?:0|false|String::new\\(\\)|Vec::new\\(\\))\\))",
+        ),
+        title: "Error replaced with normal-looking default",
+        description: "Fallible operation mapped into empty/zero/default success-like value",
+        positive: "fn f() { result.unwrap_or_default(); }",
+        negative: "fn f() -> Result<(), Error> { result?; Ok(()) }",
+    },
+    Spec {
         identifier: "ffi-ownership-pairing",
         pattern: Detector::Tokens("(?:Box|CString|Arc|Rc)::from_raw\\("),
         title: "FFI allocation/deallocation pairing review",
