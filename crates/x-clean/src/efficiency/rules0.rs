@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "eager-default",
+        pattern: Detector::Tokens(
+            "\\.(?:unwrap_or|or_insert|map_or)\\([A-Za-z_]\\w*(?:::\\w+)*\\(",
+        ),
+        title: "Eager expensive fallback",
+        description: "unwrap_or or or_insert evaluates allocating/computing fallback eagerly",
+        positive: "fn f() { value.unwrap_or(make_default()); }",
+        negative: "fn f() { value.unwrap_or_else(make_default); }",
+    },
+    Spec {
         identifier: "empty-range-off-by-one",
         pattern: Detector::Tokens(
             "(?:0\\.\\.[A-Za-z_]\\w*\\.len\\(\\)-1|0\\.\\.=\\w+\\.len\\(\\))",
