@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "large-stack-array",
+        pattern: Detector::Tokens("let\\w+(?::[^=]+)?=\\[[^;\\]]+;(?:[1-9]\\d{5,})\\]"),
+        title: "Large fixed array local",
+        description: "Local repeated array of at least 100000 elements; byte size depends on element type",
+        positive: "fn f() { let data = [0u8; 1000000]; }",
+        negative: "fn f() { let data = [0u8; 100]; }",
+    },
+    Spec {
         identifier: "linear-membership-loop",
         pattern: Detector::Ast,
         title: "Repeated linear membership checks",
