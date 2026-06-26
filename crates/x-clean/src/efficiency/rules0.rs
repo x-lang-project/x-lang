@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "ignored-result-operation",
+        pattern: Detector::Tokens(
+            "(?:let_=|drop\\()[^;]*(?:\\.write(?:_all)?\\(|\\.flush\\(|\\.wait\\(|std::fs::\\w+\\()",
+        ),
+        title: "Fallible operation explicitly ignored",
+        description: "let _ or drop used with I/O/process/synchronization Result",
+        positive: "fn f() { let _ = file.write_all(data); }",
+        negative: "fn f() -> Result<(), Error> { file.write_all(data)?; Ok(()) }",
+    },
+    Spec {
         identifier: "index-range-loop",
         pattern: Detector::Tokens("for(\\w+)in0\\.\\.(\\w+)\\.len\\(\\)\\{[^{}]*?\\2\\[\\1\\]"),
         title: "Range used solely for indexing",
