@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "float-equality",
+        pattern: Detector::Tokens("let(\\w+):f(?:32|64)=[^;]+;[^{}]*?\\1(?:==|!=)"),
+        title: "Exact floating-point equality",
+        description: "Locally annotated f32/f64 binding later compared with equality",
+        positive: "fn f() { let value: f64 = 1.0; if value == target {} }",
+        negative: "fn f() { let value: u32 = 1; if value == target {} }",
+    },
+    Spec {
         identifier: "format-then-append",
         pattern: Detector::Tokens("\\.push_str\\(&format!\\("),
         title: "Temporary formatted string appended",
