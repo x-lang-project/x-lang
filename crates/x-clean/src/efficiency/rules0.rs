@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "ffi-ownership-pairing",
+        pattern: Detector::Tokens("(?:Box|CString|Arc|Rc)::from_raw\\("),
+        title: "FFI allocation/deallocation pairing review",
+        description: "Box/CString/Arc/Rc from_raw call requires ownership-pairing review",
+        positive: "fn f() { let owned = unsafe { Box::from_raw(pointer) }; }",
+        negative: "fn f() { let owned = Box::new(value); }",
+    },
+    Spec {
         identifier: "float-equality",
         pattern: Detector::Tokens("let(\\w+):f(?:32|64)=[^;]+;[^{}]*?\\1(?:==|!=)"),
         title: "Exact floating-point equality",
