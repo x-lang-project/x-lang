@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "format-then-append",
+        pattern: Detector::Tokens("\\.push_str\\(&format!\\("),
+        title: "Temporary formatted string appended",
+        description: "push_str with format result, or string += formatted temporary",
+        positive: "fn f() { text.push_str(&format!(\"{}\",value)); }",
+        negative: "fn f() { write!(text,\"{}\",value); }",
+    },
+    Spec {
         identifier: "full-count-for-existence",
         pattern: Detector::Tokens("\\.count\\(\\)(?:>|!=|==)0"),
         title: "Full traversal for existence",
