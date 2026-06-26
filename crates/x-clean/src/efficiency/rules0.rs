@@ -25,4 +25,12 @@ pub(super) const SPECS: &[Spec] = &[
         positive: "fn f() { values.collect::<Vec<_>>().len(); }",
         negative: "fn f() { values.count(); }",
     },
+    Spec {
+        identifier: "index-range-loop",
+        pattern: Detector::Tokens("for(\\w+)in0\\.\\.(\\w+)\\.len\\(\\)\\{[^{}]*?\\2\\[\\1\\]"),
+        title: "Range used solely for indexing",
+        description: "for 0..collection.len where index only accesses that collection",
+        positive: "fn f() { for index in 0..values.len() { consume(values[index]); } }",
+        negative: "fn f() { for value in values { consume(value); } }",
+    },
 ];
