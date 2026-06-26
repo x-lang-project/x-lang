@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "full-count-for-existence",
+        pattern: Detector::Tokens("\\.count\\(\\)(?:>|!=|==)0"),
+        title: "Full traversal for existence",
+        description: "Iterator count compared to zero or collected len checked for emptiness",
+        positive: "fn f() { if values.count() > 0 {} }",
+        negative: "fn f() { if values.next().is_some() {} }",
+    },
+    Spec {
         identifier: "ignored-result-operation",
         pattern: Detector::Tokens(
             "(?:let_=|drop\\()[^;]*(?:\\.write(?:_all)?\\(|\\.flush\\(|\\.wait\\(|std::fs::\\w+\\()",
