@@ -26,6 +26,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "empty-range-off-by-one",
+        pattern: Detector::Tokens(
+            "(?:0\\.\\.[A-Za-z_]\\w*\\.len\\(\\)-1|0\\.\\.=\\w+\\.len\\(\\))",
+        ),
+        title: "Suspicious range boundaries",
+        description: "len - 1 or <= len patterns near indexing and iteration",
+        positive: "fn f() { for i in 0..values.len()-1 { use_value(i); } }",
+        negative: "fn f() { for i in 0..values.len() { use_value(i); } }",
+    },
+    Spec {
         identifier: "error-stringification",
         pattern: Detector::Tokens("\\.map_err\\(\\|\\w+\\|\\w+\\.to_string\\(\\)\\)"),
         title: "Structured error converted to string",
