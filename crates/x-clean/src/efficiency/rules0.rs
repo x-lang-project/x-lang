@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "error-stringification",
+        pattern: Detector::Tokens("\\.map_err\\(\\|\\w+\\|\\w+\\.to_string\\(\\)\\)"),
+        title: "Structured error converted to string",
+        description: "map_err/to_string discards typed error and source chain",
+        positive: "fn f() { result.map_err(|error| error.to_string()); }",
+        negative: "fn f() { result.map_err(Error::Source); }",
+    },
+    Spec {
         identifier: "error-to-default",
         pattern: Detector::Tokens(
             "\\.unwrap_or(?:_default\\(\\)|\\((?:0|false|String::new\\(\\)|Vec::new\\(\\))\\))",
