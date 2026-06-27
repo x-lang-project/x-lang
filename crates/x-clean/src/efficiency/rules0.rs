@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "collect-reiterate",
+        pattern: Detector::Tokens("\\.collect(?:::[^;()]*)?\\(\\)\\.(?:into_iter|iter)\\("),
+        title: "Intermediate collection immediately iterated",
+        description: "Direct collect().iter()/into_iter() chain materialises an intermediate collection",
+        positive: "fn f() { values.collect::<Vec<_>>().into_iter(); }",
+        negative: "fn f() { values.into_iter(); }",
+    },
+    Spec {
         identifier: "eager-default",
         pattern: Detector::Tokens(
             "\\.(?:unwrap_or|or_insert|map_or)\\([A-Za-z_]\\w*(?:::\\w+)*\\(",
