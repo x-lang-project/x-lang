@@ -26,6 +26,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { values.count(); }",
     },
     Spec {
+        identifier: "collect-membership-only",
+        pattern: Detector::Tokens("\\.collect(?:::[^;()]*)?\\(\\)\\.contains\\("),
+        title: "Collection used only for membership",
+        description: "Direct collect().contains() chain materialises a collection for membership",
+        positive: "fn f() { values.collect::<Vec<_>>().contains(&value); }",
+        negative: "fn f() { values.any(|value| value == target); }",
+    },
+    Spec {
         identifier: "collect-reiterate",
         pattern: Detector::Tokens("\\.collect(?:::[^;()]*)?\\(\\)\\.(?:into_iter|iter)\\("),
         title: "Intermediate collection immediately iterated",
