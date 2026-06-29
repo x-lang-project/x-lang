@@ -18,6 +18,16 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let value = input; consume(value.clone()); consume(value); }",
     },
     Spec {
+        identifier: "clone-copy-type",
+        pattern: Detector::Tokens(
+            "let([A-Za-z_]\\w*):(?:u\\d+|i\\d+|bool|char|f\\d+)=[^;]+;[^{}]*?\\1\\.clone\\(",
+        ),
+        title: "Clone on Copy value",
+        description: "Clone call on a locally annotated built-in scalar type",
+        positive: "fn f() { let value: u32 = 2; value.clone(); }",
+        negative: "fn f() { let value: String = input; value.clone(); }",
+    },
+    Spec {
         identifier: "clone-in-loop",
         pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.clone\\("),
         title: "Repeated cloning inside loops",
