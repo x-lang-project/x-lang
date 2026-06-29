@@ -10,6 +10,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let mut w = BufWriter::new(file); w.flush(); }",
     },
     Spec {
+        identifier: "clone-before-borrow",
+        pattern: Detector::Tokens("&[A-Za-z_]\\w*\\.(?:clone|to_owned)\\(\\)"),
+        title: "Clone immediately borrowed",
+        description: "A clone or to_owned result immediately passed by reference",
+        positive: "fn f() { take(&value.clone()); }",
+        negative: "fn f() { take(&value); }",
+    },
+    Spec {
         identifier: "clone-before-move",
         pattern: Detector::Ast,
         title: "Clone before last use",
