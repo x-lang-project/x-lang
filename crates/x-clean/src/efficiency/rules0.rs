@@ -18,6 +18,14 @@ pub(super) const SPECS: &[Spec] = &[
         negative: "fn f() { let value = input; consume(value.clone()); consume(value); }",
     },
     Spec {
+        identifier: "clone-in-loop",
+        pattern: Detector::Tokens("(?:for[^{}]+|while[^{}]+|loop)\\{[^{}]*?\\.clone\\("),
+        title: "Repeated cloning inside loops",
+        description: "Clone method inside a simple loop body; invariance and cost are unresolved",
+        positive: "fn f() { for item in items { value.clone(); } }",
+        negative: "fn f() { let copy = value.clone(); for item in items { consume(&copy); } }",
+    },
+    Spec {
         identifier: "collect-length-only",
         pattern: Detector::Ast,
         title: "Collection used only for length",
