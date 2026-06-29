@@ -2,6 +2,14 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "box-small-copy",
+        pattern: Detector::Tokens("Box::new\\((?:true|false|[0-9]+(?:u\\d+|i\\d+)?)\\)"),
+        title: "Heap allocation for small Copy value",
+        description: "Box allocated for fixed-size cheap scalar or small Copy struct",
+        positive: "fn f() { let x = Box::new(1u32); }",
+        negative: "fn f() { let x = Box::new(value); }",
+    },
+    Spec {
         identifier: "buffered-write-flush-policy",
         pattern: Detector::Ast,
         title: "Buffered writer dropped without observable flush handling",
