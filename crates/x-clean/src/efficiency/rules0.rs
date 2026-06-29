@@ -2,6 +2,16 @@ use super::{Detector, Spec};
 
 pub(super) const SPECS: &[Spec] = &[
     Spec {
+        identifier: "blocking-in-async",
+        pattern: Detector::Tokens(
+            "async(?:fn|\\{)[\\s\\S]*?(?:std::thread::sleep|std::fs::\\w+|\\.lock\\()",
+        ),
+        title: "Blocking call within async execution",
+        description: "Blocking API-shaped syntax after an async body starts; lexical execution context requires review",
+        positive: "async fn f() { std::thread::sleep(delay); }",
+        negative: "async fn f() { tokio::time::sleep(delay).await; }",
+    },
+    Spec {
         identifier: "box-small-copy",
         pattern: Detector::Tokens("Box::new\\((?:true|false|[0-9]+(?:u\\d+|i\\d+)?)\\)"),
         title: "Heap allocation for small Copy value",
