@@ -15,6 +15,7 @@ members = [
   "x-proofs",
   "x-differential",
   "x-clean",
+  "x-runtime",
 ]
 
 [workspace.dependencies]

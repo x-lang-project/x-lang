@@ -499,6 +499,13 @@ name = "x-proofs"
 version = "1.0.0"
 
 [[package]]
+name = "x-runtime"
+version = "1.0.0"
+dependencies = [
+ "x-diagnostics",
+]
+
+[[package]]
 name = "x-utils"
 version = "1.0.0"
 dependencies = [
