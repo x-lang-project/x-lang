@@ -2,6 +2,34 @@ use crate::Lifetime;
 
 mod children;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ReferenceQualifiers {
+    pub is_mut: bool,
+    pub is_unique: bool,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Operator {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Modulo,
+    ShiftLeft,
+    ShiftRight,
+    BitAnd,
+    Xor,
+    BitOr,
+    LessThan,
+    GreaterThan,
+    LessThanOrEqual,
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
+    Or,
+    And,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Copy, Default)]
 pub enum Layout {
     #[default]
@@ -75,6 +103,22 @@ pub enum Type {
 }
 
 impl Type {
+    pub fn pointee(&self) -> Option<&Self> {
+        match self {
+            Self::RawPointer { inner, .. } | Self::Reference { inner, .. } => Some(inner.as_ref()),
+            _ => None,
+        }
+    }
+
+    pub fn any_nested_type(&self, predicate: impl Fn(&Self) -> bool + Copy) -> bool {
+        if predicate(self) {
+            return true;
+        }
+
+        self.children()
+            .any(|inner| inner.any_nested_type(predicate))
+    }
+
     pub fn is_scalar(&self) -> bool {
         self.is_integer() || matches!(self, Self::F32 | Self::F64 | Self::Boolean)
     }
