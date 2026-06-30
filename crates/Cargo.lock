@@ -458,6 +458,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-ast"
+version = "1.0.0"
+dependencies = [
+ "x-diagnostics",
+]
+
+[[package]]
 name = "x-clean"
 version = "1.0.0"
 dependencies = [

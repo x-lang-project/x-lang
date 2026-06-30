@@ -16,6 +16,7 @@ members = [
   "x-differential",
   "x-clean",
   "x-runtime",
+  "x-ast",
 ]
 
 [workspace.dependencies]

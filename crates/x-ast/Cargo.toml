@@ -1,0 +1,22 @@
+[package]
+name = "x-ast"
+version.workspace = true
+edition.workspace = true
+description = "AST types and utilities for X"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lib]
+test = true
+doctest = true
+name = "x_ast"
+path = "src/lib.rs"
+
+[dependencies]
+x-diagnostics = { workspace = true }
+
+[features]
+default = []
