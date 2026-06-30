@@ -1,3 +1,5 @@
+use crate::Type;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Lifetime {
     Static,
