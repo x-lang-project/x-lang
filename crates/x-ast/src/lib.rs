@@ -13,7 +13,11 @@
 
 pub mod intrinsics;
 
+mod metadata;
+
 mod validate;
+
+pub use metadata::Lifetime;
 
 pub use validate::MAX_AST_EXPRESSION_DEPTH;
 pub use validate::MAX_AST_NODES;
