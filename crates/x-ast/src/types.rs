@@ -1,5 +1,7 @@
 use crate::Lifetime;
 
+mod children;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Type {
     I8,
