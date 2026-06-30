@@ -15,6 +15,7 @@ pub mod intrinsics;
 
 mod metadata;
 
+mod substitute;
 mod type_names;
 mod type_symbols;
 mod types;
@@ -22,6 +23,7 @@ mod validate;
 
 pub use metadata::Lifetime;
 
+pub use substitute::substitute_self_in_type;
 pub use type_names::{primitive_type_from_name, type_from_name};
 pub use type_symbols::symbol_name_component;
 pub use types::{Layout, Operator, ReferenceQualifiers, Type, UnaryOperator};
