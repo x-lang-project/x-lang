@@ -20,7 +20,9 @@ mod validate;
 
 pub use metadata::Lifetime;
 
+pub use types::Layout;
 pub use types::Type;
+pub use types::UnaryOperator;
 pub use validate::MAX_AST_EXPRESSION_DEPTH;
 pub use validate::MAX_AST_NODES;
 pub use validate::MAX_AST_STATEMENT_DEPTH;
