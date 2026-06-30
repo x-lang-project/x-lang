@@ -14,7 +14,7 @@
 pub mod intrinsics;
 
 mod metadata;
-
+mod statements;
 mod substitute;
 mod type_names;
 mod type_symbols;
@@ -22,7 +22,9 @@ mod types;
 mod validate;
 
 pub use metadata::Lifetime;
-
+pub use statements::ExternParameter;
+pub use statements::Parameter;
+pub use statements::ParameterRole;
 pub use substitute::substitute_self_in_type;
 pub use type_names::{primitive_type_from_name, type_from_name};
 pub use type_symbols::symbol_name_component;
