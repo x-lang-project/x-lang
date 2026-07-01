@@ -13,6 +13,7 @@
 
 pub mod intrinsics;
 
+mod located_error;
 mod metadata;
 mod statements;
 mod substitute;
@@ -21,6 +22,7 @@ mod type_symbols;
 mod types;
 mod validate;
 
+pub use located_error::{LocatedError, SourceError};
 pub use metadata::{
     Attribute, ConstValue, DeclarationKey, GenericArgument, GenericParameter, Lifetime, SourceSpan,
     Visibility,
