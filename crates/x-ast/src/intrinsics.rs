@@ -1,3 +1,4 @@
+mod effects;
 mod model;
 mod names;
 
@@ -8,6 +9,7 @@ pub use model::IntrinsicVisibility;
 pub use model::LayoutIntrinsic;
 pub use model::MemoryIntrinsic;
 
+pub use effects::EffectCategory;
 pub use names::function_leaf_name;
 pub use names::function_owner_name;
 pub use names::is_abort_call;
