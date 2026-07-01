@@ -29,6 +29,46 @@ pub fn function_leaf_name(function: &str) -> &str {
         .trim_end_matches("::")
 }
 
+pub fn function_owner_name(function: &str) -> Option<&str> {
+    let mut depth: usize = 0;
+
+    for byte in function.bytes() {
+        match byte {
+            b'<' => depth += 1,
+            b'>' => depth = depth.checked_sub(1)?,
+            _ => {}
+        }
+    }
+
+    if depth != 0 {
+        return None;
+    }
+
+    let leaf_start = function_leaf_start(function);
+
+    if leaf_start == function.len() {
+        return None;
+    }
+
+    let owner = function.get(..leaf_start.checked_sub(2)?)?;
+
+    (!owner.is_empty()).then_some(owner)
+}
+
+pub fn parse_generic_type_argument(function: &str) -> Option<&str> {
+    let (start, end) = generic_argument_bounds(function)?;
+    let value_type = function[start + 1..end].trim();
+
+    (!value_type.is_empty()).then_some(value_type)
+}
+
+pub fn strip_explicit_type_arguments(name: &str) -> &str {
+    match generic_argument_bounds(name) {
+        Some((start, end)) if end + 1 == name.len() => name[..start].trim_end_matches("::"),
+        _ => name,
+    }
+}
+
 fn generic_argument_bounds(name: &str) -> Option<(usize, usize)> {
     let start = name.find('<')?;
     let mut depth: usize = 0;
