@@ -12,7 +12,7 @@
 )]
 
 pub mod intrinsics;
-
+mod invariants;
 mod located_error;
 mod metadata;
 mod statements;
@@ -22,6 +22,7 @@ mod type_symbols;
 mod types;
 mod validate;
 
+pub use invariants::InvariantBinding;
 pub use located_error::{LocatedError, SourceError};
 pub use metadata::{
     Attribute, ConstValue, DeclarationKey, GenericArgument, GenericParameter, Lifetime, SourceSpan,
