@@ -54,6 +54,24 @@ pub struct OverflowIntrinsic {
 }
 
 impl OverflowIntrinsic {
+    pub fn resolve(name: &str) -> Option<Self> {
+        let (operation, width) = name.split_once("_with_overflow_")?;
+        let operation = match operation {
+            "add" => OverflowOperation::Add,
+            "sub" => OverflowOperation::Subtract,
+            "mul" => OverflowOperation::Multiply,
+            _ => return None,
+        };
+
+        let value = match width {
+            "i32" => OverflowType::I32,
+            "usize" => OverflowType::USize,
+            _ => return None,
+        };
+
+        Some(Self { operation, value })
+    }
+
     pub fn value_type(self) -> Type {
         self.value.value_type()
     }
