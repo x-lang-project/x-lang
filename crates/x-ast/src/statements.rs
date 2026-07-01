@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use crate::GenericParameter;
 use crate::Layout;
 use crate::Type;
 

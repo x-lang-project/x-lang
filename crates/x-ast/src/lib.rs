@@ -21,7 +21,10 @@ mod type_symbols;
 mod types;
 mod validate;
 
-pub use metadata::Lifetime;
+pub use metadata::{
+    Attribute, ConstValue, DeclarationKey, GenericArgument, GenericParameter, Lifetime, SourceSpan,
+    Visibility,
+};
 pub use statements::ExternParameter;
 pub use statements::Parameter;
 pub use statements::ParameterRole;
