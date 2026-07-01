@@ -1,4 +1,12 @@
+mod model;
 mod names;
+
+pub use model::ControlIntrinsic;
+pub use model::IntrinsicScope;
+pub use model::IntrinsicSignature;
+pub use model::IntrinsicVisibility;
+pub use model::LayoutIntrinsic;
+pub use model::MemoryIntrinsic;
 
 pub use names::function_leaf_name;
 pub use names::function_owner_name;

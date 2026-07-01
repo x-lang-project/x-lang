@@ -22,6 +22,12 @@ mod type_symbols;
 mod types;
 mod validate;
 
+pub use intrinsics::ControlIntrinsic;
+pub use intrinsics::IntrinsicScope;
+pub use intrinsics::IntrinsicSignature;
+pub use intrinsics::IntrinsicVisibility;
+pub use intrinsics::LayoutIntrinsic;
+pub use intrinsics::MemoryIntrinsic;
 pub use invariants::InvariantBinding;
 pub use located_error::{LocatedError, SourceError};
 pub use metadata::{
