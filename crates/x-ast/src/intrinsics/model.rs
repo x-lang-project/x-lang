@@ -1,3 +1,8 @@
+use crate::BitIntrinsic;
+use crate::BitOperation;
+use crate::BitWidth;
+use crate::OverflowIntrinsic;
+use crate::RotateDirection;
 use crate::Type;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

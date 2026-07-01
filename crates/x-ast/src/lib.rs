@@ -11,6 +11,7 @@
     )
 )]
 
+mod integer_intrinsics;
 pub mod intrinsics;
 mod invariants;
 mod located_error;
@@ -22,6 +23,10 @@ mod type_symbols;
 mod types;
 mod validate;
 
+pub use integer_intrinsics::{
+    BitIntrinsic, BitOperation, BitWidth, OverflowIntrinsic, OverflowOperation, OverflowType,
+    RotateDirection,
+};
 pub use intrinsics::ControlIntrinsic;
 pub use intrinsics::IntrinsicScope;
 pub use intrinsics::IntrinsicSignature;
