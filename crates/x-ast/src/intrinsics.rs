@@ -2,13 +2,10 @@ mod effects;
 mod model;
 mod names;
 
-pub use crate::BitIntrinsic;
-pub use crate::BitOperation;
-pub use crate::BitWidth;
-pub use crate::OverflowIntrinsic;
-pub use crate::OverflowOperation;
-pub use crate::OverflowType;
-pub use crate::RotateDirection;
+pub use crate::{
+    BitIntrinsic, BitOperation, BitWidth, FloatIntrinsic, FloatOperation, FloatWidth,
+    OverflowIntrinsic, OverflowOperation, OverflowType, RotateDirection,
+};
 pub use model::ControlIntrinsic;
 pub use model::IntrinsicScope;
 pub use model::IntrinsicSignature;

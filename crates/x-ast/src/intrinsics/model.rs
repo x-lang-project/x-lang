@@ -1,9 +1,7 @@
-use crate::BitIntrinsic;
-use crate::BitOperation;
-use crate::BitWidth;
-use crate::OverflowIntrinsic;
-use crate::RotateDirection;
-use crate::Type;
+use crate::{
+    BitIntrinsic, BitOperation, BitWidth, FloatIntrinsic, FloatOperation, FloatWidth,
+    OverflowIntrinsic, RotateDirection, Type,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IntrinsicScope {
