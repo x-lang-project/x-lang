@@ -51,10 +51,28 @@ impl FloatIntrinsic {
     pub(crate) fn parse(name: &str) -> Option<Self> {
         let (width, operation) = name.split_once('_')?;
         let width = match width {
+            "f32" => FloatWidth::F32,
+            "f64" => FloatWidth::F64,
             _ => return None,
         };
 
         let operation = match operation {
+            "sqrt" => FloatOperation::Sqrt,
+            "floor" => FloatOperation::Floor,
+            "ceil" => FloatOperation::Ceil,
+            "round" => FloatOperation::Round,
+            "is_nan" => FloatOperation::IsNan,
+            "is_infinite" => FloatOperation::IsInfinite,
+            "sin" => FloatOperation::Sin,
+            "cos" => FloatOperation::Cos,
+            "tan" => FloatOperation::Tan,
+            "asin" => FloatOperation::Asin,
+            "acos" => FloatOperation::Acos,
+            "atan" => FloatOperation::Atan,
+            "atan2" => FloatOperation::Atan2,
+            "exp" => FloatOperation::Exp,
+            "ln" => FloatOperation::Ln,
+            "powf" => FloatOperation::Pow,
             _ => return None,
         };
 
