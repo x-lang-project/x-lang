@@ -41,6 +41,7 @@ pub use integer_intrinsics::{
 };
 pub use intrinsics::AlignOperation;
 pub use intrinsics::ControlIntrinsic;
+pub use intrinsics::HeapAllocation;
 pub use intrinsics::Intrinsic;
 pub use intrinsics::IntrinsicDefinition;
 pub use intrinsics::IntrinsicScope;
@@ -49,6 +50,8 @@ pub use intrinsics::IntrinsicVisibility;
 pub use intrinsics::LayoutIntrinsic;
 pub use intrinsics::MemoryIntrinsic;
 pub use intrinsics::NumberOperation;
+pub use intrinsics::PointerConstructor;
+pub use intrinsics::PointerOperation;
 pub use intrinsics::SliceOperation;
 pub use invariants::{InvariantBinding, StructInvariant};
 pub use located_error::{LocatedError, SourceError};
