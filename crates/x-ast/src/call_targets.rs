@@ -68,6 +68,31 @@ impl CallTarget {
         }
     }
 
+    pub fn leaf_name(&self) -> &str {
+        self.path
+            .segments
+            .last()
+            .map(|segment| segment.name.as_str())
+            .unwrap_or("")
+    }
+
+    pub fn leaf_type_arguments(&self) -> &[Type] {
+        self.path
+            .segments
+            .last()
+            .map(|segment| segment.type_arguments.as_slice())
+            .unwrap_or_default()
+    }
+
+    pub fn owner_type_arguments(&self) -> Option<&[Type]> {
+        let (_, owners) = self.path.segments.split_last()?;
+
+        owners
+            .iter()
+            .find(|segment| !segment.type_arguments.is_empty())
+            .map(|segment| segment.type_arguments.as_slice())
+    }
+
     pub fn resolved_name(&self) -> Option<&str> {
         match &self.resolution {
             Some(CallResolution::Source(name) | CallResolution::Builtin { name, .. }) => Some(name),
