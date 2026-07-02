@@ -60,7 +60,7 @@ pub use substitute::{
     substitute_self_in_expression, substitute_self_in_statement, substitute_self_in_type,
 };
 pub use type_names::{primitive_type_from_name, type_from_name};
-pub use type_symbols::symbol_name_component;
+pub use type_symbols::{symbol_name_component, type_symbol_component, type_symbol_components};
 pub use types::{Layout, Operator, ReferenceQualifiers, Type, UnaryOperator};
 pub use validate::MAX_AST_EXPRESSION_DEPTH;
 pub use validate::MAX_AST_NODES;
