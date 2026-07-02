@@ -28,6 +28,21 @@ impl AlignOperation {
             _ => return None,
         })
     }
+
+    pub const fn source_name(self) -> &'static str {
+        match self {
+            Self::IsPowerOfTwo => "is_power_of_two",
+            Self::IsAligned => "is_aligned",
+            Self::AlignUp => "align_up",
+            Self::PageAlignUp => "page_align_up",
+            Self::AlignPointer => "align_ptr",
+            Self::AlignDown => "align_down",
+            Self::PageAlignDown => "page_align_down",
+            Self::PaddingNeeded => "padding_needed",
+            Self::Maximum => "max_align",
+            Self::Minimum => "min_align",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -52,6 +67,14 @@ pub enum NumberOperation {
 impl NumberOperation {
     pub fn resolve(leaf: &str) -> Option<Self> {
         Some(match leaf {
+            "test_sign_extension" => Self::TestSignExtension,
+            "test_truncation" => Self::TestTruncation,
+            "saturating_sub_usize" => Self::SaturatingSubtractUsize,
+            "checked_mul_usize" => Self::CheckedMultiplyUsize,
+            "checked_add_usize" => Self::CheckedAddUsize,
+            "checked_sub_usize" => Self::CheckedSubtractUsize,
+            "abs_i32" => Self::AbsoluteI32,
+            "min" => Self::Minimum,
             "max" => Self::Maximum,
             "clamp" => Self::Clamp,
             "sign_extend_u32" => Self::SignExtendU32,
