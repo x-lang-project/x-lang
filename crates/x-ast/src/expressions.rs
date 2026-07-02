@@ -1,5 +1,6 @@
 use std::fmt;
 
+use crate::CallTarget;
 use crate::Operator;
 use crate::SourceSpan;
 use crate::Type;
