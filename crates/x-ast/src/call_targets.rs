@@ -3,6 +3,8 @@ use std::fmt;
 
 use crate::Type;
 
+mod text;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CallSegment {
     pub name: String,
