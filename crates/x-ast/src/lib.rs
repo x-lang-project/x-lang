@@ -11,6 +11,7 @@
     )
 )]
 
+mod expressions;
 mod float_intrinsics;
 mod integer_intrinsics;
 pub mod intrinsics;
@@ -24,6 +25,7 @@ mod type_symbols;
 mod types;
 mod validate;
 
+pub use expressions::Pattern;
 pub use float_intrinsics::{FloatIntrinsic, FloatOperation, FloatWidth};
 pub use integer_intrinsics::{
     BitIntrinsic, BitOperation, BitWidth, OverflowIntrinsic, OverflowOperation, OverflowType,

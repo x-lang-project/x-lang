@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::GenericParameter;
 use crate::Layout;
+use crate::Pattern;
 use crate::Type;
 
 #[derive(Debug, Clone, PartialEq)]
