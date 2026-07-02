@@ -1,3 +1,6 @@
+pub use crate::builtin_calls::SliceOperation;
+pub use crate::builtin_calls::SliceReceiverAccess;
+
 mod effects;
 mod model;
 mod names;

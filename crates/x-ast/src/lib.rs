@@ -11,6 +11,7 @@
     )
 )]
 
+mod builtin_calls;
 mod call_targets;
 mod display;
 mod expressions;
@@ -46,6 +47,7 @@ pub use intrinsics::IntrinsicSignature;
 pub use intrinsics::IntrinsicVisibility;
 pub use intrinsics::LayoutIntrinsic;
 pub use intrinsics::MemoryIntrinsic;
+pub use intrinsics::SliceOperation;
 pub use invariants::{InvariantBinding, StructInvariant};
 pub use located_error::{LocatedError, SourceError};
 pub use metadata::{
