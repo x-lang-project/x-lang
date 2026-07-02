@@ -64,6 +64,31 @@ impl SliceOperation {
         }
     }
 
+    pub fn resolve(leaf: &str) -> Option<Self> {
+        Some(match leaf {
+            "len" => Self::Len,
+            "is_empty" => Self::IsEmpty,
+            "as_ptr" => Self::AsPointer,
+            "as_mut_ptr" => Self::AsMutPointer,
+            "first" => Self::First,
+            "last" => Self::Last,
+            "reduce" => Self::Reduce,
+            "sum" => Self::Sum,
+            "all" => Self::All,
+            "any" => Self::Any,
+            "contains" => Self::Contains,
+            "has_duplicate_by" => Self::HasDuplicateBy,
+            "unique_by" => Self::UniqueBy,
+            "fill" => Self::Fill,
+            "swap" => Self::Swap,
+            "copy_within" => Self::CopyWithin,
+            "copy_from" => Self::CopyFrom,
+            "get" => Self::Get,
+            "get_mut" => Self::GetMut,
+            _ => return None,
+        })
+    }
+
     pub const fn source_name(self) -> &'static str {
         match self {
             Self::Len => "len",
