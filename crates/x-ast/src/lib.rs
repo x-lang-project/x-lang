@@ -12,7 +12,7 @@
 )]
 
 mod call_targets;
-
+mod display;
 mod expressions;
 mod float_intrinsics;
 mod integer_intrinsics;
