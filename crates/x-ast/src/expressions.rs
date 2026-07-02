@@ -11,6 +11,24 @@ pub struct Expression {
     pub kind: ExpressionKind,
 }
 
+impl Expression {
+    pub fn new(value_type: Type, kind: ExpressionKind) -> Self {
+        Self {
+            span: None,
+            value_type,
+            kind,
+        }
+    }
+
+    pub fn with_span(mut self, span: SourceSpan) -> Self {
+        if self.span.is_none() {
+            self.span = Some(span);
+        }
+
+        self
+    }
+}
+
 impl fmt::Debug for Expression {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
