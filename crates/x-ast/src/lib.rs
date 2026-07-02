@@ -30,6 +30,8 @@ pub use integer_intrinsics::{
     RotateDirection,
 };
 pub use intrinsics::ControlIntrinsic;
+pub use intrinsics::Intrinsic;
+pub use intrinsics::IntrinsicDefinition;
 pub use intrinsics::IntrinsicScope;
 pub use intrinsics::IntrinsicSignature;
 pub use intrinsics::IntrinsicVisibility;

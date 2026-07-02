@@ -108,6 +108,12 @@ pub struct BitIntrinsic {
 }
 
 impl BitIntrinsic {
+    pub fn resolve(name: &str) -> Option<Self> {
+        use crate::intrinsics::{IntrinsicDefinition, IntrinsicScope};
+
+        <Self as IntrinsicDefinition>::resolve(name, IntrinsicScope::Source)
+    }
+
     pub(crate) fn parse(name: &str) -> Option<Self> {
         let (operation, width) = name.rsplit_once('_')?;
         let width = match width {

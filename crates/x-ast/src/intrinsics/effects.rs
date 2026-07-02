@@ -1,4 +1,5 @@
 use super::ControlIntrinsic;
+use super::Intrinsic;
 use super::strip_explicit_type_arguments;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

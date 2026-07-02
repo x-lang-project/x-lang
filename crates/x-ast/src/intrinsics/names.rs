@@ -90,6 +90,10 @@ fn generic_argument_bounds(name: &str) -> Option<(usize, usize)> {
     None
 }
 
+pub fn is_bit_intrinsic_call(leaf: &str) -> bool {
+    crate::BitIntrinsic::resolve(leaf).is_some()
+}
+
 pub fn is_heap_allocate_call(base: &str, leaf: &str) -> bool {
     matches!(leaf, "alloc" | "alloc_zeroed") && base.strip_prefix("heap::") == Some(leaf)
 }
