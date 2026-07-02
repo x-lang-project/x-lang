@@ -1,4 +1,5 @@
 pub use crate::builtin_calls::AlignOperation;
+pub use crate::builtin_calls::CoreMemoryOperation;
 pub use crate::builtin_calls::HeapAllocation;
 pub use crate::builtin_calls::NumberOperation;
 pub use crate::builtin_calls::PointerConstructor;

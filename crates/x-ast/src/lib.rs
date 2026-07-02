@@ -39,20 +39,11 @@ pub use integer_intrinsics::{
     BitIntrinsic, BitOperation, BitWidth, OverflowIntrinsic, OverflowOperation, OverflowType,
     RotateDirection,
 };
-pub use intrinsics::AlignOperation;
-pub use intrinsics::ControlIntrinsic;
-pub use intrinsics::HeapAllocation;
-pub use intrinsics::Intrinsic;
-pub use intrinsics::IntrinsicDefinition;
-pub use intrinsics::IntrinsicScope;
-pub use intrinsics::IntrinsicSignature;
-pub use intrinsics::IntrinsicVisibility;
-pub use intrinsics::LayoutIntrinsic;
-pub use intrinsics::MemoryIntrinsic;
-pub use intrinsics::NumberOperation;
-pub use intrinsics::PointerConstructor;
-pub use intrinsics::PointerOperation;
-pub use intrinsics::SliceOperation;
+pub use intrinsics::{
+    AlignOperation, ControlIntrinsic, CoreMemoryOperation, HeapAllocation, Intrinsic,
+    IntrinsicDefinition, IntrinsicScope, IntrinsicSignature, IntrinsicVisibility, LayoutIntrinsic,
+    MemoryIntrinsic, NumberOperation, PointerConstructor, PointerOperation, SliceOperation,
+};
 pub use invariants::{InvariantBinding, StructInvariant};
 pub use located_error::{LocatedError, SourceError};
 pub use metadata::{
