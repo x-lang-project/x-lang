@@ -39,6 +39,7 @@ pub use integer_intrinsics::{
     BitIntrinsic, BitOperation, BitWidth, OverflowIntrinsic, OverflowOperation, OverflowType,
     RotateDirection,
 };
+pub use intrinsics::AlignOperation;
 pub use intrinsics::ControlIntrinsic;
 pub use intrinsics::Intrinsic;
 pub use intrinsics::IntrinsicDefinition;
@@ -47,6 +48,7 @@ pub use intrinsics::IntrinsicSignature;
 pub use intrinsics::IntrinsicVisibility;
 pub use intrinsics::LayoutIntrinsic;
 pub use intrinsics::MemoryIntrinsic;
+pub use intrinsics::NumberOperation;
 pub use intrinsics::SliceOperation;
 pub use invariants::{InvariantBinding, StructInvariant};
 pub use located_error::{LocatedError, SourceError};
