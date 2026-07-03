@@ -23,12 +23,65 @@ pub(super) struct CallContext<'a> {
 }
 
 impl<'a> CallContext<'a> {
+    pub fn new(name: &'a str, arguments: &'a [Type]) -> Self {
+        let base = strip_explicit_type_arguments(name);
+        let leaf = function_leaf_name(name);
+        let receiver = arguments.first();
+        let pointer_context = base
+            .strip_prefix("ptr::")
+            .is_some_and(|operator| !operator.contains("::"))
+            || (base == leaf
+                && receiver
+                    .is_some_and(|value_type| matches!(value_type, Type::RawPointer { .. })));
+        let operation = base.strip_prefix("intrinsic::").unwrap_or(base);
+
+        Self {
+            base,
+            leaf,
+            pointer_context,
+            scalar_operation: (!operation.contains("::")).then_some(operation),
+            receiver,
+        }
+    }
+
+    fn collection_operation(&self) -> Option<BuiltinKind> {
+        match self.base {
+            _ => None,
+        }
+    }
+
+    fn slice_receiver(&self) -> bool {
+        self.receiver.is_some_and(array_receiver)
+            || (self.base == "len" && self.receiver.is_some_and(string_receiver))
+    }
+
     fn memory_operation(&self) -> Option<BuiltinKind> {
         if self.scalar_operation == Some("fill_i32") {
             return Some(BuiltinKind::FillI32);
         }
 
         match self.base {
+            "mem::copy_nonoverlapping"
+            | "mem::copy_nonoverlapping_bytes"
+            | "mem::copy"
+            | "mem::move_objects"
+            | "mem::move_bytes"
+            | "mem::set_bytes"
+            | "mem::zero_objects"
+            | "mem::zero_bytes"
+            | "mem::fill"
+            | "mem::checked_array_size" => {
+                CoreMemoryOperation::resolve(self.leaf).map(BuiltinKind::CoreMemory)
+            }
+            "heap::alloc" | "heap::alloc_zeroed"
+                if matches!(self.leaf, "alloc" | "alloc_zeroed") =>
+            {
+                Some(BuiltinKind::HeapAllocate(if self.leaf == "alloc_zeroed" {
+                    HeapAllocation::Zeroed
+                } else {
+                    HeapAllocation::Uninitialized
+                }))
+            }
             "size_of" | "mem::size_of" | "intrinsic::size_of" => Some(BuiltinKind::Intrinsic(
                 Intrinsic::Layout(LayoutIntrinsic::SizeOf),
             )),
