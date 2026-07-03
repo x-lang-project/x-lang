@@ -21,3 +21,41 @@ pub(super) struct CallContext<'a> {
     scalar_operation: Option<&'a str>,
     receiver: Option<&'a Type>,
 }
+
+impl<'a> CallContext<'a> {
+    fn memory_operation(&self) -> Option<BuiltinKind> {
+        if self.scalar_operation == Some("fill_i32") {
+            return Some(BuiltinKind::FillI32);
+        }
+
+        match self.base {
+            "size_of" | "mem::size_of" | "intrinsic::size_of" => Some(BuiltinKind::Intrinsic(
+                Intrinsic::Layout(LayoutIntrinsic::SizeOf),
+            )),
+            "align_of" | "mem::align_of" | "intrinsic::align_of" => Some(BuiltinKind::Intrinsic(
+                Intrinsic::Layout(LayoutIntrinsic::AlignOf),
+            )),
+            "offset_of" | "mem::offset_of" | "intrinsic::offset_of" => Some(
+                BuiltinKind::Intrinsic(Intrinsic::Layout(LayoutIntrinsic::OffsetOf)),
+            ),
+            "mem::swap" if self.leaf == "swap" => Some(BuiltinKind::MemSwap),
+            "mem::replace" if self.leaf == "replace" => Some(BuiltinKind::MemReplace),
+            "ptr::assert_non_null" if self.leaf == "assert_non_null" => {
+                Some(BuiltinKind::AssertNonNull)
+            }
+            "ptr::assert_aligned" if self.leaf == "assert_aligned" => {
+                Some(BuiltinKind::AssertAligned)
+            }
+            _ if self.pointer_context
+                && matches!(self.leaf, "null" | "null_mut" | "dangling" | "dangling_mut") =>
+            {
+                PointerConstructor::resolve(self.leaf).map(BuiltinKind::PointerNamespace)
+            }
+            _ if matches!(self.scalar_operation, Some("memcpy" | "memmove" | "memset")) => {
+                Intrinsic::resolve(self.scalar_operation?, IntrinsicScope::Source)
+                    .map(BuiltinKind::Intrinsic)
+            }
+            _ => None,
+        }
+    }
+}
