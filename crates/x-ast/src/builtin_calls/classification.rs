@@ -1,5 +1,6 @@
 use crate::Type;
 use crate::builtin_calls::AlignOperation;
+use crate::builtin_calls::BuiltinKind;
 use crate::builtin_calls::CoreMemoryOperation;
 use crate::builtin_calls::HeapAllocation;
 use crate::builtin_calls::NumberOperation;
