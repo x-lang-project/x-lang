@@ -32,3 +32,7 @@ pub enum BuiltinKind {
     AssertAligned,
     PointerNamespace(PointerConstructor),
 }
+
+pub fn is_slice_operation(leaf: &str) -> bool {
+    SliceOperation::resolve(leaf).is_some()
+}
