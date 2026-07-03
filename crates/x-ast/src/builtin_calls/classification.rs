@@ -40,6 +40,75 @@ impl<'a> CallContext<'a> {
         }
     }
 
+    pub fn classify(&self) -> Option<BuiltinKind> {
+        // Pointer methods take precedence over collection methods.
+        self.pointer_operation()
+            .or_else(|| self.runtime_operation())
+            .or_else(|| self.numeric_intrinsic())
+            .or_else(|| self.collection_operation())
+            .or_else(|| self.memory_operation())
+    }
+
+    fn pointer_operation(&self) -> Option<BuiltinKind> {
+        let method = self.pointer_context
+            && matches!(
+                self.leaf,
+                "add"
+                    | "add_mut"
+                    | "sub"
+                    | "sub_mut"
+                    | "offset"
+                    | "offset_mut"
+                    | "as_ref"
+                    | "as_mut"
+                    | "read"
+                    | "read_unaligned"
+                    | "read_volatile"
+                    | "write"
+                    | "write_unaligned"
+                    | "write_volatile"
+                    | "replace"
+                    | "swap"
+                    | "copy"
+                    | "copy_nonoverlapping"
+                    | "write_bytes"
+                    | "is_null"
+                    | "from_addr"
+                    | "from_addr_mut"
+                    | "from_exposed_addr"
+                    | "from_exposed_addr_mut"
+                    | "addr"
+                    | "expose_addr"
+                    | "with_exposed_addr"
+                    | "with_exposed_addr_mut"
+            );
+        let intrinsic = matches!(
+            self.scalar_operation,
+            Some(
+                "ptr_offset"
+                    | "ptr_offset_mut"
+                    | "ptr_read"
+                    | "volatile_read"
+                    | "ptr_write"
+                    | "volatile_write"
+                    | "with_exposed_addr"
+                    | "with_exposed_addr_mut"
+                    | "from_exposed_addr"
+                    | "from_exposed_addr_mut"
+                    | "from_addr"
+                    | "from_addr_mut"
+                    | "expose_addr"
+                    | "addr"
+            )
+        );
+
+        if method || intrinsic {
+            PointerOperation::resolve(self.leaf).map(BuiltinKind::Pointer)
+        } else {
+            None
+        }
+    }
+
     fn runtime_operation(&self) -> Option<BuiltinKind> {
         let control = self
             .scalar_operation
