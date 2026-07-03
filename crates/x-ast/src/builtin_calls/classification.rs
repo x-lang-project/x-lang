@@ -40,8 +40,71 @@ impl<'a> CallContext<'a> {
         }
     }
 
+    fn runtime_operation(&self) -> Option<BuiltinKind> {
+        let control = self
+            .scalar_operation
+            .and_then(|name| Intrinsic::resolve(name, IntrinsicScope::Source))
+            .filter(|intrinsic| matches!(intrinsic, Intrinsic::Control(_)));
+
+        if let Some(control) = control {
+            Some(BuiltinKind::Intrinsic(control))
+        } else if is_abort_call(self.base) {
+            Some(BuiltinKind::Intrinsic(Intrinsic::Control(
+                ControlIntrinsic::Abort,
+            )))
+        } else if self.base == "as_str" && self.receiver == Some(&Type::String) {
+            Some(BuiltinKind::StringView)
+        } else if is_builtin_print_call(self.base, "print") {
+            Some(BuiltinKind::Print)
+        } else if is_builtin_print_call(self.base, "println") {
+            Some(BuiltinKind::Println)
+        } else {
+            None
+        }
+    }
+
+    fn numeric_intrinsic(&self) -> Option<BuiltinKind> {
+        let operation = self.scalar_operation?;
+        let intrinsic = Intrinsic::resolve(operation, IntrinsicScope::Source)?;
+
+        match intrinsic {
+            Intrinsic::Float(_)
+            | Intrinsic::Overflow(_)
+            | Intrinsic::Rotate(_)
+            | Intrinsic::Bit(_) => Some(BuiltinKind::Intrinsic(intrinsic)),
+            Intrinsic::Control(_) | Intrinsic::Memory(_) | Intrinsic::Layout(_) => None,
+        }
+    }
+
     fn collection_operation(&self) -> Option<BuiltinKind> {
         match self.base {
+            "slice::from_raw_parts" | "slice::from_raw_parts_mut" => {
+                Some(BuiltinKind::FromRawParts)
+            }
+            "align::is_power_of_two"
+            | "align::is_aligned"
+            | "align::align_up"
+            | "align::page_align_up"
+            | "align::align_ptr"
+            | "align::align_down"
+            | "align::page_align_down"
+            | "align::padding_needed"
+            | "align::max_align"
+            | "align::min_align" => AlignOperation::resolve(self.leaf).map(BuiltinKind::Align),
+            "num::saturating_sub_usize"
+            | "num::checked_mul_usize"
+            | "num::checked_add_usize"
+            | "num::checked_sub_usize"
+            | "num::abs_i32"
+            | "num::min"
+            | "num::max"
+            | "num::clamp" => NumberOperation::resolve(self.leaf).map(BuiltinKind::Number),
+            _ if self.base == self.leaf
+                && self.slice_receiver()
+                && is_slice_operation(self.leaf) =>
+            {
+                SliceOperation::resolve(self.leaf).map(BuiltinKind::Slice)
+            }
             _ => None,
         }
     }
