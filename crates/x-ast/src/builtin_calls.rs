@@ -33,6 +33,16 @@ pub enum BuiltinKind {
     PointerNamespace(PointerConstructor),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+
+pub struct BuiltinCall {
+    pub name: String,
+    pub kind: BuiltinKind,
+    pub type_argument: Option<Type>,
+    pub argument_types: Vec<Type>,
+    pub return_type: Option<Type>,
+}
+
 pub fn is_slice_operation(leaf: &str) -> bool {
     SliceOperation::resolve(leaf).is_some()
 }

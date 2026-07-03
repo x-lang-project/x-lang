@@ -1,7 +1,4 @@
-use super::BuiltinKind;
-use super::ControlIntrinsic;
-use super::Intrinsic;
-use super::strip_explicit_type_arguments;
+use super::{BuiltinCall, BuiltinKind, ControlIntrinsic, Intrinsic, strip_explicit_type_arguments};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EffectCategory {

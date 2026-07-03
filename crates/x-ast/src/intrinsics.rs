@@ -1,12 +1,7 @@
-pub use crate::builtin_calls::AlignOperation;
-pub use crate::builtin_calls::BuiltinKind;
-pub use crate::builtin_calls::CoreMemoryOperation;
-pub use crate::builtin_calls::HeapAllocation;
-pub use crate::builtin_calls::NumberOperation;
-pub use crate::builtin_calls::PointerConstructor;
-pub use crate::builtin_calls::PointerOperation;
-pub use crate::builtin_calls::SliceOperation;
-pub use crate::builtin_calls::SliceReceiverAccess;
+pub use crate::builtin_calls::{
+    AlignOperation, BuiltinCall, BuiltinKind, CoreMemoryOperation, HeapAllocation, NumberOperation,
+    PointerConstructor, PointerOperation, SliceOperation, SliceReceiverAccess,
+};
 
 mod effects;
 mod model;
