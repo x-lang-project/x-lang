@@ -13,3 +13,10 @@ use crate::intrinsics::{
 use receivers::{array_receiver, string_receiver};
 
 mod receivers;
+pub(super) struct CallContext<'a> {
+    pub base: &'a str,
+    pub leaf: &'a str,
+    pub pointer_context: bool,
+    scalar_operation: Option<&'a str>,
+    receiver: Option<&'a Type>,
+}
