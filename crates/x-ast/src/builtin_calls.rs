@@ -1,6 +1,7 @@
 use crate::Type;
 use crate::intrinsics::parse_generic_type_argument;
 
+mod classification;
 mod memory_operations;
 mod pointer_operations;
 pub use memory_operations::CoreMemoryOperation;
