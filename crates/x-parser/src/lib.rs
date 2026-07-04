@@ -20,3 +20,8 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::parser_messages;
 
 mod pipeline;
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct ParseOptions {
+    pub disable_semantic_keywords: bool,
+}
