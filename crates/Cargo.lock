@@ -513,6 +513,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-std"
+version = "1.0.0"
+dependencies = [
+ "x-runtime",
+]
+
+[[package]]
 name = "x-utils"
 version = "1.0.0"
 dependencies = [

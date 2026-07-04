@@ -17,6 +17,7 @@ members = [
   "x-clean",
   "x-runtime",
   "x-ast",
+  "x-std",
 ]
 
 [workspace.dependencies]
