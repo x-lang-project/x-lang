@@ -60,9 +60,9 @@ pub use substitute::{
 pub use type_names::{primitive_type_from_name, type_from_name};
 pub use type_symbols::{symbol_name_component, type_symbol_component, type_symbol_components};
 pub use types::{Layout, Operator, ReferenceQualifiers, Type, UnaryOperator};
-pub use validate::MAX_AST_EXPRESSION_DEPTH;
-pub use validate::MAX_AST_NODES;
-pub use validate::MAX_AST_STATEMENT_DEPTH;
+pub use validate::{
+    AstValidationError, MAX_AST_EXPRESSION_DEPTH, MAX_AST_NODES, MAX_AST_STATEMENT_DEPTH,
+};
 pub use visit_expression::{
     ExpressionVisitor, walk_expression_children, walk_statement_expressions,
 };

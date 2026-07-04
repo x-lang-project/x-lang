@@ -16,7 +16,10 @@ pub use model::{
     IntrinsicVisibility, LayoutIntrinsic, MemoryIntrinsic,
 };
 
-pub use effects::EffectCategory;
+pub use effects::{
+    EffectCategory, early_impure_call_category, early_impure_call_effect, impure_builtin_category,
+    impure_builtin_effect,
+};
 pub use names::{
     function_leaf_name, function_owner_name, is_abort_call, is_bit_intrinsic_call,
     is_builtin_print_call, is_catch_call, is_heap_allocate_call, is_mem_namespace_call,

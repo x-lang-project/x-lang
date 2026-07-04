@@ -43,6 +43,21 @@ pub struct BuiltinCall {
     pub return_type: Option<Type>,
 }
 
+impl BuiltinCall {
+    pub fn resolve(name: &str, arguments: &[Type], value_type: Option<&Type>) -> Option<Self> {
+        let context = classification::CallContext::new(name, arguments);
+        let kind = context.classify()?;
+
+        Some(Self {
+            name: name.into(),
+            kind,
+            type_argument: parse_generic_type_argument(name).map(crate::type_from_name),
+            argument_types: arguments.to_vec(),
+            return_type: value_type.cloned(),
+        })
+    }
+}
+
 pub fn is_slice_operation(leaf: &str) -> bool {
     SliceOperation::resolve(leaf).is_some()
 }
