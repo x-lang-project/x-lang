@@ -1,0 +1,20 @@
+[package]
+name = "x-parser"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+x-diagnostics = { workspace = true }
+x-utils = { workspace = true }
+pest = { workspace = true }
+pest_derive = { workspace = true }
+x-ast = { workspace = true }
+
+[lib]
+test = true
+doctest = true
