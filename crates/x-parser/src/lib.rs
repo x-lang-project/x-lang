@@ -27,3 +27,9 @@ mod worker;
 pub struct ParseOptions {
     pub disable_semantic_keywords: bool,
 }
+
+pub struct ParsedModule {
+    pub program: Program,
+    pub item_spans: Vec<Option<SourceSpan>>,
+    pub submodules: Vec<String>,
+}
