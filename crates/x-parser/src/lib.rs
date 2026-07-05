@@ -21,6 +21,8 @@ use x_diagnostics::parser_messages;
 
 mod pipeline;
 
+mod worker;
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ParseOptions {
     pub disable_semantic_keywords: bool,
