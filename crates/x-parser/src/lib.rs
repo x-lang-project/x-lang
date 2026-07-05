@@ -23,6 +23,8 @@ mod pipeline;
 
 mod worker;
 
+mod statement;
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ParseOptions {
     pub disable_semantic_keywords: bool,
