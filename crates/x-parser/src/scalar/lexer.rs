@@ -1,4 +1,5 @@
 use super::Attempt;
+use crate::integer_suffix::IntegerSuffix;
 
 fn digits(bytes: &[u8], at: &mut usize, radix: u32) -> Attempt<()> {
     fn valid(byte: u8, radix: u32) -> bool {
