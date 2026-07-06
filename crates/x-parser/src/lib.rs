@@ -21,6 +21,8 @@ use x_diagnostics::parser_messages;
 
 mod pipeline;
 
+mod scalar;
+
 mod source_limits;
 mod worker;
 
