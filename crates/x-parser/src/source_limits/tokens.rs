@@ -54,6 +54,42 @@ pub(super) fn scan_quoted_literal(bytes: &[u8], start: usize) -> Result<usize, S
     Ok(bytes.len())
 }
 
+pub(super) fn is_numeric_continuation(bytes: &[u8], index: usize) -> bool {
+    let Some(&current) = bytes.get(index) else {
+        return false;
+    };
+
+    current.is_ascii_alphanumeric()
+        || current == b'_'
+        || (current == b'.' && bytes.get(index.saturating_add(1)) != Some(&b'.'))
+        || (matches!(current, b'+' | b'-')
+            && index
+                .checked_sub(1)
+                .and_then(|previous| bytes.get(previous))
+                .is_some_and(|byte| matches!(byte, b'e' | b'E')))
+}
+
+pub(super) fn scan_identifier_token(bytes: &[u8], start: usize) -> Result<usize, SourceLimitError> {
+    let mut end = start;
+
+    for (index, byte) in bytes.iter().copied().enumerate().skip(start) {
+        if !byte.is_ascii_alphanumeric() && byte != b'_' {
+            break;
+        }
+
+        end = index.saturating_add(1);
+
+        if end.saturating_sub(start) > MAX_TOKEN_BYTES {
+            return Err(SourceLimitError::TokenTooLarge {
+                offset: start,
+                maximum: MAX_TOKEN_BYTES,
+            });
+        }
+    }
+
+    Ok(end)
+}
+
 pub(super) fn record_token(
     token_count: &mut usize,
     offset: usize,
