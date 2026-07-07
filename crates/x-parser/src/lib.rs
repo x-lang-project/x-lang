@@ -27,7 +27,7 @@ mod scalar;
 
 mod source_limits;
 mod worker;
-
+pub use source_limits::MAX_SOURCE_BYTES;
 mod statement;
 
 #[derive(Debug, Clone, Copy, Default)]
