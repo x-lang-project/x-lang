@@ -54,6 +54,27 @@ pub(super) fn scan_quoted_literal(bytes: &[u8], start: usize) -> Result<usize, S
     Ok(bytes.len())
 }
 
+pub(super) fn scan_numeric_token(bytes: &[u8], start: usize) -> Result<usize, SourceLimitError> {
+    let mut end = start;
+
+    for (index, _) in bytes.iter().enumerate().skip(start) {
+        if index != start && !is_numeric_continuation(bytes, index) {
+            break;
+        }
+
+        end = index.saturating_add(1);
+
+        if end.saturating_sub(start) > MAX_NUMERIC_LITERAL_BYTES {
+            return Err(SourceLimitError::NumericLiteralTooLarge {
+                offset: start,
+                maximum: MAX_NUMERIC_LITERAL_BYTES,
+            });
+        }
+    }
+
+    Ok(end)
+}
+
 pub(super) fn is_numeric_continuation(bytes: &[u8], index: usize) -> bool {
     let Some(&current) = bytes.get(index) else {
         return false;
