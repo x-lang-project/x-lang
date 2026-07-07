@@ -14,6 +14,17 @@ pub const MAX_DELIMITER_PREFIX: usize = 6;
 
 pub use x_diagnostics::parser_messages::SourceLimitError;
 
+pub fn validate_source(input: &str) -> Result<(), SourceLimitError> {
+    if input.len() > MAX_SOURCE_BYTES {
+        return Err(SourceLimitError::SourceTooLarge {
+            actual: input.len(),
+            maximum: MAX_SOURCE_BYTES,
+        });
+    }
+
+    SourceScanner::new(input).validate()
+}
+
 struct SourceScanner<'a> {
     input: &'a str,
     bytes: &'a [u8],
@@ -25,6 +36,98 @@ struct SourceScanner<'a> {
 }
 
 impl<'a> SourceScanner<'a> {
+    fn new(input: &'a str) -> Self {
+        Self {
+            input,
+            bytes: input.as_bytes(),
+            position: 0,
+            nesting_depth: 0,
+            token_count: 0,
+            prefix_chain: 0,
+            delimiter_prefix: 0,
+        }
+    }
+
+    fn validate(mut self) -> Result<(), SourceLimitError> {
+        while self.position < self.bytes.len() {
+            let Some(&byte) = self.bytes.get(self.position) else {
+                return Err(SourceLimitError::ScannerDidNotAdvance {
+                    offset: self.position,
+                });
+            };
+
+            if self.is_line_comment() {
+                self.skip_comment()?;
+            } else if matches!(byte, b'"' | b'\'') {
+                self.scan_literal()?;
+            } else if byte.is_ascii_digit() {
+                self.scan_number()?;
+            } else if byte.is_ascii_alphabetic() || byte == b'_' {
+                self.scan_identifier()?;
+            } else {
+                self.scan_punctuation(byte)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn is_line_comment(&self) -> bool {
+        self.bytes
+            .get(self.position..)
+            .is_some_and(|tail| tail.starts_with(b"//"))
+    }
+
+    fn skip_comment(&mut self) -> Result<(), SourceLimitError> {
+        let next = scan_line_comment(self.bytes, self.position);
+        require_scanner_progress(self.position, next)?;
+        self.position = next;
+        self.delimiter_prefix = 0;
+
+        Ok(())
+    }
+
+    fn advance_token(&mut self, start: usize, next: usize) -> Result<(), SourceLimitError> {
+        require_scanner_progress(start, next)?;
+        self.position = next;
+        record_token(&mut self.token_count, start, MAX_TOKEN_COUNT)?;
+        self.prefix_chain = 0;
+
+        Ok(())
+    }
+
+    fn scan_literal(&mut self) -> Result<(), SourceLimitError> {
+        let start = self.position;
+        let next = scan_quoted_literal(self.bytes, start)?;
+        self.advance_token(start, next)?;
+        self.delimiter_prefix = 0;
+
+        Ok(())
+    }
+
+    fn scan_number(&mut self) -> Result<(), SourceLimitError> {
+        let start = self.position;
+        let next = scan_numeric_token(self.bytes, start)?;
+        self.advance_token(start, next)?;
+        let literal = self
+            .input
+            .get(start..self.position)
+            .ok_or(SourceLimitError::ScannerDidNotAdvance { offset: start })?;
+        validate_numeric_literal(literal, start)?;
+        self.delimiter_prefix = 0;
+
+        Ok(())
+    }
+
+    fn scan_identifier(&mut self) -> Result<(), SourceLimitError> {
+        let start = self.position;
+        let next = scan_identifier_token(self.bytes, start)?;
+        self.advance_token(start, next)?;
+        self.delimiter_prefix = 0;
+
+        Ok(())
+    }
+
     fn scan_punctuation(&mut self, byte: u8) -> Result<(), SourceLimitError> {
         if !byte.is_ascii_whitespace() {
             record_token(&mut self.token_count, self.position, MAX_TOKEN_COUNT)?;
