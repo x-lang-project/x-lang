@@ -24,7 +24,7 @@ mod integer_suffix;
 mod pipeline;
 
 mod scalar;
-
+mod script_entry;
 mod source_limits;
 mod worker;
 pub use source_limits::MAX_SOURCE_BYTES;
