@@ -1,5 +1,5 @@
 use crate::ParsedModule;
-
+use lexer::Token;
 use x_ast::{Program, SourceSpan, Type};
 
 mod lexer;
