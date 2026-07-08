@@ -75,4 +75,10 @@ impl IntegerSuffix {
             })
             .unwrap_or((literal, None))
     }
+
+    pub(crate) fn starts_token(input: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|suffix| input.starts_with(suffix.spelling()))
+    }
 }
