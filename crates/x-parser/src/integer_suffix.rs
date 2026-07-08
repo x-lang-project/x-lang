@@ -49,6 +49,22 @@ impl IntegerSuffix {
         }
     }
 
+    pub(crate) fn value_type(self) -> Type {
+        match self {
+            Self::I8 => Type::I8,
+            Self::U8 => Type::U8,
+            Self::I16 => Type::I16,
+            Self::U16 => Type::U16,
+            Self::I32 => Type::I32,
+            Self::U32 => Type::U32,
+            Self::I64 => Type::I64,
+            Self::U64 => Type::U64,
+            Self::I128 | Self::U128 => Type::Unknown,
+            Self::ISize => Type::ISize,
+            Self::USize => Type::USize,
+        }
+    }
+
     pub(crate) fn split(literal: &str) -> (&str, Option<Self>) {
         Self::ALL
             .into_iter()
