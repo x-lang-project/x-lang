@@ -3,6 +3,7 @@ use crate::ParsedModule;
 use x_ast::{Program, SourceSpan, Type};
 
 mod lexer;
+mod literals;
 
 type Attempt<T> = Option<T>;
 
