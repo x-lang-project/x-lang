@@ -43,3 +43,59 @@ fn digits(bytes: &[u8], at: &mut usize, radix: u32) -> Attempt<()> {
 
     Some(())
 }
+
+fn scan_number(input: &str, start: usize) -> Attempt<usize> {
+    let bytes = input.as_bytes();
+    let mut at = start;
+    let mut floating = false;
+
+    if input
+        .get(start..)
+        .is_some_and(|text| text.starts_with("0x"))
+    {
+        at += 2;
+        digits(bytes, &mut at, 16)?;
+    } else if input
+        .get(start..)
+        .is_some_and(|text| text.starts_with("0b"))
+    {
+        at += 2;
+        digits(bytes, &mut at, 2)?;
+    } else {
+        digits(bytes, &mut at, 10)?;
+        if bytes.get(at) == Some(&b'.') && bytes.get(at + 1).is_some_and(u8::is_ascii_digit) {
+            floating = true;
+            at += 1;
+            digits(bytes, &mut at, 10)?;
+        }
+
+        if bytes
+            .get(at)
+            .is_some_and(|byte| *byte == b'e' || *byte == b'E')
+        {
+            floating = true;
+            at += 1;
+            if bytes
+                .get(at)
+                .is_some_and(|byte| *byte == b'+' || *byte == b'-')
+            {
+                at += 1;
+            }
+
+            digits(bytes, &mut at, 10)?;
+        }
+    }
+
+    if !floating && let Some(suffix) = input.get(at..).and_then(IntegerSuffix::starts_token) {
+        at += suffix.spelling().len();
+    }
+
+    if bytes
+        .get(at)
+        .is_some_and(|byte| byte.is_ascii_alphabetic() || *byte == b'_')
+    {
+        return None;
+    }
+
+    Some(at)
+}
