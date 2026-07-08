@@ -19,6 +19,8 @@ use x_ast::{Expression, Program, SourceSpan};
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::parser_messages;
 
+mod attributes;
+
 mod integer_suffix;
 
 mod pipeline;
