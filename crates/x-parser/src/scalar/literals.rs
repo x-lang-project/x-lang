@@ -36,3 +36,29 @@ pub(super) fn numeric(raw: &str) -> Attempt<(Type, ExpressionKind)> {
         .is_finite()
         .then_some((Type::F64, ExpressionKind::Float(value)))
 }
+
+pub(super) fn decode_string(content: &str) -> Attempt<String> {
+    let mut result = String::new();
+    let mut chars = content.chars();
+
+    while let Some(character) = chars.next() {
+        if character == '\\' {
+            match chars.next()? {
+                'n' => result.push('\n'),
+                'r' => result.push('\r'),
+                't' => result.push('\t'),
+                '\\' => result.push('\\'),
+                '"' => result.push('"'),
+                '0' => result.push('\0'),
+                other => {
+                    result.push('\\');
+                    result.push(other);
+                }
+            }
+        } else {
+            result.push(character);
+        }
+    }
+
+    Some(result)
+}
