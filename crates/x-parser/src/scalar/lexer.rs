@@ -8,6 +8,134 @@ pub(super) struct Token<'a> {
     pub(super) end: usize,
 }
 
+pub(super) fn lex(input: &str) -> Attempt<Vec<Token<'_>>> {
+    let bytes = input.as_bytes();
+    let mut at = 0;
+    let mut tokens: Vec<Token<'_>> = Vec::new();
+
+    while at < bytes.len() {
+        let byte = *bytes.get(at)?;
+
+        if matches!(byte, b' ' | b'\t' | b'\r' | b'\n') {
+            at += 1;
+            continue;
+        }
+
+        let start = at;
+
+        if byte.is_ascii_alphabetic() || byte == b'_' {
+            at += 1;
+
+            while bytes.get(at).is_some_and(|current_byte| {
+                current_byte.is_ascii_alphanumeric() || *current_byte == b'_'
+            }) {
+                at += 1;
+            }
+        } else if byte.is_ascii_digit() {
+            at = scan_number(input, at)?;
+        } else if byte == b'"' {
+            at += 1;
+            while bytes
+                .get(at)
+                .is_some_and(|current_byte| *current_byte != b'"')
+            {
+                match *bytes.get(at)? {
+                    _ => at += 1,
+                }
+            }
+
+            if *bytes.get(at)? != b'"' {
+                return None;
+            }
+
+            at += 1;
+        } else {
+            if byte >= 128 || byte == b'\'' || byte == b'#' {
+                return None;
+            }
+
+            if bytes
+                .get(at..at + 2)
+                .is_some_and(|current_text| current_text == b"//")
+            {
+                while bytes
+                    .get(at)
+                    .is_some_and(|current_byte| *current_byte != b'\n')
+                {
+                    at += 1;
+                }
+
+                continue;
+            }
+
+            let two = input.get(at..at + 2).unwrap_or("");
+
+            if matches!(
+                two,
+                "->" | "::" | "==" | "!=" | "<=" | ">=" | "&&" | "||" | "<<" | ">>" | "++" | "--"
+            ) {
+                at += 2;
+            } else {
+                at += 1;
+            }
+        }
+
+        if matches!(
+            input.get(start..at)?,
+            "struct"
+                | "trait"
+                | "impl"
+                | "extern"
+                | "for"
+                | "match"
+                | "invariant"
+                | "parallel"
+                | "become"
+                | "throw"
+                | "panic"
+                | "do"
+                | "layout"
+                | "["
+                | "]"
+                | "."
+                | "?"
+        ) {
+            return None;
+        }
+
+        let text = input.get(start..at)?;
+
+        if matches!(text, "&" | "*")
+            && tokens.last().is_some_and(|token| {
+                matches!(
+                    token.text,
+                    ":" | "->" | "as" | "static" | "unique" | "mut" | "return" | "=" | "(" | ","
+                )
+            })
+        {
+            return None;
+        }
+
+        if tokens.last().is_some_and(|token| token.text == "<") && super::name_allowed(text) {
+            return None;
+        }
+
+        tokens.push(Token {
+            text: input.get(start..at)?,
+            start,
+            end: at,
+        });
+    }
+
+    tokens.push(Token {
+        text: "",
+        start: input.len(),
+        end: input.len(),
+    });
+
+    Some(tokens)
+}
+
 fn digits(bytes: &[u8], at: &mut usize, radix: u32) -> Attempt<()> {
     fn valid(byte: u8, radix: u32) -> bool {
         (byte as char).is_digit(radix)
