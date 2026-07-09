@@ -40,6 +40,11 @@ pub(super) fn lex(input: &str) -> Attempt<Vec<Token<'_>>> {
                 .is_some_and(|current_byte| *current_byte != b'"')
             {
                 match *bytes.get(at)? {
+                    b'\\' => {
+                        at += 1;
+                        at += input.get(at..)?.chars().next()?.len_utf8();
+                    }
+                    b'{' | b'$' => return None,
                     _ => at += 1,
                 }
             }
