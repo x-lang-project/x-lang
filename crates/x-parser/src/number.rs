@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use pest::iterators::Pair;
 
+use crate::source_span_from_pair;
 use x_ast::{Expression, ExpressionKind, Type};
 use x_diagnostics::parser_messages::{self, ParserIssue};
 

@@ -1,0 +1,365 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" | COMMENT }
+
+COMMENT  = _{ "//" ~ (!NEWLINE ~ ANY)* }
+
+NEWLINE  = _{ "\n" }
+
+ASCII_LOWER = _{ 'a'..'z' }
+ASCII_UPPER = _{ 'A'..'Z' }
+ASCII_DIGIT = _{ '0'..'9' }
+ASCII_HEX = _{ ASCII_DIGIT | 'a'..'f' | 'A'..'F' }
+
+ASCII_ALPHANUMERIC = _{ ASCII_LOWER | ASCII_UPPER | ASCII_DIGIT }
+ID_CONT = _{ ASCII_ALPHANUMERIC | "_" }
+
+attribute_content = { (!"]" ~ ANY)* }
+attribute     = { "#[" ~ attribute_content ~ "]" }
+
+kw_mut  = @{ "mut" ~ !ID_CONT }
+kw_static = @{ "static" ~ !ID_CONT }
+kw_const = @{ "const" ~ !ID_CONT }
+
+semantic_keyword = @{ ("pure" | "memoise" | "parallel" | "static" | "unique" | "throws" | "invariant" | "layout" | "multi" | "become") ~ !ID_CONT }
+
+keyword = _{ &('a'..'w') ~ (
+  semantic_keyword
+ | "fn" ~ !ID_CONT
+ | "let" ~ !ID_CONT
+ | "const" ~ !ID_CONT
+ | "struct" ~ !ID_CONT
+ | "return" ~ !ID_CONT
+ | "if" ~ !ID_CONT
+ | "else" ~ !ID_CONT
+ | "true" ~ !ID_CONT
+ | "false" ~ !ID_CONT
+ | "import" ~ !ID_CONT
+ | "mod" ~ !ID_CONT
+ | "throw" ~ !ID_CONT
+ | "extern" ~ !ID_CONT
+ | "while" ~ !ID_CONT
+ | "for" ~ !ID_CONT
+ | "in" ~ !ID_CONT
+ | "trait" ~ !ID_CONT
+ | "impl" ~ !ID_CONT
+ | "pub" ~ !ID_CONT
+ | kw_mut ~ !ID_CONT
+ | "as" ~ !ID_CONT
+ | "sizeof" ~ !ID_CONT
+ | "break" ~ !ID_CONT
+ | "continue" ~ !ID_CONT
+ | "unsafe" ~ !ID_CONT
+ | "match" ~ !ID_CONT
+ | "do" ~ !ID_CONT
+ | "type" ~ !ID_CONT
+) }
+
+ASCII_ALPHA = _{ ASCII_LOWER | ASCII_UPPER }
+
+value_identifier = @{ !keyword ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+type_identifier = @{ !keyword ~ ASCII_UPPER ~ (ASCII_ALPHANUMERIC | "_")* }
+
+identifier     = { value_identifier | type_identifier }
+
+lifetime = @{ "'" ~ (ASCII_LOWER | ASCII_UPPER | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+digit_seq = _{ ASCII_DIGIT ~ ("_"? ~ ASCII_DIGIT)* }
+hex_seq = _{ ASCII_HEX ~ ("_"? ~ ASCII_HEX)* }
+binary_seq = _{ binary_digit ~ ("_"? ~ binary_digit)* }
+exponent = _{ ("e" | "E") ~ ("+" | "-")? ~ digit_seq }
+float = @{ "-"? ~ digit_seq ~ (("." ~ digit_seq ~ exponent?) | exponent) }
+integer_suffix = _{ "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128" | "isize" | "usize" }
+binary_digit = _{ "0" | "1" }
+integer = @{ "-"? ~ ( ("0x" ~ hex_seq) | ("0b" ~ binary_seq) | digit_seq ) ~ integer_suffix? }
+number = { float | integer }
+boolean = { "true" | "false" }
+string_char  = @{ !("\"" | "$" | "\\") ~ ANY }
+escape_seq = @{ "\\" ~ ANY }
+interpolation = { "${" ~ (!"}" ~ ANY)+ ~ "}" }
+string_part  = { string_char+ | escape_seq | interpolation }
+string    = @{ "\"" ~ string_part* ~ "\"" }
+unicode_escape = _{ "\\u{" ~ ASCII_HEX+ ~ "}" }
+char_literal = @{ "'" ~ ( unicode_escape | ("\\" ~ ANY) | (!"'" ~ ANY) ) ~ "'" }
+literal    = { float | integer | boolean | string | char_literal }
+
+basic_type  = @{ ("i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" | "u64" | "i128" | "u128" | "isize" | "usize" | "f32" | "f64" | "bool" | "str" | "char" | "void") ~ !ID_CONT }
+
+pointer_type = { "*" ~ (kw_mut | kw_const)? ~ type_atom }
+
+associated_generic_argument = { identifier ~ "=" ~ type_specifier }
+generic_argument = { associated_generic_argument | lifetime | integer | type_specifier }
+custom_type = { identifier ~ ("::" ~ identifier)* ~ ("<" ~ generic_argument ~ ("," ~ generic_argument)* ~ ">")? }
+
+unique_kw = @{ "unique" ~ !ID_CONT }
+type_atom = { array_type | pointer_type | tuple_type | function_type | basic_type | custom_type }
+reference_type   = { kw_static? ~ "&" ~ unique_kw? ~ ((lifetime | kw_static) ~ kw_mut? | kw_mut ~ (lifetime | kw_static)?)? ~ type ~ array_postfix* }
+function_type = { "fn" ~ "(" ~ ( type ~ ("," ~ type )* )? ~ ")" ~ ( "->" ~ type_specifier )? }
+array_postfix = { "[]" | "[" ~ (integer | identifier) ~ "]" }
+array_type = { "[" ~ type ~ ( ";" ~ (integer | identifier) )? ~ "]" }
+type_specifier = { type }
+type = { reference_type | type_atom ~ array_postfix* }
+tuple_type = { "(" ~ type ~ ("," ~ type)+ ~ (","?) ~ ")" }
+
+callable_bound = { identifier ~ "(" ~ (type ~ ("," ~ type)* ~ ","?)? ~ ")" ~ return_type_annotation? }
+relaxed_bound = { "?" ~ type_specifier }
+generic_bound = { callable_bound | relaxed_bound | type_specifier | lifetime }
+generic_bound_list = { generic_bound ~ ("+" ~ generic_bound)* }
+const_generic_parameter = { "const" ~ identifier ~ ":" ~ type_specifier }
+generic_parameter = { lifetime | const_generic_parameter | identifier ~ (":" ~ generic_bound_list)? ~ ("=" ~ type_specifier)? }
+generic_parameter_definition_list = { "<" ~ generic_parameter ~ ("," ~ generic_parameter)* ~ ">" }
+
+program = { SOI ~ statement* ~ EOI }
+
+statement = {
+  block |
+ external_function_declaration |
+  mod_declaration |
+  external_block |
+  static_declaration |
+  type_alias_declaration |
+  struct_declaration |
+  trait_declaration |
+  impl_definition |
+  if_statement |
+  for_range_loop |
+  for_each_loop |
+  while_loop |
+  loop_statement |
+  invariant_statement |
+  unsafe_statement |
+  function_definition |
+  return_statement |
+  throw_statement |
+  panic_statement |
+  do_statement |
+  become_statement |
+  break_statement |
+  continue_statement |
+  const_declaration_statement |
+  variable_declaration_statement |
+  assignment_statement |
+  import_statement |
+  match_expression |
+  expression_statement
+}
+
+loop_statement = { "loop" ~ block }
+invariant_statement = { invariant_block }
+unsafe_statement = { unsafe_block }
+
+const_declaration_statement = { const_declaration ~ ";" }
+variable_declaration_statement = { variable_declaration ~ ";" }
+mod_declaration = { "mod" ~ identifier ~ ";" }
+import_statement = { "pub"? ~ ("import" | "use") ~ import_path ~ ";" }
+import_path = { import_root ~ ("::" ~ identifier)* }
+import_root = @{ ("crate" | "std") ~ !ID_CONT | identifier }
+expression_statement = { expression ~ ";" }
+
+const_declaration = { "pub"? ~ "const" ~ identifier ~ (":" ~ type_specifier)? ~ "=" ~ expression }
+
+type_alias_declaration = { visibility* ~ "type" ~ identifier ~ generic_parameter_definition_list? ~ "=" ~ type_specifier ~ ";" }
+
+external_modifier = @{ ("pure" | "unsafe" | "pub") ~ !ID_CONT }
+external_function_declaration = { external_modifier* ~ "extern" ~ (string | char_literal | identifier)? ~ external_modifier* ~ "fn" ~ identifier ~ "(" ~ external_parameters? ~ ")" ~ ( "->" ~ type_specifier )? ~ ";" }
+external_parameters = { external_parameter ~ ("," ~ external_parameter)* }
+external_parameter  = { identifier ~ ":" ~ ("..." | type_specifier) }
+
+external_block_function = { external_modifier* ~ "fn" ~ identifier ~ function_parameter_list ~ return_type_annotation? ~ ";" }
+external_block = { "extern" ~ (string | char_literal | identifier)? ~ "{" ~ external_block_function* ~ "}" }
+
+throws_declaration = @{ "throws" ~ !ID_CONT }
+builtin_modifier = @{ ("pure" | "static" | "memoise" | "multi" | "unsafe" | "pub") ~ !ID_CONT }
+modifiers = { builtin_modifier | throws_declaration }
+visibility = @{ "pub" ~ !ID_CONT }
+
+function_signature = _{ "fn" ~ identifier ~ generic_parameter_definition_list? ~ function_parameter_list ~ return_type_annotation? }
+function_definition = { attribute* ~ modifiers* ~ (("extern" ~ string? ~ function_signature ~ block) | (function_signature ~ (block | ";"))) }
+
+function_parameter_list = { "(" ~ (parameter_list_nonempty)? ~ ")" }
+parameter_list_nonempty = { parameter_item ~ ("," ~ parameter_item)* ~ ","? }
+parameter_item = { parameter_self | parameter_owned_self | parameter_normal }
+parameter_owned_self = { kw_static? ~ kw_mut? ~ "self" ~ !ID_CONT ~ !":" }
+parameter_self = { ( "&" ~ (lifetime | kw_static)? ~ unique_kw? ~ kw_mut? ~ "self" ~ !ID_CONT ) | ( unique_kw ~ "&" ~ (lifetime | kw_static)? ~ kw_mut? ~ "self" ~ !ID_CONT ) }
+parameter_normal = { kw_static? ~ unique_kw? ~ kw_mut? ~ identifier ~ (":" ~ type_specifier)? }
+return_type_annotation = { "->" ~ type_specifier }
+
+block = { "{" ~ statement* ~ expression? ~ "}" }
+
+unsafe_block = { "unsafe" ~ block }
+
+let_pattern = { identifier | "(" ~ identifier ~ ("," ~ identifier)* ~ (","?) ~ ")" }
+
+variable_modifier = { unique_kw | kw_mut }
+variable_declaration = { "let" ~ variable_modifier* ~ let_pattern ~ (
+  ( ":" ~ type ~ ("=" ~ expression)? ) |
+  ( "=" ~ expression )
+) }
+
+assign_operator = { "=" ~ !("=") }
+
+primary_lvalue = { postfix_expression | "(" ~ l_value ~ ")" }
+l_value = { address_of | deref | primary_lvalue }
+
+
+assignment = { l_value ~ assign_operator ~ expression }
+assignment_statement = { assignment ~ ";" }
+
+if_statement    = { "if" ~ expression ~ block ~ ("else" ~ (if_statement | block))? }
+if_expression    = { if_statement }    
+while_loop = { "while" ~ expression ~ block }
+parallel_kw  = @{ "parallel" ~ !ID_CONT }
+for_range_loop = { parallel_kw? ~ "for" ~ identifier ~ "in" ~ expression ~ ".." ~ expression ~ block }
+for_each_loop = { parallel_kw? ~ "for" ~ identifier ~ "in" ~ expression ~ block }
+
+become_statement  = { "become" ~ function_call ~ ";" }
+do_statement  = { "do" ~ function_call ~ ";" }
+throw_kw = @{ "throw" ~ !ID_CONT }
+panic_kw = @{ "panic" ~ !ID_CONT }
+return_statement  = { "return" ~ expression? ~ ";" }
+throw_statement  = { throw_kw ~ expression ~ ";" }
+panic_statement  = { panic_kw ~ expression? ~ ";" }
+break_statement = { "break" ~ ";" }
+continue_statement = { "continue" ~ ";" }
+
+unary_expression = {
+    ( pre_inc_operator | pre_dec_operator | neg_operator | not_operator | bit_not_operator ) ~ unary_expression
+    | address_of
+    | deref
+    | postfix_expression
+}
+cast_expression = { unary_expression ~ (type_cast)* }
+postfix_expression = { primary ~ (postfix)* }
+address_of = { ( "&" ~ unique_kw? ~ kw_mut? ~ unary_expression ) | ( unique_kw ~ "&" ~ kw_mut? ~ unary_expression ) }
+deref  = { "*" ~ unary_expression }
+
+expression = { ternary_expression }
+
+ternary_expression = { binary_expression ~ ("?" ~ expression ~ ":" ~ ternary_expression)? }
+
+postfix = {
+  array_access |
+  call_postfix |
+  method_call |
+  try_postfix |
+  field_access
+}
+
+array_access = { "[" ~ expression ~ "]" }
+call_postfix = { "(" ~ arguments? ~ ")" }
+method_call  = { "." ~ identifier ~ generic_arguments? ~ "(" ~ arguments? ~ ")" }
+try_postfix  = { "?" ~ !(number | boolean | identifier | string | char_literal | "(" | "[" ) }
+field_access = { "." ~ identifier }
+type_cast    = { "as" ~ type_specifier }
+
+sizeof_expression = { "sizeof" ~ "(" ~ type_specifier ~ ")" }
+
+primary = {
+  number |
+  boolean |
+  match_expression |
+  function_call |
+  struct_instantiate |
+  path |
+  identifier |
+  tuple_literal |
+  "(" ~ expression ~ ")" |
+  string |
+  char_literal |
+  array_literal |
+  sizeof_expression
+ | unsafe_block
+ | if_expression
+}
+
+pattern_path = @{ identifier ~ ("::" ~ identifier)* }
+tuple_pattern = { "(" ~ pattern_argument ~ ("," ~ pattern_argument)* ~ ","? ~ ")" }
+pattern_argument = { "_" | tuple_pattern | pattern_path }
+pattern = { "_" | enum_pattern | tuple_pattern | pattern_path }
+enum_pattern = { pattern_path ~ "(" ~ pattern_argument? ~ ")" }
+match_return = { "return" ~ expression }
+match_arm = { pattern ~ "=>" ~ (block | match_return | expression) ~ ","? }
+match_expression = { "match" ~ expression ~ "{" ~ match_arm* ~ "}" }
+
+static_declaration = { "static" ~ !"fn" ~ kw_mut? ~ identifier ~ ":" ~ type_specifier ~ ( "=" ~ expression )? ~ ";" }
+
+tuple_literal = { "(" ~ (expression ~ ("," ~ expression)+ ~ ","? | expression ~ ",")? ~ ")" }
+
+neg_operator = { "-" }
+not_operator = { "!" }
+bit_not_operator = { "~" }
+pre_inc_operator = { "++" }
+pre_dec_operator = { "--" }
+generic_arguments = { "::"? ~ "<" ~ type_specifier ~ ("," ~ type_specifier)* ~ ">" }
+path_segment = { identifier ~ generic_arguments? }
+path = { path_segment ~ ("::" ~ path_segment)* }
+function_call = { path ~ generic_arguments? ~ "(" ~ arguments? ~ ")" }
+arguments     = { expression ~ ("," ~ expression)* }
+
+array_literal = { "[" ~ (expression ~ ("," ~ expression)*)? ~ ( ";" ~ (integer | identifier) )? ~ ","? ~ "]" }
+
+struct_field = {
+    visibility* ~ identifier ~ ":" ~ type_specifier
+}
+
+invariant_kw = @{ "invariant" ~ !ID_CONT }
+invariant_block = {
+    invariant_kw ~ block
+}
+
+struct_declaration = {
+    attribute* ~ visibility* ~ "struct" ~ identifier ~ generic_parameter_definition_list? ~
+    (("{" ~ struct_body? ~ "}") | ";")
+}
+
+struct_body = { (struct_field ~ ","? | invariant_block)* }
+
+struct_fields = {
+    struct_field ~ ("," ~ struct_field)* ~ ","?
+}
+struct_instantiate = { pattern_path ~ "{" ~ struct_initialise_fields? ~ "}" }
+struct_initialise_fields = { struct_initialise_field ~ ("," ~ struct_initialise_field)* ~ ","? }
+struct_initialise_field = { identifier ~ (":" ~ expression)? }
+
+or_operator = { "||" }
+and_operator = { "&&" }
+bit_or_operator = { "|" ~ !"|" }
+xor_operator = { "^" }
+bit_and_operator = { "&" ~ !"&" }
+eq_operator = { "==" }
+neq_operator = { "!=" }
+le_operator = { "<=" }
+ge_operator = { ">=" }
+lt_operator = @{ !("<<" | "<=") ~ "<" }
+gt_operator = @{ !(">>" | ">=") ~ ">" }
+shl_operator = @{ "<<" }
+shr_operator = @{ ">>" }
+add_operator = { "+" }
+sub_operator = { "-" }
+mul_operator = { "*" }
+div_operator = { "/" }
+mod_operator = { "%" }
+
+associated_type_declaration = { "type" ~ identifier ~ generic_parameter_definition_list? ~ (":" ~ generic_bound_list)? ~ ("=" ~ type_specifier)? ~ ";" }
+trait_item = { associated_type_declaration | function_definition }
+impl_item = { associated_type_declaration | const_declaration_statement | function_definition }
+
+trait_declaration = {
+    visibility* ~ "trait" ~ identifier ~ generic_parameter_definition_list? ~ (":" ~ generic_bound_list)? ~
+    "{" ~ trait_item* ~ "}"
+}
+
+trait_path = { custom_type }
+
+trait_impl_declaration = {
+    visibility* ~ "impl" ~ generic_parameter_definition_list? ~ trait_path ~ "for" ~ type_specifier ~
+    "{" ~ impl_item* ~ "}"
+}
+
+inherent_impl_declaration = {
+    visibility* ~ "impl" ~ generic_parameter_definition_list? ~ type_specifier ~
+    "{" ~ impl_item* ~ "}"
+}
+
+impl_definition = { trait_impl_declaration | inherent_impl_declaration }
+
+binary_expression = { cast_expression ~ ((or_operator | and_operator | bit_or_operator | xor_operator | bit_and_operator | eq_operator | neq_operator | lt_operator | gt_operator | le_operator | ge_operator | shl_operator | shr_operator | add_operator | sub_operator | mul_operator | div_operator | mod_operator) ~ cast_expression)* }
