@@ -23,6 +23,7 @@ mod attributes;
 
 mod integer_suffix;
 
+mod number;
 mod pipeline;
 
 mod reference_syntax;
