@@ -2,6 +2,7 @@ use crate::ParsedModule;
 use lexer::{Token, lex};
 use x_ast::{Program, SourceSpan, Type};
 
+mod expressions;
 mod lexer;
 mod literals;
 
