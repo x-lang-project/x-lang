@@ -25,6 +25,7 @@ mod integer_suffix;
 
 mod pipeline;
 
+mod reference_syntax;
 mod scalar;
 mod script_entry;
 mod source_limits;
