@@ -1,5 +1,6 @@
 use std::{cell::RefCell, panic, sync::mpsc, thread};
 
+use crate::diagnostics::parser_ice_diagnostic;
 use crate::pipeline::{self, EntryPoint};
 use crate::{PARSER_STACK_BYTES, ParseOptions, ParsedModule};
 use x_diagnostics::{CompilationFailure, parser_messages};

@@ -21,6 +21,8 @@ use x_diagnostics::parser_messages;
 
 mod attributes;
 
+mod diagnostics;
+
 mod integer_suffix;
 
 mod number;
