@@ -1,6 +1,63 @@
 use x_ast::{Layout, Program, Statement, Type, TypeVisitorMut, walk_statement_types_mut};
 
+pub(super) fn strip_semantic_features_in_program(program: &mut Program) {
+    Baseline.visit_statements(&mut program.statements);
+}
+
 struct Baseline;
+impl TypeVisitorMut for Baseline {
+    fn visit_type(&mut self, value_type: &mut Type) {
+        strip_semantic_features_in_type(value_type);
+    }
+
+    fn visit_statement(&mut self, statement: &mut Statement) {
+        if let Statement::Become { call } = statement {
+            *statement = Statement::Return {
+                value: Some(call.clone()),
+            };
+        }
+
+        match statement {
+            Statement::Function {
+                parameters,
+                is_pure,
+                is_memoised,
+                is_static,
+                is_multi,
+                is_throws,
+                is_exported,
+                ..
+            } => {
+                *is_pure = false;
+                *is_memoised = false;
+                *is_static = false;
+                *is_multi = false;
+                *is_throws = false;
+                *is_exported = false;
+
+                for parameter in parameters {
+                    parameter.is_static = false;
+                }
+            }
+
+            Statement::TraitDeclaration(definition) => {
+                for method in definition.methods.values_mut().flatten() {
+                    self.visit_statement(method);
+                }
+
+                return;
+            }
+            Statement::ImplDeclaration(definition) => {
+                self.visit_type(&mut definition.type_name);
+                self.visit_statements(&mut definition.methods);
+                return;
+            }
+            _ => {}
+        }
+
+        walk_statement_types_mut(self, statement);
+    }
+}
 
 fn strip_semantic_features_in_type(value_type: &mut Type) {
     match value_type {

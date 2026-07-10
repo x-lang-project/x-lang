@@ -1,5 +1,7 @@
 use pest::Parser;
 
+use crate::baseline::strip_semantic_features_in_program;
+
 use crate::ParseOptions;
 use crate::ParsedModule;
 use crate::XParser;
