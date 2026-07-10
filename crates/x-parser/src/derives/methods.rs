@@ -1,5 +1,106 @@
 use super::*;
 
+pub(super) fn derive_debug_impl(definition: &StructDefinition) -> Statement {
+    derive_method_impl(
+        definition,
+        DerivedMethodSignature {
+            derive: BuiltinDerive::Debug,
+            method_name: "fmt_debug",
+            parameters: vec![
+                self_reference_parameter(false),
+                Parameter {
+                    role: x_ast::ParameterRole::Argument,
+                    name: "f".to_string(),
+                    value_type: Type::Reference {
+                        lifetime: None,
+                        is_mut: true,
+                        is_unique: false,
+                        inner: Box::new(Type::Custom("Formatter".to_string())),
+                    },
+                    is_static: false,
+                    is_mut: true,
+                },
+            ],
+            return_type: Type::Custom("FormatResult".to_string()),
+        },
+        Expression::new(
+            Type::Unknown,
+            ExpressionKind::MethodCall {
+                object: Box::new(identifier_expression("f")),
+                target: x_ast::CallTarget::plain("write_str"),
+                arguments: vec![string_expression(&definition.name)],
+            },
+        ),
+    )
+}
+
+pub(super) fn derive_clone_impl(definition: &StructDefinition) -> Statement {
+    let fields = definition
+        .fields
+        .iter()
+        .map(|(field, _)| {
+            (
+                field.clone(),
+                Expression::new(
+                    Type::Unknown,
+                    ExpressionKind::FieldAccess {
+                        object: Box::new(identifier_expression("self")),
+                        field: field.clone(),
+                    },
+                ),
+            )
+        })
+        .collect();
+
+    derive_struct_constructor(
+        definition,
+        DerivedMethodSignature {
+            derive: BuiltinDerive::Clone,
+            method_name: "clone",
+            parameters: vec![self_reference_parameter(false)],
+            return_type: Type::TypeParameter("Self".to_string()),
+        },
+        fields,
+    )
+}
+
+pub(super) fn derive_default_impl(definition: &StructDefinition) -> Statement {
+    let fields = definition
+        .fields
+        .iter()
+        .map(|(field, value_type)| (field.clone(), default_expression_for_type(value_type)))
+        .collect();
+
+    derive_struct_constructor(
+        definition,
+        DerivedMethodSignature {
+            derive: BuiltinDerive::Default,
+            method_name: "default",
+            parameters: Vec::new(),
+            return_type: Type::TypeParameter("Self".to_string()),
+        },
+        fields,
+    )
+}
+
+pub(super) fn derive_struct_constructor(
+    definition: &StructDefinition,
+    signature: DerivedMethodSignature<'_>,
+    fields: Vec<(String, Expression)>,
+) -> Statement {
+    derive_method_impl(
+        definition,
+        signature,
+        Expression::new(
+            Type::Unknown,
+            ExpressionKind::StructInstantiate(StructInitialisation {
+                name: definition.name.clone(),
+                fields,
+            }),
+        ),
+    )
+}
+
 pub(super) fn default_expression_for_type(value_type: &Type) -> Expression {
     match value_type {
         Type::Boolean => Expression::new(Type::Boolean, ExpressionKind::Boolean(false)),
