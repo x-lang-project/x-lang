@@ -19,6 +19,7 @@ use x_ast::{Expression, Program, SourceSpan};
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::parser_messages;
 
+mod array;
 mod attributes;
 mod baseline;
 mod block;
