@@ -5,6 +5,33 @@ use x_ast::{
     StructDefinition, StructInitialisation, Type,
 };
 
+pub(super) fn expand_builtin_derives(statements: &mut Vec<Statement>) {
+    let mut derived_impls = Vec::new();
+
+    for statement in statements.iter() {
+        let Statement::StructDeclaration(definition) = statement else {
+            continue;
+        };
+
+        for derive in definition
+            .derives
+            .iter()
+            .filter_map(|name| BuiltinDerive::resolve(name))
+        {
+            match derive {
+                BuiltinDerive::Debug => derived_impls.push(derive_debug_impl(definition)),
+                BuiltinDerive::Clone => derived_impls.push(derive_clone_impl(definition)),
+                BuiltinDerive::Default => derived_impls.push(derive_default_impl(definition)),
+                BuiltinDerive::Eq | BuiltinDerive::PartialEq | BuiltinDerive::Hash => {
+                    derived_impls.push(derive_marker_impl(definition, derive));
+                }
+            }
+        }
+    }
+
+    statements.extend(derived_impls);
+}
+
 #[derive(Clone, Copy)]
 enum BuiltinDerive {
     Debug,
@@ -16,6 +43,18 @@ enum BuiltinDerive {
 }
 
 impl BuiltinDerive {
+    fn resolve(name: &str) -> Option<Self> {
+        Some(match name.trim().to_ascii_lowercase().as_str() {
+            "debug" => Self::Debug,
+            "clone" => Self::Clone,
+            "default" => Self::Default,
+            "eq" => Self::Eq,
+            "partialeq" | "partial_eq" => Self::PartialEq,
+            "hash" => Self::Hash,
+            _ => return None,
+        })
+    }
+
     fn name(self) -> &'static str {
         match self {
             Self::Debug => "Debug",
