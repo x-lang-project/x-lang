@@ -20,7 +20,7 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::parser_messages;
 
 mod attributes;
-
+mod baseline;
 mod block;
 
 mod derives;
