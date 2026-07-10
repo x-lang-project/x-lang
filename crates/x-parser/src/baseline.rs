@@ -39,7 +39,17 @@ impl TypeVisitorMut for Baseline {
                     parameter.is_static = false;
                 }
             }
+            Statement::ForRangeLoop { is_parallel, .. }
+            | Statement::ForEachLoop { is_parallel, .. } => *is_parallel = false,
+            Statement::StructDeclaration(definition) => {
+                definition.layout = Layout::AoS;
+                definition.invariant = None;
+                for (_, value_type) in &mut definition.fields {
+                    self.visit_type(value_type);
+                }
 
+                return;
+            }
             Statement::TraitDeclaration(definition) => {
                 for method in definition.methods.values_mut().flatten() {
                     self.visit_statement(method);
