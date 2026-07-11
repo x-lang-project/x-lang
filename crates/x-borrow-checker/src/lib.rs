@@ -20,6 +20,7 @@ mod control_flow;
 mod reference_value;
 mod return_summaries;
 
+mod storage;
 mod type_properties;
 
 pub use reference_value::ReferenceProjection;
