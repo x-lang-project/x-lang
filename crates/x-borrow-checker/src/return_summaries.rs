@@ -4,6 +4,8 @@ use std::sync::Arc;
 use crate::ReferenceProjection;
 use x_ast::{Expression, ExpressionKind};
 
+mod expressions;
+
 // Shared summary nodes still consume work on each visit.
 const MAX_SUMMARY_DEPTH: usize = 128;
 
@@ -28,6 +30,16 @@ pub(super) enum ReturnSummary {
 enum ScalarValue {
     Boolean(bool),
     Integer(i64),
+}
+
+impl ScalarValue {
+    fn from_expression(expression: &Expression) -> Option<Self> {
+        match expression.kind {
+            ExpressionKind::Boolean(value) => Some(Self::Boolean(value)),
+            ExpressionKind::Integer(value) => Some(Self::Integer(value)),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
