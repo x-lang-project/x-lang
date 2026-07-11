@@ -5,6 +5,7 @@ use crate::ReferenceProjection;
 use x_ast::{Expression, ExpressionKind};
 
 // Shared summary nodes still consume work on each visit.
+const MAX_SUMMARY_DEPTH: usize = 128;
 
 #[derive(Clone, Debug)]
 pub(super) enum ReturnSummary {
@@ -40,4 +41,9 @@ enum ScalarSource {
 pub(super) struct ValueSummary {
     references: Arc<ReturnSummary>,
     scalar: ScalarSource,
+}
+
+struct SummaryFunctions {
+    summaries: HashMap<String, Arc<ReturnSummary>>,
+    declared_names: HashSet<String>,
 }
