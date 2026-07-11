@@ -13,10 +13,14 @@
 
 use std::sync::Arc;
 
+use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_parameter};
+
 mod control_flow;
 
 mod reference_value;
 mod return_summaries;
+
+mod type_properties;
 
 pub use reference_value::ReferenceProjection;
 
