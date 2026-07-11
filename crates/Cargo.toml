@@ -19,6 +19,7 @@ members = [
   "x-ast",
   "x-std",
   "x-parser",
+  "x-borrow-checker",
 ]
 
 [workspace.dependencies]

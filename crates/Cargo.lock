@@ -591,6 +591,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-borrow-checker"
+version = "1.0.0"
+dependencies = [
+ "x-ast",
+ "x-diagnostics",
+]
+
+[[package]]
 name = "x-clean"
 version = "1.0.0"
 dependencies = [
