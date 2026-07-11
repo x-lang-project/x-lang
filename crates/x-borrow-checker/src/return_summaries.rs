@@ -6,6 +6,23 @@ use x_ast::{Expression, ExpressionKind};
 
 // Shared summary nodes still consume work on each visit.
 
+#[derive(Clone, Debug)]
+pub(super) enum ReturnSummary {
+    Parameter(usize),
+    Bound(Arc<Self>),
+    Project(Box<Self>, ReferenceProjection),
+    Aggregate(Vec<(ReferenceProjection, Self)>),
+    Select(usize, Box<Self>, Box<Self>),
+    Index(Box<Self>, usize),
+    Call {
+        callee: Arc<Self>,
+        arguments: Vec<ValueSummary>,
+    },
+    Empty,
+    Never,
+    Union(Box<Self>, Box<Self>),
+}
+
 #[derive(Clone, Copy, Debug)]
 enum ScalarValue {
     Boolean(bool),
@@ -17,4 +34,10 @@ enum ScalarSource {
     Parameter(usize),
     Literal(ScalarValue),
     Unknown,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct ValueSummary {
+    references: Arc<ReturnSummary>,
+    scalar: ScalarSource,
 }
