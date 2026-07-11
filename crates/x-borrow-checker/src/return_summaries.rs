@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
+use crate::ReferenceProjection;
 use x_ast::{Expression, ExpressionKind};
 
 // Shared summary nodes still consume work on each visit.

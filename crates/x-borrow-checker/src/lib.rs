@@ -15,6 +15,9 @@ use std::sync::Arc;
 
 mod control_flow;
 
+mod reference_value;
 mod return_summaries;
+
+pub use reference_value::ReferenceProjection;
 
 // Origin collection and lifetime checks must share this depth limit.
