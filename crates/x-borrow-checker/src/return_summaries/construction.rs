@@ -108,6 +108,47 @@ impl SummaryContext<'_> {
         let remaining = executable.cloned().collect::<Vec<_>>();
 
         match statement {
+            Statement::Block { statements } => {
+                if !remaining.is_empty() {
+                    return None;
+                }
+
+                self.summarize_body(statements, &bindings, depth + 1)
+            }
+            Statement::Return { value: Some(value) } => {
+                summarize_expression(value, &bindings, depth + 1, self.known)
+            }
+            Statement::If {
+                condition,
+                then_block,
+                else_block,
+            } => {
+                let mut then_statements = then_block.clone();
+                then_statements.extend(remaining.iter().cloned());
+                let mut else_statements = else_block.clone().unwrap_or_default();
+                else_statements.extend(remaining.iter().cloned());
+                let left = self.summarize_body(&then_statements, &bindings, depth + 1)?;
+                let right = self.summarize_body(&else_statements, &bindings, depth + 1)?;
+
+                match scalar_source(condition, &bindings) {
+                    ScalarSource::Literal(ScalarValue::Boolean(value)) => {
+                        Some(if value { left } else { right })
+                    }
+                    ScalarSource::Parameter(index)
+                        if self
+                            .parameters
+                            .get(index)
+                            .is_some_and(|parameter| parameter.value_type == Type::Boolean) =>
+                    {
+                        Some(ReturnSummary::Select(
+                            index,
+                            Box::new(left),
+                            Box::new(right),
+                        ))
+                    }
+                    _ => Some(ReturnSummary::Union(Box::new(left), Box::new(right))),
+                }
+            }
             Statement::Throw { .. } | Statement::Panic { .. } => Some(ReturnSummary::Never),
             _ => None,
         }
