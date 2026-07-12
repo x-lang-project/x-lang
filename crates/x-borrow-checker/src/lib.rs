@@ -13,9 +13,13 @@
 
 use std::sync::Arc;
 
+use program::nominal_owner_name;
+
 use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_parameter};
 
 mod control_flow;
+
+mod program;
 
 mod reference_value;
 mod return_summaries;

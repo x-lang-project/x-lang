@@ -9,7 +9,7 @@ use super::ScalarValue;
 use super::SummaryFunctions;
 use super::ValueSummary;
 use super::expressions::{scalar_source, summarize_expression, summarize_local};
-
+use crate::nominal_owner_name;
 use x_ast::{Parameter, Program, Statement, Type};
 
 struct FunctionDefinition<'a> {
