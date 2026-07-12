@@ -4,6 +4,8 @@ use std::sync::Arc;
 use crate::ReferenceProjection;
 use x_ast::{Expression, ExpressionKind};
 
+mod construction;
+
 mod expressions;
 
 // Shared summary nodes still consume work on each visit.
