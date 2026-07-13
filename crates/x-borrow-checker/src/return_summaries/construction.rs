@@ -71,6 +71,36 @@ impl<'a> FunctionInventory<'a> {
     }
 }
 
+fn return_summary(
+    function: &FunctionDefinition<'_>,
+    known: &SummaryFunctions,
+) -> Option<ReturnSummary> {
+    let FunctionDefinition {
+        parameters, body, ..
+    } = function;
+
+    let bindings = parameters
+        .iter()
+        .enumerate()
+        .map(|(index, parameter)| {
+            (
+                parameter.name.clone(),
+                ValueSummary {
+                    references: Arc::new(ReturnSummary::Parameter(index)),
+                    scalar: ScalarSource::Parameter(index),
+                },
+            )
+        })
+        .collect();
+
+    SummaryContext {
+        parameters,
+        known,
+        remaining_work: Cell::new(MAX_SUMMARY_WORK),
+    }
+    .summarize_body(body, &bindings, 0)
+}
+
 struct SummaryContext<'a> {
     parameters: &'a [Parameter],
     known: &'a SummaryFunctions,
