@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use super::MAX_SUMMARY_DEPTH;
+use super::MAX_SUMMARY_WORK;
 use super::ReturnSummary;
 use super::ScalarSource;
 use super::ScalarValue;
