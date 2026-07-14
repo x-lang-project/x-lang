@@ -22,6 +22,7 @@ use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_para
 mod context;
 mod control_flow;
 
+mod ownership;
 mod parameter_origins;
 
 mod program;
