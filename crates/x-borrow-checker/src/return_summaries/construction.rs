@@ -2,14 +2,11 @@ use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use super::MAX_SUMMARY_DEPTH;
-use super::MAX_SUMMARY_WORK;
-use super::ReturnSummary;
-use super::ScalarSource;
-use super::ScalarValue;
-use super::SummaryFunctions;
-use super::ValueSummary;
 use super::expressions::{scalar_source, summarize_expression, summarize_local};
+use super::{
+    MAX_DEPENDENCY_PASSES, MAX_SUMMARY_DEPTH, MAX_SUMMARY_WORK, ReturnSummary, ScalarSource,
+    ScalarValue, SummaryFunctions, ValueSummary,
+};
 use crate::nominal_owner_name;
 use x_ast::{Parameter, Program, Statement, Type};
 

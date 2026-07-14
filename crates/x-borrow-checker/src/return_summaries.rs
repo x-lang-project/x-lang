@@ -11,6 +11,7 @@ mod expressions;
 // Shared summary nodes still consume work on each visit.
 const MAX_SUMMARY_DEPTH: usize = 128;
 const MAX_SUMMARY_WORK: usize = 65_536;
+const MAX_DEPENDENCY_PASSES: usize = 128;
 
 #[derive(Clone, Debug)]
 pub(super) enum ReturnSummary {
