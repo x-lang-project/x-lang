@@ -21,6 +21,7 @@ mod control_flow;
 
 mod program;
 
+mod reference_returns;
 mod reference_value;
 mod return_summaries;
 
