@@ -33,3 +33,15 @@ mod type_properties;
 pub use reference_value::ReferenceProjection;
 
 // Origin collection and lifetime checks must share this depth limit.
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub struct Region(pub usize);
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ReferenceTarget {
+    pub binding_generation: usize,
+    pub projection: Vec<ReferenceProjection>,
+    pub target_variable: String,
+    pub origin_region: Region,
+    pub is_mut: bool,
+}

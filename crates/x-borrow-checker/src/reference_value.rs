@@ -1,5 +1,7 @@
 use std::collections::{BTreeSet, HashMap};
 
+use crate::ReferenceTarget;
+
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ReferenceProjection {
     Field(String),

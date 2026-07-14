@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use super::ReferenceTarget;
+use super::Region;
 use crate::ReferenceProjection;
 use x_ast::{StructDefinition, Type};
 use x_diagnostics::borrow_messages;

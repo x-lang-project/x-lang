@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use super::Region;
 use x_ast::Type;
 
 pub(super) fn field_paths_overlap(first: &str, second: &str) -> bool {
