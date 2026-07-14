@@ -13,10 +13,13 @@
 
 use std::sync::Arc;
 
+use context::FunctionLifetimeContext;
+
 use program::nominal_owner_name;
 
 use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_parameter};
 
+mod context;
 mod control_flow;
 
 mod parameter_origins;

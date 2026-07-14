@@ -1,3 +1,4 @@
+use super::FunctionLifetimeContext;
 use super::Region;
 use super::parameter_origins;
 use crate::ReferenceProjection;
