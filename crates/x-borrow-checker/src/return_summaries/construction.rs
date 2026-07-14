@@ -68,6 +68,36 @@ impl<'a> FunctionInventory<'a> {
     }
 }
 
+pub(crate) fn build_summaries(program: &Program) -> HashMap<String, Arc<ReturnSummary>> {
+    let inventory = FunctionInventory::collect(program);
+    let mut known = SummaryFunctions {
+        summaries: HashMap::new(),
+        declared_names: inventory.declared_names,
+    };
+    let mut pending = inventory.definitions;
+
+    for _ in 0..MAX_DEPENDENCY_PASSES {
+        let before = pending.len();
+        pending.retain(|function| {
+            if let Some(summary) = return_summary(function, &known) {
+                known
+                    .summaries
+                    .insert(function.name.clone(), Arc::new(summary));
+
+                false
+            } else {
+                true
+            }
+        });
+
+        if pending.len() == before {
+            break;
+        }
+    }
+
+    known.summaries
+}
+
 fn return_summary(
     function: &FunctionDefinition<'_>,
     known: &SummaryFunctions,

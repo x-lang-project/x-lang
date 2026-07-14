@@ -8,6 +8,8 @@ mod construction;
 
 mod expressions;
 
+pub(super) use construction::build_summaries;
+
 // Shared summary nodes still consume work on each visit.
 const MAX_SUMMARY_DEPTH: usize = 128;
 const MAX_SUMMARY_WORK: usize = 65_536;
