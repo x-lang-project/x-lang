@@ -1,3 +1,4 @@
+use super::parameter_origins;
 use crate::ReferenceProjection;
 use traversal::{LifetimeTraversal, OriginRequirement};
 use x_ast::{Expression, ExpressionKind, Lifetime, Type};

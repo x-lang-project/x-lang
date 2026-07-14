@@ -19,6 +19,8 @@ use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_para
 
 mod control_flow;
 
+mod parameter_origins;
+
 mod program;
 
 mod reference_returns;

@@ -1,3 +1,4 @@
+use super::parameter_origins;
 use x_ast::{GenericParameter, Lifetime, Type};
 
 pub(super) fn has_non_lifetime_generic_parameter(parameters: &[GenericParameter]) -> bool {
