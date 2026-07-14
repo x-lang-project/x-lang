@@ -23,4 +23,21 @@ impl ReferenceProjection {
 
         Self::Field(name.into())
     }
+
+    pub(crate) fn from_index_expression(expression: &x_ast::Expression) -> Self {
+        match expression.kind {
+            x_ast::ExpressionKind::Integer(index) => Self::Index(index),
+            _ => Self::AnyIndex,
+        }
+    }
+}
+
+impl std::fmt::Display for ReferenceProjection {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Field(name) => formatter.write_str(name),
+            Self::Index(index) => index.fmt(formatter),
+            Self::AnyIndex => formatter.write_str("*"),
+        }
+    }
 }
