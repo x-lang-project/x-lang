@@ -1,11 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
+use super::ReferenceValue;
 use crate::ReferenceProjection;
 use x_ast::{Expression, ExpressionKind};
 
 mod construction;
-
+mod evaluation;
 mod expressions;
 
 pub(super) use construction::build_summaries;
@@ -59,6 +60,11 @@ enum ScalarSource {
 pub(super) struct ValueSummary {
     references: Arc<ReturnSummary>,
     scalar: ScalarSource,
+}
+
+struct ArgumentValue {
+    references: ReferenceValue,
+    scalar: Option<ScalarValue>,
 }
 
 struct SummaryFunctions {

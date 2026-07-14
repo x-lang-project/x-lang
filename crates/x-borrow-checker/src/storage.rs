@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use super::ReferenceValue;
 use super::Region;
 use x_ast::Type;
 

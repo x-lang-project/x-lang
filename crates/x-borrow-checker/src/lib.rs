@@ -33,7 +33,7 @@ mod return_summaries;
 mod storage;
 mod type_properties;
 
-pub use reference_value::ReferenceProjection;
+pub use reference_value::{ReferenceProjection, ReferenceValue};
 
 // Origin collection and lifetime checks must share this depth limit.
 
