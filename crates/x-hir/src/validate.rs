@@ -8,6 +8,72 @@ use x_ast::Type;
 mod errors;
 pub use errors::HirValidationError;
 
+impl HirProgram {
+    pub fn validate(&self) -> Result<(), HirValidationError> {
+        for (index, item) in self.items.iter().enumerate() {
+            let path = format!("item[{index}]");
+
+            match item {
+                HirItem::Function(function) => validate_function(function, &path)?,
+                HirItem::ExternFunction(function) => {
+                    validate_name(&function.name, || format!("{path}.extern.name"))?;
+                }
+                HirItem::Struct(definition) => {
+                    validate_name(&definition.name, || format!("{path}.struct.name"))?;
+                    for (field_index, (name, value_type)) in definition.fields.iter().enumerate() {
+                        validate_name(name, || format!("{path}.struct.field[{field_index}].name"))?;
+                        validate_type(value_type, || {
+                            format!("{path}.struct.field[{field_index}].type")
+                        })?;
+                    }
+
+                    if let Some(invariant) = &definition.invariant {
+                        validate_type(&invariant.predicate.value_type, || {
+                            format!("{path}.struct.invariant.type")
+                        })?;
+                    }
+                }
+                HirItem::Trait(definition) => {
+                    validate_name(&definition.name, || format!("{path}.trait.name"))?;
+                    validate_associated_types(
+                        &definition.associated_types,
+                        &format!("{path}.trait"),
+                    )?;
+                }
+                HirItem::Impl(definition) => {
+                    validate_type(&definition.type_name, || format!("{path}.impl.type"))?;
+                    validate_associated_types(
+                        &definition.associated_types,
+                        &format!("{path}.impl"),
+                    )?;
+
+                    for (method_index, method) in definition.methods.iter().enumerate() {
+                        validate_function(method, &format!("{path}.impl.method[{method_index}]"))?;
+                    }
+                }
+                HirItem::TypeAlias {
+                    name, value_type, ..
+                } => {
+                    validate_name(name, || format!("{path}.alias.name"))?;
+                    validate_type(value_type, || format!("{path}.alias.type"))?;
+                }
+                HirItem::GlobalLet(binding) => validate_let(binding, &path)?,
+                HirItem::Const {
+                    name,
+                    value_type,
+                    value,
+                } => validate_const(name, value_type, value, &path)?,
+                HirItem::Import { module, item } => {
+                    validate_name(module, || format!("{path}.import.module"))?;
+                    validate_name(item, || format!("{path}.import.item"))?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
 fn validate_associated_types(
     types: &BTreeMap<String, Type>,
     path: &str,
