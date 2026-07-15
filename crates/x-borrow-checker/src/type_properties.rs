@@ -1,3 +1,4 @@
+use super::MAX_AGGREGATE_LAYOUT_DEPTH;
 use super::parameter_origins;
 use x_ast::{GenericParameter, Lifetime, Type};
 

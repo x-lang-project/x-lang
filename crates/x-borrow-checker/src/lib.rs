@@ -37,9 +37,17 @@ mod type_properties;
 pub use reference_value::{ReferenceProjection, ReferenceValue};
 
 // Origin collection and lifetime checks must share this depth limit.
+const MAX_AGGREGATE_LAYOUT_DEPTH: usize = 128;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct Region(pub usize);
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Borrow {
+    pub region: Region,
+    pub is_mut: bool,
+    pub is_reborrow: bool,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ReferenceTarget {
@@ -48,4 +56,10 @@ pub struct ReferenceTarget {
     pub target_variable: String,
     pub origin_region: Region,
     pub is_mut: bool,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum LoopExitKind {
+    Break,
+    Continue,
 }

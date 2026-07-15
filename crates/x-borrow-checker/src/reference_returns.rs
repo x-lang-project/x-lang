@@ -1,4 +1,5 @@
 use super::FunctionLifetimeContext;
+use super::MAX_AGGREGATE_LAYOUT_DEPTH;
 use super::ReferenceValue;
 use super::Region;
 use super::parameter_origins;
