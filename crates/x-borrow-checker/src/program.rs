@@ -7,6 +7,31 @@ use x_ast::{
 };
 
 impl BorrowChecker {
+    pub fn check(&mut self, program: &Program) -> Result<(), BorrowCheckError> {
+        self.check_with_declaration_sources(program, &HashMap::new())
+    }
+
+    pub fn check_with_declaration_sources(
+        &mut self,
+        program: &Program,
+        sources: &HashMap<DeclarationKey, SourceSpan>,
+    ) -> Result<(), BorrowCheckError> {
+        self.prepare_program(program);
+        self.declare_program_bindings(program)?;
+
+        for statement in &program.statements {
+            self.check_statement(statement).map_err(|error| {
+                error.at_source(
+                    statement
+                        .declaration_key()
+                        .and_then(|key| sources.get(&key).copied()),
+                )
+            })?;
+        }
+
+        Ok(())
+    }
+
     fn prepare_program(&mut self, program: &Program) {
         let context = Arc::make_mut(&mut self.context);
         context.return_summaries = Arc::new(return_summaries::build_summaries(program));

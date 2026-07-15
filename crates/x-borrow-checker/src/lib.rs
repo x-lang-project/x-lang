@@ -19,6 +19,7 @@ use program::nominal_owner_name;
 use scope::Scope;
 use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_parameter};
 
+mod assignments;
 mod context;
 mod control_flow;
 mod errors;
@@ -28,12 +29,12 @@ mod parameter_origins;
 mod place_types;
 mod places;
 mod program;
-
+mod reference_calls;
 mod reference_returns;
 mod reference_value;
 mod return_summaries;
 mod scope;
-
+mod statements;
 mod storage;
 mod type_properties;
 pub use errors::BorrowCheckError;

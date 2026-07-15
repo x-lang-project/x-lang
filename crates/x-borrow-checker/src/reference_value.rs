@@ -2,6 +2,7 @@ use std::collections::{BTreeSet, HashMap};
 
 use crate::ReferenceTarget;
 
+mod evaluation;
 mod loans;
 mod storage;
 
