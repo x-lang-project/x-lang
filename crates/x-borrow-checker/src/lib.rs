@@ -80,3 +80,18 @@ pub struct BorrowChecker {
     flow: FlowState,
     context: Arc<AnalysisContext>,
 }
+
+impl Default for BorrowChecker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl BorrowChecker {
+    pub fn new() -> Self {
+        Self {
+            flow: FlowState::default(),
+            context: Arc::default(),
+        }
+    }
+}

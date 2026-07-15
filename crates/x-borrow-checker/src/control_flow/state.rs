@@ -10,6 +10,20 @@ pub(crate) struct FlowState {
     pub(crate) loop_exits: Vec<LoopExit>,
 }
 
+impl Default for FlowState {
+    fn default() -> Self {
+        Self {
+            scopes: vec![Scope {
+                region: Region(0),
+                ..Default::default()
+            }],
+            next_region_identifier: 1,
+            path_terminated: false,
+            loop_exits: Vec::new(),
+        }
+    }
+}
+
 impl FlowState {
     pub(crate) fn merge_branches(&mut self, left: &Self, right: &Self) {
         let mut exits = left.loop_exits.clone();
