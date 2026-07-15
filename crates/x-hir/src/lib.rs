@@ -28,6 +28,8 @@ use x_ast::Statement;
 use x_ast::{GenericParameter, Parameter, Pattern, StructDefinition, TraitDefinition, Type};
 use x_diagnostics::frontend_messages;
 
+mod lower;
+
 mod validate;
 pub use validate::HirValidationError;
 
