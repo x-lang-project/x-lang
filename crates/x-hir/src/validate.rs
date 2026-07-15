@@ -36,6 +36,20 @@ fn validate_let(binding: &HirLet, path: &str) -> Result<(), HirValidationError> 
     validate_expression(&binding.value, &format!("{path}.let.value"))
 }
 
+fn validate_const(
+    name: &str,
+    value_type: &Option<Type>,
+    value: &HirExpression,
+    path: &str,
+) -> Result<(), HirValidationError> {
+    validate_name(name, || format!("{path}.const.name"))?;
+    if let Some(value_type) = value_type {
+        validate_type(value_type, || format!("{path}.const.type"))?;
+    }
+
+    validate_expression(value, &format!("{path}.const.value"))
+}
+
 fn validate_statement(statement: &x_ast::Statement, path: &str) -> Result<(), HirValidationError> {
     use x_ast::Statement;
 
