@@ -81,7 +81,19 @@ fn validate_expression(expression: &HirExpression, path: &str) -> Result<(), Hir
         ExpressionKind::Cast { to, .. }
         | ExpressionKind::TypeLiteral(to)
         | ExpressionKind::SizeOf(to) => validate_type(to, || format!("{path}.embedded_type"))?,
+        ExpressionKind::AnonymousFunction {
+            parameters,
+            return_type,
+            ..
+        } => {
+            for parameter in parameters {
+                validate_name(parameter, || format!("{path}.closure.param"))?;
+            }
 
+            if let Some(value_type) = return_type {
+                validate_type(value_type, || format!("{path}.closure.return_type"))?;
+            }
+        }
         _ => {}
     }
 
