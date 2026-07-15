@@ -13,7 +13,7 @@
 
 use std::sync::Arc;
 
-use context::FunctionLifetimeContext;
+use context::{AnalysisContext, FunctionLifetimeContext};
 
 use program::nominal_owner_name;
 
