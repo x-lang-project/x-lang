@@ -71,7 +71,13 @@ fn validate_expression(expression: &HirExpression, path: &str) -> Result<(), Hir
         ExpressionKind::FieldAccess { field, .. } => {
             validate_name(field, || format!("{path}.field"))?
         }
+        ExpressionKind::StructInstantiate(initialise) => {
+            validate_name(&initialise.name, || format!("{path}.struct.name"))?;
 
+            for (name, _) in &initialise.fields {
+                validate_name(name, || format!("{path}.field.name"))?;
+            }
+        }
         ExpressionKind::Cast { to, .. }
         | ExpressionKind::TypeLiteral(to)
         | ExpressionKind::SizeOf(to) => validate_type(to, || format!("{path}.embedded_type"))?,
