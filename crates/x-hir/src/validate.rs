@@ -20,6 +20,23 @@ fn validate_associated_types(
     Ok(())
 }
 
+fn validate_function(function: &HirFunction, path: &str) -> Result<(), HirValidationError> {
+    validate_name(&function.name, || format!("{path}.function.name"))?;
+    for (index, parameter) in function.parameters.iter().enumerate() {
+        validate_name(&parameter.name, || format!("{path}.param[{index}].name"))?;
+        validate_type(&parameter.value_type, || {
+            format!("{path}.param[{index}].type")
+        })?;
+    }
+
+    validate_type(&function.return_type, || format!("{path}.return_type"))?;
+    if let Some(body) = &function.body {
+        validate_block(body, &format!("{path}.body"))?;
+    }
+
+    Ok(())
+}
+
 fn validate_block(block: &HirBlock, path: &str) -> Result<(), HirValidationError> {
     for (index, statement) in block.iter().enumerate() {
         validate_statement(statement, &format!("{path}.statement[{index}]"))?;
