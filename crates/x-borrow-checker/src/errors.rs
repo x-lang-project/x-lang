@@ -58,7 +58,23 @@ impl BorrowCheckError {
             }
         }
     }
+
+    pub fn into_diagnostic(self, span: Span) -> Diagnostic {
+        match self {
+            Self::Located(LocatedError {
+                span: origin,
+                error,
+            }) => error.into_diagnostic(Span {
+                source: span.source,
+                start: origin.start,
+                end: origin.end,
+            }),
+            other => other.into_catalog().into_diagnostic(span),
+        }
+    }
 }
+
+x_ast::impl_source_error!(BorrowCheckError);
 
 impl Display for BorrowCheckError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
