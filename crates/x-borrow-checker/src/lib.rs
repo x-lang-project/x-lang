@@ -14,27 +14,31 @@
 use std::sync::Arc;
 
 use context::{AnalysisContext, FunctionLifetimeContext};
-
+use control_flow::state::FlowState;
 use program::nominal_owner_name;
-
+use scope::Scope;
 use type_properties::{declared_reference_lifetime, has_non_lifetime_generic_parameter};
 
 mod context;
 mod control_flow;
-
+mod errors;
+mod expressions;
 mod ownership;
 mod parameter_origins;
-
+mod place_types;
+mod places;
 mod program;
 
 mod reference_returns;
 mod reference_value;
 mod return_summaries;
+mod scope;
 
 mod storage;
 mod type_properties;
-
+pub use errors::BorrowCheckError;
 pub use reference_value::{ReferenceProjection, ReferenceValue};
+pub use storage::VariableInfo;
 
 // Origin collection and lifetime checks must share this depth limit.
 const MAX_AGGREGATE_LAYOUT_DEPTH: usize = 128;
@@ -62,4 +66,16 @@ pub struct ReferenceTarget {
 enum LoopExitKind {
     Break,
     Continue,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+struct LoopExit {
+    kind: LoopExitKind,
+    scopes: Vec<Scope>,
+}
+
+#[derive(Clone)]
+pub struct BorrowChecker {
+    flow: FlowState,
+    context: Arc<AnalysisContext>,
 }

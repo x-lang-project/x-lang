@@ -1,10 +1,84 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use super::return_summaries;
+use super::{BorrowCheckError, BorrowChecker, return_summaries};
 use x_ast::{
     DeclarationKey, ExpressionKind, Pattern, Program, SourceError, SourceSpan, Statement, Type,
 };
+
+impl BorrowChecker {
+    fn prepare_program(&mut self, program: &Program) {
+        let context = Arc::make_mut(&mut self.context);
+        context.return_summaries = Arc::new(return_summaries::build_summaries(program));
+        context.method_receivers = Arc::new(method_receivers(program));
+        context.struct_layouts = Arc::new(
+            program
+                .statements
+                .iter()
+                .filter_map(|statement| {
+                    if let Statement::StructDeclaration(definition) = statement {
+                        Some((definition.name.clone(), definition.clone()))
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+        );
+    }
+
+    fn declare_program_bindings(&mut self, program: &Program) -> Result<(), BorrowCheckError> {
+        for current_statement in &program.statements {
+            match current_statement {
+                Statement::Function { name, .. }
+                | Statement::ExternFunctionDeclaration { name, .. } => {
+                    self.declare_variable(name, Type::Unknown, true)?;
+                }
+                Statement::ImplDeclaration(definition) => {
+                    let owner = nominal_owner_name(&definition.type_name);
+
+                    for statement in &definition.methods {
+                        if let Statement::Function { name, .. } = statement {
+                            self.declare_variable(
+                                &format!("{owner}::{name}"),
+                                Type::Unknown,
+                                true,
+                            )?;
+                        }
+                    }
+                }
+                Statement::Constant {
+                    name,
+                    type_annotation,
+                    value,
+                } => {
+                    self.declare_variable(
+                        name,
+                        type_annotation
+                            .clone()
+                            .unwrap_or_else(|| value.value_type.clone()),
+                        true,
+                    )?;
+                }
+                Statement::VariableDeclaration {
+                    pattern: Pattern::Identifier(name),
+                    type_annotation,
+                    value,
+                } => {
+                    self.declare_variable(
+                        name,
+                        type_annotation
+                            .clone()
+                            .unwrap_or_else(|| value.value_type.clone()),
+                        !matches!(value.kind, ExpressionKind::TypeLiteral(_)),
+                    )?;
+                }
+                _ => {}
+            }
+        }
+
+        Ok(())
+    }
+}
 
 pub(super) fn nominal_owner_name(value_type: &Type) -> String {
     match value_type {

@@ -2,6 +2,9 @@ use std::collections::{BTreeSet, HashMap};
 
 use crate::ReferenceTarget;
 
+mod loans;
+mod storage;
+
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ReferenceProjection {
     Field(String),
