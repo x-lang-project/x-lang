@@ -6,6 +6,28 @@ use x_ast::SourceError;
 use x_ast::SourceSpan;
 use x_ast::{ImplDefinition, Program, Statement};
 
+fn lower_owned_program(
+    program: Program,
+    sources: &HashMap<DeclarationKey, SourceSpan>,
+) -> Result<HirProgram, HirLowerError> {
+    let mut items = Vec::new();
+
+    for statement in program.statements {
+        let origin = statement
+            .declaration_key()
+            .and_then(|key| sources.get(&key).copied());
+
+        if let Some(item) = lower_item(statement).map_err(|error| error.at_source(origin))? {
+            items.push(item);
+        }
+    }
+
+    Ok(HirProgram {
+        items,
+        declaration_spans: sources.clone(),
+    })
+}
+
 fn lower_item(statement: Statement) -> Result<Option<HirItem>, HirLowerError> {
     let item = match statement {
         Statement::Function {
