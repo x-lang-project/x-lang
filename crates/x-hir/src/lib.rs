@@ -29,6 +29,7 @@ use x_ast::{GenericParameter, Parameter, Pattern, StructDefinition, TraitDefinit
 use x_diagnostics::frontend_messages;
 
 mod lower;
+pub use lower::{lower_program, lower_program_with_sources};
 
 mod validate;
 pub use validate::HirValidationError;

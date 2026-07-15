@@ -6,6 +6,25 @@ use x_ast::SourceError;
 use x_ast::SourceSpan;
 use x_ast::{ImplDefinition, Program, Statement};
 
+pub fn lower_program_with_sources(
+    program: Program,
+    sources: &HashMap<DeclarationKey, SourceSpan>,
+) -> Result<HirProgram, HirLowerError> {
+    lower_owned_program(program, sources)
+}
+
+pub fn lower_program(program: Program) -> Result<HirProgram, HirLowerError> {
+    program.try_into()
+}
+
+impl TryFrom<Program> for HirProgram {
+    type Error = HirLowerError;
+
+    fn try_from(program: Program) -> Result<Self, Self::Error> {
+        lower_owned_program(program, &HashMap::new())
+    }
+}
+
 fn lower_owned_program(
     program: Program,
     sources: &HashMap<DeclarationKey, SourceSpan>,
