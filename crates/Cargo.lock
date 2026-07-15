@@ -627,6 +627,14 @@ name = "x-differential"
 version = "1.0.0"
 
 [[package]]
+name = "x-hir"
+version = "1.0.0"
+dependencies = [
+ "x-ast",
+ "x-diagnostics",
+]
+
+[[package]]
 name = "x-logging"
 version = "1.0.0"
 dependencies = [
