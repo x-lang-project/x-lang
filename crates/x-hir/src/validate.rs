@@ -8,6 +8,14 @@ use x_ast::Type;
 mod errors;
 pub use errors::HirValidationError;
 
+fn validate_block(block: &HirBlock, path: &str) -> Result<(), HirValidationError> {
+    for (index, statement) in block.iter().enumerate() {
+        validate_statement(statement, &format!("{path}.statement[{index}]"))?;
+    }
+
+    Ok(())
+}
+
 fn validate_let(binding: &HirLet, path: &str) -> Result<(), HirValidationError> {
     if let Some(value_type) = &binding.type_annotation {
         validate_type(value_type, || format!("{path}.let.type"))?;
