@@ -8,6 +8,18 @@ use x_ast::Type;
 mod errors;
 pub use errors::HirValidationError;
 
+fn validate_associated_types(
+    types: &BTreeMap<String, Type>,
+    path: &str,
+) -> Result<(), HirValidationError> {
+    for (name, value_type) in types {
+        validate_name(name, || format!("{path}.associated_type.name"))?;
+        validate_type(value_type, || format!("{path}.associated_type[{name}]"))?;
+    }
+
+    Ok(())
+}
+
 fn validate_block(block: &HirBlock, path: &str) -> Result<(), HirValidationError> {
     for (index, statement) in block.iter().enumerate() {
         validate_statement(statement, &format!("{path}.statement[{index}]"))?;
