@@ -13,6 +13,8 @@
 
 mod ir;
 
+mod obligations;
+
 pub use ir::LocalIdentifier;
 pub use ir::MirStatement;
 pub use ir::Operand;
