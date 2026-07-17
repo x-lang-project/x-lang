@@ -21,3 +21,11 @@ pub enum ContractObligationError {
         argument: usize,
     },
 }
+
+pub(super) struct Function<'a> {
+    name: &'a str,
+    body: Option<&'a MirBody>,
+    parameters: &'a [Type],
+    pure: bool,
+    memoised: bool,
+}
