@@ -12,7 +12,7 @@
 )]
 
 mod ir;
-
+mod local_declarations;
 mod obligations;
 
 pub use ir::LocalDeclaration;
