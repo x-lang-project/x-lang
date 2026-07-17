@@ -15,6 +15,8 @@ mod ir;
 mod local_declarations;
 mod obligations;
 
+mod validate;
+
 pub use ir::LocalDeclaration;
 pub use ir::LocalIdentifier;
 pub use ir::MirStatement;
@@ -23,3 +25,5 @@ pub use ir::Place;
 pub use ir::Rvalue;
 
 pub use obligations::ContractObligationError;
+
+pub use validate::MirValidationError;
