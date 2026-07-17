@@ -17,12 +17,10 @@ mod obligations;
 
 mod validate;
 
-pub use ir::LocalDeclaration;
-pub use ir::LocalIdentifier;
-pub use ir::MirStatement;
-pub use ir::Operand;
-pub use ir::Place;
-pub use ir::Rvalue;
+pub use ir::{
+    BasicBlock, BlockIdentifier, LocalDeclaration, LocalIdentifier, MirStatement, MirTerminator,
+    Operand, Place, Rvalue,
+};
 
 pub use obligations::ContractObligationError;
 

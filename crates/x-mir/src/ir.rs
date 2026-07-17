@@ -1,6 +1,9 @@
 use x_ast::{Operator, Type, UnaryOperator};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct BlockIdentifier(pub usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct LocalIdentifier(pub usize);
 
 #[derive(Debug, Clone, PartialEq)]
@@ -92,6 +95,56 @@ pub enum MirStatement {
         worker: String,
         captures: Vec<Operand>,
     },
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum MirTerminator {
+    Return,
+    Goto(BlockIdentifier),
+    SwitchInteger {
+        discriminant: Operand,
+        targets: Vec<(i64, BlockIdentifier)>,
+        otherwise: BlockIdentifier,
+    },
+    Call {
+        function: String,
+        arguments: Vec<Operand>,
+        destination: Place,
+        target: BlockIdentifier,
+    },
+    TailCall {
+        function: String,
+        arguments: Vec<Operand>,
+    },
+    Throw {
+        error: Operand,
+    },
+    TryCall {
+        function: String,
+        arguments: Vec<Operand>,
+        destination: Place,
+        target: BlockIdentifier,
+    },
+    CatchCall {
+        function: String,
+        arguments: Vec<Operand>,
+        fallback: Operand,
+        destination: Place,
+        target: BlockIdentifier,
+    },
+
+    Abort,
+
+    Exit {
+        code: Operand,
+    },
+    Unreachable,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BasicBlock {
+    pub statements: Vec<MirStatement>,
+    pub terminator: Option<MirTerminator>,
 }
 
 #[derive(Debug, Clone, PartialEq)]

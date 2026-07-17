@@ -1,6 +1,7 @@
 mod errors;
 mod types;
 
+use crate::BlockIdentifier;
 use crate::LocalIdentifier;
 
 use types::validate_type;
