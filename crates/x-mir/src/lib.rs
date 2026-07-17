@@ -17,6 +17,7 @@ mod contracts;
 mod ir;
 mod local_declarations;
 mod obligations;
+mod program;
 
 mod validate;
 
@@ -32,5 +33,5 @@ pub use ir::{
 };
 
 pub use obligations::ContractObligationError;
-
+pub use program::MirBody;
 pub use validate::MirValidationError;

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::MirBody;
 use crate::MirStatement;
 use crate::MirTerminator;
 use crate::Rvalue;
