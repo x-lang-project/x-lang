@@ -93,3 +93,10 @@ pub enum MirStatement {
         captures: Vec<Operand>,
     },
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct LocalDeclaration {
+    pub identifier: LocalIdentifier,
+    pub name: Option<String>,
+    pub value_type: Type,
+}
