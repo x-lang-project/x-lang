@@ -21,3 +21,5 @@ pub use ir::MirStatement;
 pub use ir::Operand;
 pub use ir::Place;
 pub use ir::Rvalue;
+
+pub use obligations::ContractObligationError;
