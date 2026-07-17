@@ -11,6 +11,7 @@
     )
 )]
 
+mod call_targets;
 mod contracts;
 
 mod ir;
@@ -19,6 +20,7 @@ mod obligations;
 
 mod validate;
 
+pub use call_targets::ResolvedCall;
 pub use contracts::CallContract;
 pub use contracts::MemoiseCallContract;
 pub use contracts::MemoiseIndexing;
