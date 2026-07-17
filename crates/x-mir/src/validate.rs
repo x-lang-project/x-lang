@@ -6,6 +6,7 @@ use crate::BlockIdentifier;
 use crate::LocalIdentifier;
 use crate::MirBody;
 
+use calls::validate_call_identities;
 use types::validate_type;
 use x_diagnostics::backend_messages;
 

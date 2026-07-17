@@ -2,6 +2,41 @@ use super::MirValidationError;
 use crate::{MirBody, Place, ResolvedCall};
 use x_ast::intrinsics;
 
+pub(super) fn validate_call_identities(
+    function: &str,
+    body: &MirBody,
+) -> Result<(), MirValidationError> {
+    for (name, target) in &body.call_targets {
+        let consistent = match target {
+            ResolvedCall::Source { name: source, .. } => source == name,
+            ResolvedCall::Builtin(signatures) => {
+                !signatures.is_empty()
+                    && signatures.iter().all(|identity| {
+                        Some(identity.clone())
+                            == intrinsics::BuiltinCall::resolve(
+                                name,
+                                &identity.argument_types,
+                                identity.return_type.as_ref(),
+                            )
+                    })
+            }
+        };
+
+        if !consistent {
+            return Err(call_identity_error(function, name));
+        }
+    }
+
+    Ok(())
+}
+
+fn call_identity_error(function: &str, call: &str) -> MirValidationError {
+    MirValidationError::CallIdentityMismatch {
+        function: function.into(),
+        call: call.into(),
+    }
+}
+
 // Lifetime names may differ after call instantiation; pointee types must match.
 fn same_runtime_type(declared: &x_ast::Type, actual: &x_ast::Type) -> bool {
     use x_ast::Type;
