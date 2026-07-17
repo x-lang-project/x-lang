@@ -21,6 +21,7 @@ members = [
   "x-parser",
   "x-borrow-checker",
   "x-hir",
+  "x-mir",
 ]
 
 [workspace.dependencies]

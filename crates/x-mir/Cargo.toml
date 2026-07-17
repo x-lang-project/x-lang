@@ -1,0 +1,19 @@
+[package]
+name = "x-mir"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+thiserror = { workspace = true }
+x-ast = { workspace = true }
+x-hir = { workspace = true }
+x-diagnostics = { workspace = true }
+
+[lib]
+test = true
+doctest = true
