@@ -1,3 +1,4 @@
+mod block;
 mod calls;
 mod errors;
 mod types;
@@ -5,7 +6,7 @@ mod types;
 use crate::BlockIdentifier;
 use crate::LocalIdentifier;
 use crate::MirBody;
-
+use block::BlockValidator;
 use calls::validate_call_identities;
 use types::validate_type;
 use x_diagnostics::backend_messages;
