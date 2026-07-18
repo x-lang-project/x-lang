@@ -12,6 +12,63 @@ pub(super) struct BlockValidator<'a> {
 }
 
 impl BlockValidator<'_> {
+    pub(super) fn validate_rvalue(&self, value: &Rvalue) -> Result<(), MirValidationError> {
+        match value {
+            Rvalue::Use(value) | Rvalue::UnaryOperator(_, value) => self.validate_operand(value),
+            Rvalue::BinaryOperator(_, left, right)
+            | Rvalue::PointerOffset {
+                base: left,
+                offset: right,
+            } => {
+                self.validate_operand(left)?;
+
+                self.validate_operand(right)
+            }
+            Rvalue::Cast { expression, to } => {
+                self.validate_operand(expression)?;
+
+                validate_type(to, &|| {
+                    backend_messages::function_function_block_value_cast(
+                        self.function,
+                        self.block.0,
+                    )
+                })
+            }
+            Rvalue::AddressOf { expression, .. } => self.validate_place(expression),
+            Rvalue::Tuple(values) | Rvalue::Array(values) => self.validate_operands(values),
+            Rvalue::SizeOf(value_type) => validate_type(value_type, &|| {
+                backend_messages::function_function_block_value_sizeof(self.function, self.block.0)
+            }),
+            Rvalue::Call { arguments, .. } | Rvalue::TryCall { arguments, .. } => {
+                self.validate_operands(arguments)
+            }
+            Rvalue::CatchCall {
+                arguments,
+                fallback,
+                ..
+            } => {
+                self.validate_operands(arguments)?;
+
+                self.validate_operand(fallback)
+            }
+            Rvalue::StructInstantiate { fields, .. } => {
+                for (_, value) in fields {
+                    self.validate_operand(value)?;
+                }
+
+                Ok(())
+            }
+        }
+    }
+
+    fn validate_operands(&self, values: &[Operand]) -> Result<(), MirValidationError> {
+        for value in values {
+            self.validate_operand(value)?;
+        }
+
+        Ok(())
+    }
+
     pub(super) fn validate_operand(&self, value: &Operand) -> Result<(), MirValidationError> {
         match value {
             Operand::Copy(place) | Operand::Move(place) => self.validate_place(place),
