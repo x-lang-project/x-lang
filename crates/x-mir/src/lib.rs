@@ -19,6 +19,7 @@ mod local_declarations;
 mod obligations;
 mod program;
 
+mod type_queries;
 mod validate;
 
 pub use call_targets::ResolvedCall;
