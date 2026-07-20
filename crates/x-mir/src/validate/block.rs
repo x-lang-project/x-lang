@@ -12,6 +12,99 @@ pub(super) struct BlockValidator<'a> {
 }
 
 impl BlockValidator<'_> {
+    pub(super) fn validate_block(&self, contents: &BasicBlock) -> Result<(), MirValidationError> {
+        for statement in &contents.statements {
+            match statement {
+                MirStatement::Assign(place, value) => {
+                    self.validate_place(place)?;
+                    self.validate_rvalue(value)?;
+                }
+                MirStatement::StorageLive(local) | MirStatement::StorageDead(local) => {
+                    self.validate_local(*local)?;
+                }
+                MirStatement::ParallelFor {
+                    start,
+                    end,
+                    captures,
+                    ..
+                } => {
+                    self.validate_operand(start)?;
+                    self.validate_operand(end)?;
+
+                    for capture in captures {
+                        self.validate_operand(capture)?;
+                    }
+                }
+                MirStatement::Comment(_) => {}
+            }
+        }
+
+        let terminator =
+            contents
+                .terminator
+                .as_ref()
+                .ok_or_else(|| MirValidationError::MissingTerminator {
+                    function: self.function.to_string(),
+                    block: self.block.0,
+                })?;
+
+        self.validate_terminator(terminator)
+    }
+
+    fn validate_terminator(&self, terminator: &MirTerminator) -> Result<(), MirValidationError> {
+        let target = |target: BlockIdentifier| self.validate_target(target);
+
+        match terminator {
+            MirTerminator::Goto(next) => target(*next),
+            MirTerminator::SwitchInteger {
+                discriminant,
+                targets,
+                otherwise,
+            } => {
+                self.validate_operand(discriminant)?;
+                for (_, next) in targets {
+                    target(*next)?;
+                }
+
+                target(*otherwise)
+            }
+            MirTerminator::Call {
+                arguments,
+                destination,
+                target: next,
+                ..
+            }
+            | MirTerminator::TryCall {
+                arguments,
+                destination,
+                target: next,
+                ..
+            } => {
+                self.validate_operands(arguments)?;
+                self.validate_place(destination)?;
+
+                target(*next)
+            }
+            MirTerminator::CatchCall {
+                arguments,
+                fallback,
+                destination,
+                target: next,
+                ..
+            } => {
+                self.validate_operands(arguments)?;
+                self.validate_operand(fallback)?;
+                self.validate_place(destination)?;
+
+                target(*next)
+            }
+            MirTerminator::TailCall { arguments, .. } => self.validate_operands(arguments),
+            MirTerminator::Throw { error } => self.validate_operand(error),
+            MirTerminator::Exit { code } => self.validate_operand(code),
+            MirTerminator::Return | MirTerminator::Abort | MirTerminator::Unreachable => Ok(()),
+        }
+    }
+
     pub(super) fn validate_rvalue(&self, value: &Rvalue) -> Result<(), MirValidationError> {
         match value {
             Rvalue::Use(value) | Rvalue::UnaryOperator(_, value) => self.validate_operand(value),
