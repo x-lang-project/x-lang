@@ -5,6 +5,7 @@ mod types;
 
 use crate::BlockIdentifier;
 use crate::FunctionMeta;
+use crate::GlobalItem;
 use crate::LocalIdentifier;
 use crate::MirBody;
 use block::BlockValidator;

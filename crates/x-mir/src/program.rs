@@ -18,6 +18,30 @@ pub struct MirBody {
     pub call_contract: Option<CallContract>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum GlobalItem {
+    Function {
+        name: String,
+        parameter_types: Vec<Type>,
+        return_type: Type,
+        body: Option<MirBody>,
+        meta: FunctionMeta,
+    },
+    Struct(StructDefinition),
+    Trait(TraitDefinition),
+    Impl {
+        trait_name: String,
+        type_name: Type,
+        methods: Vec<GlobalItem>,
+    },
+    Static {
+        name: String,
+        value_type: Type,
+        initializer: Option<Operand>,
+        is_constant: bool,
+    },
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct FunctionMeta {
     pub is_exported: bool,

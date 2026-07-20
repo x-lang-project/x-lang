@@ -3,6 +3,7 @@ mod origins;
 use std::collections::{BTreeMap, HashMap};
 
 use crate::BlockIdentifier;
+use crate::GlobalItem;
 use crate::MirBody;
 use crate::MirStatement;
 use crate::Place;
