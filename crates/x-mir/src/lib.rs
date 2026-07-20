@@ -33,5 +33,6 @@ pub use ir::{
 };
 
 pub use obligations::ContractObligationError;
+pub use program::FunctionMeta;
 pub use program::MirBody;
 pub use validate::MirValidationError;

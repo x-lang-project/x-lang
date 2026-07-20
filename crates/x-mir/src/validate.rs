@@ -4,6 +4,7 @@ mod errors;
 mod types;
 
 use crate::BlockIdentifier;
+use crate::FunctionMeta;
 use crate::LocalIdentifier;
 use crate::MirBody;
 use block::BlockValidator;
