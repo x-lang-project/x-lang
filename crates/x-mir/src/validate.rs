@@ -14,6 +14,23 @@ use x_diagnostics::backend_messages;
 
 pub use errors::MirValidationError;
 
+fn validate_function_contract(
+    function: &str,
+    body: &MirBody,
+    meta: &FunctionMeta,
+) -> Result<(), MirValidationError> {
+    if body.is_throws != meta.is_throws
+        || body.is_memoised != meta.is_memoised
+        || body.call_contract != meta.call_contract
+    {
+        return Err(MirValidationError::FunctionContractMismatch {
+            function: function.to_owned(),
+        });
+    }
+
+    Ok(())
+}
+
 fn validate_frame(function: &str, body: &MirBody) -> Result<(), MirValidationError> {
     if !body.basic_blocks.contains_key(&BlockIdentifier(0)) {
         return Err(MirValidationError::MissingEntryBlock {
