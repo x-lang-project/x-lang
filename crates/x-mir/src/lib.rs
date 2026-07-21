@@ -13,7 +13,7 @@
 
 mod call_targets;
 mod contracts;
-
+mod invariant_references;
 mod ir;
 mod local_declarations;
 mod obligations;
