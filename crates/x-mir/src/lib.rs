@@ -22,6 +22,8 @@ mod program;
 mod type_queries;
 mod validate;
 
+pub mod errors;
+
 pub use call_targets::ResolvedCall;
 pub use contracts::CallContract;
 pub use contracts::MemoiseCallContract;
