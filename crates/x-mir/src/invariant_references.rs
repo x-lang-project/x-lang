@@ -11,3 +11,9 @@ use x_ast::StructInvariant;
 
 type Contexts = HashMap<LocalIdentifier, Place>;
 type Invariants = HashMap<String, StructInvariant>;
+
+fn unsupported(detail: &str) -> MirLowerError {
+    MirLowerError::InvalidContract(
+        x_diagnostics::mir_messages::invariant_reference_context_required(detail),
+    )
+}
