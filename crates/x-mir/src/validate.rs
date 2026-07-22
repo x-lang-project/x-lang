@@ -9,11 +9,56 @@ use crate::GlobalItem;
 use crate::LocalIdentifier;
 use crate::MirBody;
 use block::BlockValidator;
-use calls::validate_call_identities;
+use calls::{validate_call_identities, validate_call_sites};
 use types::validate_type;
 use x_diagnostics::backend_messages;
 
 pub use errors::MirValidationError;
+
+fn validate_items(items: &[GlobalItem]) -> Result<(), MirValidationError> {
+    for item in items {
+        match item {
+            GlobalItem::Function {
+                name,
+                parameter_types,
+                return_type,
+                body,
+                meta,
+            } => {
+                for (index, value_type) in parameter_types.iter().enumerate() {
+                    validate_type(value_type, &|| {
+                        backend_messages::function_name_parameter_index(name, index)
+                    })?;
+                }
+
+                validate_type(return_type, &|| {
+                    backend_messages::function_name_return_type(name)
+                })?;
+
+                if let Some(body) = body {
+                    validate_function_contract(name, body, meta)?;
+                    validate_body(name, body)?;
+                }
+            }
+            GlobalItem::Static {
+                name, value_type, ..
+            } => {
+                validate_type(value_type, &|| backend_messages::static_name(name))?;
+            }
+            GlobalItem::Struct(definition) => {
+                for (field, value_type) in &definition.fields {
+                    validate_type(value_type, &|| {
+                        backend_messages::struct_value_field_field(&definition.name, field)
+                    })?;
+                }
+            }
+            GlobalItem::Impl { methods, .. } => validate_items(methods)?,
+            GlobalItem::Trait(_) => {}
+        }
+    }
+
+    Ok(())
+}
 
 fn validate_function_contract(
     function: &str,
@@ -30,6 +75,23 @@ fn validate_function_contract(
     }
 
     Ok(())
+}
+
+fn validate_body(function: &str, body: &MirBody) -> Result<(), MirValidationError> {
+    // Type lookup requires validated locals and places.
+    validate_call_identities(function, body)?;
+    validate_frame(function, body)?;
+
+    for (block_identifier, block) in &body.basic_blocks {
+        BlockValidator {
+            function,
+            block: *block_identifier,
+            body,
+        }
+        .validate_block(block)?;
+    }
+
+    validate_call_sites(function, body)
 }
 
 fn validate_frame(function: &str, body: &MirBody) -> Result<(), MirValidationError> {

@@ -4,6 +4,10 @@ use crate::{LocalDeclaration, LocalIdentifier, MirBody, Operand, Place};
 use x_ast::Type;
 
 impl MirBody {
+    pub fn place_type(&self, place: &Place) -> Type {
+        place_type(place, &self.locals).unwrap_or(Type::Unknown)
+    }
+
     pub fn operand_type(&self, operand: &Operand) -> Type {
         operand_type(operand, &self.locals).unwrap_or(Type::Unknown)
     }

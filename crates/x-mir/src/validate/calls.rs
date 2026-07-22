@@ -30,6 +30,45 @@ pub(super) fn validate_call_identities(
     Ok(())
 }
 
+pub(super) fn validate_call_sites(
+    function: &str,
+    body: &MirBody,
+) -> Result<(), MirValidationError> {
+    for call in body.call_sites() {
+        let target = body
+            .call_targets
+            .get(call.name)
+            .ok_or_else(|| call_identity_error(function, call.name))?;
+        let result = call.destination.map(|place| body.place_type(place));
+        let consistent = match target {
+            ResolvedCall::Source { return_type, .. } => result.as_ref().is_none_or(|result| {
+                return_type
+                    .as_ref()
+                    .is_some_and(|declared| same_runtime_type(declared, result))
+            }),
+            ResolvedCall::Builtin(signatures) => {
+                let result = Some(
+                    result.unwrap_or_else(|| body.place_type(&Place::Local(body.return_local))),
+                );
+                let arguments = call
+                    .arguments
+                    .iter()
+                    .map(|operand| body.operand_type(operand))
+                    .collect::<Vec<_>>();
+
+                intrinsics::BuiltinCall::resolve(call.name, &arguments, result.as_ref())
+                    .is_some_and(|identity| signatures.contains(&identity))
+            }
+        };
+
+        if !consistent {
+            return Err(call_identity_error(function, call.name));
+        }
+    }
+
+    Ok(())
+}
+
 fn call_identity_error(function: &str, call: &str) -> MirValidationError {
     MirValidationError::CallIdentityMismatch {
         function: function.into(),
