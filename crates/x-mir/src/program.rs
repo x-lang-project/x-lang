@@ -53,3 +53,8 @@ pub struct FunctionMeta {
     pub is_throws: bool,
     pub has_static_parameters: bool,
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MirProgram {
+    pub items: Vec<GlobalItem>,
+}

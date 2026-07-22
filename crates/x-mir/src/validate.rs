@@ -3,11 +3,7 @@ mod calls;
 mod errors;
 mod types;
 
-use crate::BlockIdentifier;
-use crate::FunctionMeta;
-use crate::GlobalItem;
-use crate::LocalIdentifier;
-use crate::MirBody;
+use crate::{BlockIdentifier, FunctionMeta, GlobalItem, LocalIdentifier, MirBody, MirProgram};
 use block::BlockValidator;
 use calls::{validate_call_identities, validate_call_sites};
 use types::validate_type;

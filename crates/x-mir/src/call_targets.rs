@@ -1,10 +1,6 @@
 use std::collections::HashMap;
 
-use crate::GlobalItem;
-use crate::MirBody;
-use crate::MirStatement;
-use crate::MirTerminator;
-use crate::Rvalue;
+use crate::{GlobalItem, MirBody, MirProgram, MirStatement, MirTerminator, Rvalue};
 use x_ast::intrinsics;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

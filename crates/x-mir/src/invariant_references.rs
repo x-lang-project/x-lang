@@ -2,11 +2,8 @@ mod contexts;
 
 use std::collections::HashMap;
 
-use crate::GlobalItem;
-use crate::LocalIdentifier;
-use crate::MirBody;
-use crate::Place;
 use crate::errors::MirLowerError;
+use crate::{GlobalItem, LocalIdentifier, MirBody, MirProgram, Place};
 use x_ast::StructInvariant;
 
 type Contexts = HashMap<LocalIdentifier, Place>;
