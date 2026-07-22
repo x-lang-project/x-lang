@@ -18,7 +18,7 @@ mod ir;
 mod local_declarations;
 mod obligations;
 mod program;
-
+mod source_names;
 mod type_queries;
 mod validate;
 
