@@ -24,7 +24,7 @@ mod validate;
 
 pub mod errors;
 
-pub use call_targets::ResolvedCall;
+pub use call_targets::{CallSite, ResolvedCall};
 pub use contracts::CallContract;
 pub use contracts::MemoiseCallContract;
 pub use contracts::MemoiseIndexing;
