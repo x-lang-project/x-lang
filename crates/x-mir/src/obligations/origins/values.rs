@@ -82,6 +82,33 @@ pub(super) fn rvalue(analysis: &Analysis<'_, '_>, value: &Rvalue, state: &State)
     let records = analysis.records;
 
     match value {
+        Rvalue::Use(value)
+        | Rvalue::Cast {
+            expression: value, ..
+        } => operand(body, value, state, records),
+        Rvalue::PointerOffset { base, offset } => {
+            if matches!(offset, Operand::ConstantInteger(0)) {
+                operand(body, base, state, records)
+            } else {
+                let mut result = operand(body, base, state, records);
+
+                for origins in result.0.values_mut() {
+                    *origins = BTreeSet::from([Origin::Unknown]);
+                }
+
+                result
+            }
+        }
+        Rvalue::AddressOf { expression, .. } => {
+            let mut result =
+                access::read(body, expression, state, records).prefixed(&[Step::Dereference]);
+            result.0.insert(
+                Vec::new(),
+                access::storage(body, expression, state, records),
+            );
+
+            result
+        }
         Rvalue::StructInstantiate { fields, .. } => {
             let mut result = Value::default();
 
