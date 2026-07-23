@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
+use super::Records;
 use crate::LocalIdentifier;
 use x_ast::Type;
 
