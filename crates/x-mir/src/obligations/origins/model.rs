@@ -10,3 +10,16 @@ pub(in crate::obligations) enum Step {
     Dereference,
     Unsupported,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub(in crate::obligations) enum Origin {
+    Parameter { index: usize, path: Vec<Step> },
+    Local { identifier: usize, path: Vec<Step> },
+    Global(String),
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub(in crate::obligations) struct Value(pub BTreeMap<Vec<Step>, BTreeSet<Origin>>);
+
+pub(super) type State = HashMap<LocalIdentifier, Value>;
