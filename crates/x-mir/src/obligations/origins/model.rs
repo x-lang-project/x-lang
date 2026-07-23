@@ -82,6 +82,14 @@ impl Value {
                 .extend(origins.clone());
         }
     }
+
+    pub fn write(&mut self, prefix: &[Step], value: &Self, weak: bool) {
+        if !weak {
+            self.0.retain(|path, _| !starts(path, prefix));
+        }
+
+        self.join(&value.prefixed(prefix));
+    }
 }
 
 pub(super) type State = HashMap<LocalIdentifier, Value>;
