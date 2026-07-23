@@ -3,7 +3,7 @@ use std::collections;
 mod access;
 
 mod havoc;
-
+mod memory;
 mod model;
 mod values;
 
