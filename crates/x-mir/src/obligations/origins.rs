@@ -2,7 +2,10 @@ use std::collections;
 
 mod access;
 
+mod havoc;
+
 mod model;
+mod values;
 
 use std::collections::{BTreeMap, HashMap};
 
