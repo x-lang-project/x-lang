@@ -1,3 +1,4 @@
+mod effects;
 mod origins;
 mod owners;
 
@@ -5,6 +6,8 @@ use std::collections::{BTreeMap, HashMap};
 
 use crate::{BlockIdentifier, GlobalItem, MirBody, MirProgram, MirStatement, Place};
 use x_ast::{StructDefinition, Type};
+
+pub use effects::LoweredMemoryEffects;
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum ContractObligationError {

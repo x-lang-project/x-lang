@@ -36,6 +36,7 @@ pub use ir::{
 };
 
 pub use obligations::ContractObligationError;
+pub use obligations::LoweredMemoryEffects;
 pub use obligations::TailTransferObligation;
 pub use program::{FunctionMeta, GlobalItem, MirBody, MirProgram};
 pub use validate::MirValidationError;
