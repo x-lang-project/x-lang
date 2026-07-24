@@ -96,3 +96,71 @@ pub(super) fn return_summaries(functions: &[Function<'_>], records: &Records<'_>
         }
     }
 }
+
+pub(super) fn validate_transfers(
+    function: &Function<'_>,
+    records: &Records<'_>,
+    summaries: &Summaries,
+    mutating_calls: &collections::BTreeSet<String>,
+) -> Result<Vec<TailTransferObligation>, ContractObligationError> {
+    let Some(body) = function.body else {
+        return Ok(Vec::new());
+    };
+
+    let mut obligations = Vec::new();
+    let analysis = Analysis {
+        body,
+        records,
+        summaries,
+        mutating_calls,
+    };
+
+    for (block, state) in flow::states(&analysis) {
+        let Some(contents) = body.basic_blocks.get(&block) else {
+            continue;
+        };
+
+        let state = flow::transfer_statements(&analysis, &contents.statements, state);
+        let Some(MirTerminator::TailCall { arguments, .. }) = &contents.terminator else {
+            continue;
+        };
+
+        let mut reference_arguments = Vec::new();
+
+        for (argument, operand) in arguments.iter().enumerate() {
+            let required = model::type_paths(&body.operand_type(operand), records);
+
+            if required.is_empty() {
+                continue;
+            }
+
+            let value = values::operand(body, operand, &state, records);
+
+            for path in required {
+                let origins = value.select(&path).root();
+
+                if path.contains(&model::Step::Unsupported)
+                    || origins.is_empty()
+                    || origins
+                        .iter()
+                        .any(|origin| matches!(origin, Origin::Local { .. } | Origin::Unknown))
+                {
+                    return Err(ContractObligationError::TailStorage {
+                        function: function.name.into(),
+                        block: block.0,
+                        argument,
+                    });
+                }
+            }
+
+            reference_arguments.push(argument);
+        }
+
+        obligations.push(TailTransferObligation {
+            block,
+            reference_arguments,
+        });
+    }
+
+    Ok(obligations)
+}
