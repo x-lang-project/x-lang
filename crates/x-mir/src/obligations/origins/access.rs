@@ -123,3 +123,80 @@ pub(super) fn storage(
         }
     }
 }
+
+fn local_path(body: &MirBody, place: &Place) -> Option<(LocalIdentifier, Vec<Step>)> {
+    match place {
+        Place::Local(identifier) => Some((*identifier, Vec::new())),
+        Place::Dereference { base, .. } => {
+            let (identifier, mut path) = local_path(body, base)?;
+            path.push(Step::Dereference);
+
+            Some((identifier, path))
+        }
+        Place::Field {
+            base, field_name, ..
+        } => {
+            let (identifier, mut path) = local_path(body, base)?;
+
+            if body.place_type(base).pointee().is_some() {
+                path.push(Step::Dereference);
+            }
+
+            path.push(Step::Field(field_name.clone()));
+
+            Some((identifier, path))
+        }
+        Place::Index {
+            base,
+            index: selected,
+            ..
+        } => {
+            let (identifier, mut path) = local_path(body, base)?;
+
+            if body.place_type(base).pointee().is_some() {
+                path.push(Step::Dereference);
+            }
+
+            path.push(index(selected));
+
+            Some((identifier, path))
+        }
+        Place::Global { .. } => None,
+    }
+}
+
+pub(super) fn canonical_value(
+    value_type: &x_ast::Type,
+    value: &Value,
+    records: &Records<'_>,
+) -> Value {
+    // Bound origin paths by the destination type to keep the analysis finite.
+    let allowed = super::model::type_paths(value_type, records);
+
+    Value(
+        allowed
+            .into_iter()
+            .map(|path| {
+                let mut origins = value.select(&path).root();
+
+                if origins.is_empty() || path.contains(&Step::Unsupported) {
+                    origins.insert(Origin::Unknown);
+                }
+
+                let origins = origins
+                    .into_iter()
+                    .map(|origin| match origin {
+                        Origin::Local { ref path, .. } | Origin::Parameter { ref path, .. }
+                            if path.len() >= 64 =>
+                        {
+                            Origin::Unknown
+                        }
+                        other => other,
+                    })
+                    .collect();
+
+                (path, origins)
+            })
+            .collect(),
+    )
+}
