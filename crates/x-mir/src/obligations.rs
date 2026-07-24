@@ -20,6 +20,12 @@ pub enum ContractObligationError {
     },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TailTransferObligation {
+    pub block: BlockIdentifier,
+    pub reference_arguments: Vec<usize>,
+}
+
 pub(super) struct Function<'a> {
     name: &'a str,
     body: Option<&'a MirBody>,

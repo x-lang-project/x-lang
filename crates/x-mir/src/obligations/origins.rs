@@ -9,8 +9,7 @@ mod values;
 
 use std::collections::{BTreeMap, HashMap};
 
-use super::ContractObligationError;
-use super::Function;
+use super::{ContractObligationError, Function, TailTransferObligation};
 use crate::MirTerminator;
 use model::{Origin, Value};
 use x_ast::StructDefinition;
