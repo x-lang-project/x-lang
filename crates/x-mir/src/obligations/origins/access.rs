@@ -200,3 +200,68 @@ pub(super) fn canonical_value(
             .collect(),
     )
 }
+
+pub(super) fn write(analysis: &Analysis<'_, '_>, place: &Place, value: &Value, state: &mut State) {
+    let body = analysis.body;
+    let records = analysis.records;
+    let value = canonical_value(&body.place_type(place), value, records);
+    let value = &value;
+    let origins = storage(body, place, state, records);
+
+    if super::havoc::raw_place(body, place)
+        || origins.is_empty()
+        || origins
+            .iter()
+            .any(|origin| matches!(origin, Origin::Unknown))
+        || (!value.0.is_empty()
+            && origins
+                .iter()
+                .any(|origin| !matches!(origin, Origin::Local { .. })))
+    {
+        super::havoc::invalidate(state);
+    }
+
+    let weak = origins.len() != 1;
+    let mut touched = BTreeSet::new();
+
+    for origin in origins {
+        if let Origin::Local { identifier, path } = origin {
+            let identifier = LocalIdentifier(identifier);
+
+            if !state.contains_key(&identifier) && value.0.is_empty() {
+                continue;
+            }
+
+            state.entry(identifier).or_default().write(
+                &path,
+                value,
+                weak || path.contains(&Step::Index(None)),
+            );
+            touched.insert(identifier.0);
+        }
+    }
+
+    if let Some((identifier, path)) = local_path(body, place)
+        && (state.contains_key(&identifier) || !value.0.is_empty())
+    {
+        state
+            .entry(identifier)
+            .or_default()
+            .write(&path, value, path.contains(&Step::Index(None)));
+        touched.insert(identifier.0);
+    }
+
+    for identifier in touched {
+        let identifier = LocalIdentifier(identifier);
+
+        if let Some(local) = body.locals.get(&identifier)
+            && let Some(value) = state.get_mut(&identifier)
+        {
+            *value = canonical_value(&local.value_type, value, records);
+
+            if value.0.is_empty() {
+                state.remove(&identifier);
+            }
+        }
+    }
+}

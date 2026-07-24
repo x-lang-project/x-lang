@@ -24,3 +24,4 @@ struct Analysis<'a, 'r> {
     summaries: &'a Summaries,
     mutating_calls: &'a collections::BTreeSet<String>,
 }
+pub(super) use memory::unproved_memory;

@@ -1,3 +1,6 @@
+use std::collections;
+use std::slice;
+
 use std::collections::BTreeMap;
 
 use super::{
@@ -86,4 +89,72 @@ fn terminator(body: &MirBody, value: &MirTerminator, state: &State, records: &Re
         MirTerminator::Exit { code } => check(code),
         _ => false,
     }
+}
+
+pub(in crate::obligations) fn unproved_memory(
+    functions: &[Function<'_>],
+    records: &Records<'_>,
+    summaries: &Summaries,
+    mutating_calls: &collections::BTreeSet<String>,
+) -> BTreeMap<String, bool> {
+    functions
+        .iter()
+        .map(|function| {
+            let unproved = function.body.is_none_or(|body| {
+                let analysis = Analysis {
+                    body,
+                    records,
+                    summaries,
+                    mutating_calls,
+                };
+
+                flow::states(&analysis)
+                    .into_iter()
+                    .any(|(identifier, mut state)| {
+                        let Some(block) = body.basic_blocks.get(&identifier) else {
+                            return true;
+                        };
+
+                        for statement in &block.statements {
+                            let observable = match statement {
+                                MirStatement::Assign(destination, value) => {
+                                    place(body, destination, &state, records)
+                                        || rvalue(body, value, &state, records)
+                                }
+                                MirStatement::ParallelFor {
+                                    start,
+                                    end,
+                                    captures,
+                                    ..
+                                } => {
+                                    operand(body, start, &state, records)
+                                        || operand(body, end, &state, records)
+                                        || captures
+                                            .iter()
+                                            .any(|value| operand(body, value, &state, records))
+                                }
+                                _ => false,
+                            };
+
+                            if observable {
+                                return true;
+                            }
+
+                            state = flow::transfer_statements(
+                                &analysis,
+                                slice::from_ref(statement),
+                                state,
+                            );
+                        }
+
+                        block
+                            .terminator
+                            .as_ref()
+                            .is_some_and(|term| terminator(body, term, &state, records))
+                    })
+            });
+
+            (function.name.to_owned(), unproved)
+        })
+        .collect()
 }
