@@ -1,11 +1,9 @@
 use std::collections::BTreeMap;
 
-use super::Analysis;
-use super::Records;
-use super::Summaries;
-use super::access;
-use super::model::Origin;
-use super::model::State;
+use super::{
+    Analysis, Records, Summaries, access, flow,
+    model::{Origin, State},
+};
 use crate::obligations::Function;
 use crate::{MirBody, MirStatement, MirTerminator, Operand, Place, Rvalue};
 
