@@ -23,10 +23,32 @@ pub enum ContractObligationError {
     },
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct MutationObligation {
+    pub block: BlockIdentifier,
+    pub statement: usize,
+    pub destination: Place,
+    /// Invariant owners, innermost first.
+    pub owners: Vec<Place>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TailTransferObligation {
     pub block: BlockIdentifier,
     pub reference_arguments: Vec<usize>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct FunctionObligations {
+    pub memory: LoweredMemoryEffects,
+    pub source_pure: bool,
+    pub tail_transfers: Vec<TailTransferObligation>,
+    pub mutations: Vec<MutationObligation>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ContractObligations {
+    pub functions: BTreeMap<String, FunctionObligations>,
 }
 
 pub(super) struct Function<'a> {
@@ -35,4 +57,26 @@ pub(super) struct Function<'a> {
     parameters: &'a [Type],
     pure: bool,
     memoised: bool,
+}
+
+fn collect<'a>(items: &'a [GlobalItem], functions: &mut Vec<Function<'a>>) {
+    for item in items {
+        match item {
+            GlobalItem::Function {
+                name,
+                body,
+                parameter_types,
+                meta,
+                ..
+            } => functions.push(Function {
+                name,
+                body: body.as_ref(),
+                parameters: parameter_types,
+                pure: meta.is_pure,
+                memoised: meta.is_memoised,
+            }),
+            GlobalItem::Impl { methods, .. } => collect(methods, functions),
+            _ => {}
+        }
+    }
 }

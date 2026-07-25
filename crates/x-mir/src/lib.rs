@@ -35,8 +35,9 @@ pub use ir::{
     Operand, Place, Rvalue,
 };
 
-pub use obligations::ContractObligationError;
-pub use obligations::LoweredMemoryEffects;
-pub use obligations::TailTransferObligation;
+pub use obligations::{
+    ContractObligationError, ContractObligations, FunctionObligations, LoweredMemoryEffects,
+    MutationObligation, TailTransferObligation,
+};
 pub use program::{FunctionMeta, GlobalItem, MirBody, MirProgram};
 pub use validate::MirValidationError;
