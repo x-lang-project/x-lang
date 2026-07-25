@@ -24,6 +24,8 @@ mod validate;
 
 pub mod errors;
 
+pub mod lower;
+
 pub use call_targets::{CallSite, ResolvedCall};
 pub use contracts::CallContract;
 pub use contracts::MemoiseCallContract;
@@ -34,7 +36,7 @@ pub use ir::{
     BasicBlock, BlockIdentifier, LocalDeclaration, LocalIdentifier, MirStatement, MirTerminator,
     Operand, Place, Rvalue,
 };
-
+pub use lower::MirLowerer;
 pub use obligations::{
     ContractObligationError, ContractObligations, FunctionObligations, LoweredMemoryEffects,
     MutationObligation, TailTransferObligation,
