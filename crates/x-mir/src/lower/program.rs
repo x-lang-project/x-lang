@@ -2,6 +2,7 @@ mod functions;
 mod globals;
 mod reachability;
 
+use super::FunctionInput;
 use super::MirLowerer;
 use crate::MirProgram;
 use crate::errors::MirLowerError;

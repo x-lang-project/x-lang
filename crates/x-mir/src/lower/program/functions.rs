@@ -1,4 +1,4 @@
-use super::MirLowerer;
+use super::{FunctionInput, MirLowerer};
 use crate::errors::MirLowerError;
 use crate::lower::type_contains_type_parameter;
 use crate::source_names::type_to_source_name;
