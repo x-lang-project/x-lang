@@ -29,4 +29,13 @@ impl LocalDeclarations {
     pub(crate) fn declarations(&self) -> &HashMap<LocalIdentifier, LocalDeclaration> {
         &self.declarations
     }
+
+    pub(crate) fn reset(&mut self) {
+        self.next_identifier = 0;
+        self.declarations.clear();
+    }
+
+    pub(crate) fn take_declarations(&mut self) -> HashMap<LocalIdentifier, LocalDeclaration> {
+        mem::take(&mut self.declarations)
+    }
 }
