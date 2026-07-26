@@ -34,6 +34,10 @@ struct LoopTargets {
 }
 
 impl MirLowerer {
+    pub fn allocate_local(&mut self, name: Option<String>, value_type: Type) -> LocalIdentifier {
+        self.locals.allocate(name, value_type)
+    }
+
     fn make_block(&mut self) -> BlockIdentifier {
         let identifier = BlockIdentifier(self.next_block);
         self.next_block += 1;
