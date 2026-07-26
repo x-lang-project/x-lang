@@ -27,11 +27,10 @@ pub mod errors;
 pub mod lower;
 
 pub use call_targets::{CallSite, ResolvedCall};
-pub use contracts::CallContract;
-pub use contracts::MemoiseCallContract;
-pub use contracts::MemoiseIndexing;
-pub use contracts::MemoiseKeyEncoding;
-pub use contracts::MemoiseSynchronization;
+pub use contracts::{
+    CallContract, DEFAULT_MEMOISE_CAPACITY, MemoiseCallContract, MemoiseIndexing,
+    MemoiseKeyEncoding, MemoiseSynchronization,
+};
 pub use ir::{
     BasicBlock, BlockIdentifier, LocalDeclaration, LocalIdentifier, MirStatement, MirTerminator,
     Operand, Place, Rvalue,
