@@ -6,6 +6,14 @@ use crate::{CallContract, FunctionMeta, GlobalItem, MemoiseCallContract};
 use x_ast::{GenericParameter, Parameter, Type};
 use x_hir::{HirExternFunction, HirFunction, HirFunctionFlags};
 
+pub(super) fn memoise_call_contract(is_memoised: bool) -> Option<CallContract> {
+    is_memoised.then(|| {
+        CallContract::Memoise(MemoiseCallContract::checked(
+            crate::DEFAULT_MEMOISE_CAPACITY,
+        ))
+    })
+}
+
 pub(super) fn impl_method_owner_name(value_type: &Type) -> Option<String> {
     match value_type {
         Type::Custom(name) => Some(name.clone()),
