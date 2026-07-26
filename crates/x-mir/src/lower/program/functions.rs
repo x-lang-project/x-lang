@@ -1,6 +1,6 @@
 use super::MirLowerer;
 use crate::errors::MirLowerError;
-
+use crate::lower::type_contains_type_parameter;
 use crate::source_names::type_to_source_name;
 use crate::{CallContract, FunctionMeta, GlobalItem, MemoiseCallContract};
 use x_ast::{GenericParameter, Parameter, Type};

@@ -5,9 +5,13 @@ use crate::local_declarations::LocalDeclarations;
 use crate::{BasicBlock, BlockIdentifier, LocalIdentifier, MirStatement, MirTerminator};
 use x_ast::Type;
 
+mod helpers;
+
 mod program;
 mod scopes;
 mod statements;
+
+pub(crate) use helpers::*;
 
 pub struct MirLowerer {
     pub(crate) next_block: usize,
