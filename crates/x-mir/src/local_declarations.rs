@@ -11,6 +11,21 @@ pub(crate) struct LocalDeclarations {
 }
 
 impl LocalDeclarations {
+    pub(crate) fn allocate(&mut self, name: Option<String>, value_type: Type) -> LocalIdentifier {
+        let identifier = LocalIdentifier(self.next_identifier);
+        self.next_identifier += 1;
+        self.declarations.insert(
+            identifier,
+            LocalDeclaration {
+                identifier,
+                name,
+                value_type,
+            },
+        );
+
+        identifier
+    }
+
     pub(crate) fn declarations(&self) -> &HashMap<LocalIdentifier, LocalDeclaration> {
         &self.declarations
     }
