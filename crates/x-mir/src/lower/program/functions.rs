@@ -59,6 +59,35 @@ pub(super) fn lower_hir_function(
         .map(Some)
 }
 
+pub(super) fn lower_external_function(function: HirExternFunction) -> GlobalItem {
+    let is_pure = function.is_pure;
+
+    GlobalItem::Function {
+        name: function.name,
+        parameter_types: function
+            .parameters
+            .iter()
+            .map(|parameter| Type::from_external_name(&parameter.type_name))
+            .collect(),
+        return_type: function
+            .return_type
+            .as_deref()
+            .map(Type::from_external_name)
+            .unwrap_or(Type::Void),
+        body: None,
+        meta: FunctionMeta {
+            is_exported: false,
+            is_pure,
+            is_memoised: false,
+            call_contract: None,
+            is_static: false,
+            is_multi: false,
+            is_throws: false,
+            has_static_parameters: false,
+        },
+    }
+}
+
 pub(super) fn memoise_call_contract(is_memoised: bool) -> Option<CallContract> {
     is_memoised.then(|| {
         CallContract::Memoise(MemoiseCallContract::checked(
