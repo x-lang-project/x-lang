@@ -9,6 +9,7 @@ mod function;
 pub use function::FunctionInput;
 mod helpers;
 
+mod operands;
 mod program;
 mod scopes;
 mod statements;
