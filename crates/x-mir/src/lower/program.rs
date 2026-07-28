@@ -27,7 +27,24 @@ fn hir_declaration_key(item: &HirItem) -> Option<x_ast::DeclarationKey> {
                 .map(|parameter| parameter.value_type.clone())
                 .collect(),
         )),
-
+        HirItem::Struct(definition) => Some(DeclarationKey::Struct(definition.name.clone())),
+        HirItem::Impl(definition) => Some(DeclarationKey::Impl(
+            definition.trait_name.clone(),
+            definition.type_name.clone(),
+        )),
+        HirItem::GlobalLet(HirLet {
+            pattern: Pattern::Identifier(name),
+            ..
+        }) => Some(DeclarationKey::Binding(vec![name.clone()])),
+        HirItem::Const { name, .. } => Some(DeclarationKey::Constant(name.clone())),
         _ => None,
     }
+}
+
+pub(crate) fn infer_tuple_pattern_value_type(
+    value: &Expression,
+    arity: usize,
+) -> Result<Type, MirLowerError> {
+    resolved_tuple_type(value, arity)
+        .ok_or_else(|| MirLowerError::UnsupportedExpression(mir_messages::tuple_binding_arity()))
 }
