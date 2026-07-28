@@ -86,7 +86,13 @@ impl MirLowerer {
                 .fields
                 .iter()
                 .any(|(_, value)| self.expression_requires_control_flow(value)),
-
+            ExpressionKind::If {
+                condition,
+                then_block,
+                else_block,
+            } => crate::lower::constant_branch_value(condition, then_block, else_block.as_deref())
+                .map(|value| self.expression_requires_control_flow(value))
+                .unwrap_or(true),
             ExpressionKind::Match { scrutinee, arms } => {
                 arms.first()
                     .is_some_and(|arm| !matches!(arm.pattern, Pattern::Enum { .. }))

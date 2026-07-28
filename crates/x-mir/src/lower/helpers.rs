@@ -4,6 +4,26 @@ use x_ast::StructDefinition;
 use x_ast::{Expression, ExpressionKind, Type};
 use x_diagnostics::backend_messages;
 
+pub(crate) fn constant_branch_value<'a>(
+    condition: &Expression,
+    then_block: &'a [Statement],
+    else_block: Option<&'a [Statement]>,
+) -> Option<&'a Expression> {
+    let selected = match condition.kind {
+        ExpressionKind::Boolean(false) => else_block?,
+        _ => return None,
+    };
+
+    let mut statements = selected
+        .iter()
+        .filter(|statement| !matches!(statement, Statement::Comment(_)));
+
+    match (statements.next(), statements.next()) {
+        (Some(Statement::Expression { expression }), None) => Some(expression),
+        _ => None,
+    }
+}
+
 pub(crate) fn literal_string_value(literal: &x_ast::StringLiteral) -> Option<String> {
     let mut value = String::new();
 
