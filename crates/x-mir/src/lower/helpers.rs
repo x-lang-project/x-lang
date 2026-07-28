@@ -10,6 +10,7 @@ pub(crate) fn constant_branch_value<'a>(
     else_block: Option<&'a [Statement]>,
 ) -> Option<&'a Expression> {
     let selected = match condition.kind {
+        ExpressionKind::Boolean(true) => then_block,
         ExpressionKind::Boolean(false) => else_block?,
         _ => return None,
     };
@@ -35,6 +36,22 @@ pub(crate) fn literal_string_value(literal: &x_ast::StringLiteral) -> Option<Str
     }
 
     Some(value)
+}
+
+pub(crate) fn array_repeat_length(expression: &Expression) -> Result<usize, errors::MirLowerError> {
+    let ExpressionKind::Integer(raw_count) = expression.kind else {
+        return Err(errors::MirLowerError::UnsupportedExpression(backend_messages::array_repetition_length_must_remain_a_compile_time_integer_through_mir_lowering()));
+    };
+
+    usize::try_from(raw_count).map_err(|_| {
+        errors::MirLowerError::UnsupportedExpression(
+            backend_messages::array_repetition_length_must_be_non_negative_and_fit_usize(),
+        )
+    })
+}
+
+pub(crate) fn resolved_expression_type(value: &Expression) -> Option<Type> {
+    (!matches!(value.value_type, Type::Unknown | Type::Infer(_))).then(|| value.value_type.clone())
 }
 
 pub(crate) fn resolved_tuple_type(value: &Expression, arity: usize) -> Option<Type> {
@@ -65,4 +82,11 @@ pub(crate) fn is_codegen_concrete_struct(definition: &StructDefinition) -> bool 
 
 pub(crate) fn type_contains_type_parameter(value_type: &Type) -> bool {
     value_type.any_nested_type(|inner| matches!(inner, Type::TypeParameter(_)))
+}
+
+pub(crate) fn canonical_array_expression_type(value_type: &Type, length: usize) -> Type {
+    match value_type {
+        Type::Array(inner) => Type::FixedSizedArray(inner.clone(), length),
+        _ => value_type.clone(),
+    }
 }
