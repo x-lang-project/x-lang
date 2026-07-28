@@ -2,8 +2,7 @@ mod functions;
 mod globals;
 mod reachability;
 
-use super::FunctionInput;
-use super::MirLowerer;
+use super::{FunctionInput, MirLowerer, resolved_tuple_type};
 use crate::MirProgram;
 use crate::errors::MirLowerError;
 use functions::{

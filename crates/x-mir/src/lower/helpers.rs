@@ -17,6 +17,13 @@ pub(crate) fn literal_string_value(literal: &x_ast::StringLiteral) -> Option<Str
     Some(value)
 }
 
+pub(crate) fn resolved_tuple_type(value: &Expression, arity: usize) -> Option<Type> {
+    match &value.value_type {
+        Type::Tuple(items) if items.len() == arity => Some(value.value_type.clone()),
+        _ => None,
+    }
+}
+
 pub(crate) use crate::type_queries::operand_type;
 
 pub(crate) fn is_codegen_concrete_struct(definition: &StructDefinition) -> bool {
