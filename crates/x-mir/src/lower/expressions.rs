@@ -1,3 +1,5 @@
+mod control;
+
 mod values;
 
 use super::MirLowerer;
