@@ -26,6 +26,10 @@ impl LocalDeclarations {
         identifier
     }
 
+    pub(crate) fn get(&self, identifier: &LocalIdentifier) -> Option<&LocalDeclaration> {
+        self.declarations.get(identifier)
+    }
+
     pub(crate) fn declarations(&self) -> &HashMap<LocalIdentifier, LocalDeclaration> {
         &self.declarations
     }
