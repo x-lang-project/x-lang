@@ -5,6 +5,7 @@ use crate::local_declarations::LocalDeclarations;
 use crate::{BasicBlock, BlockIdentifier, LocalIdentifier, MirStatement, MirTerminator};
 use x_ast::Type;
 
+mod expressions;
 mod function;
 pub use function::FunctionInput;
 mod helpers;
