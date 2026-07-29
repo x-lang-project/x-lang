@@ -36,6 +36,20 @@ struct LoopTargets {
 }
 
 impl MirLowerer {
+    pub fn new() -> Self {
+        Self {
+            next_block: 0,
+            locals: LocalDeclarations::default(),
+            variable_mappings: HashMap::new(),
+            global_mappings: HashMap::new(),
+            source_functions: HashSet::new(),
+            basic_blocks: HashMap::new(),
+            current_block: None,
+            loop_targets: Vec::new(),
+            expression_buffer: Vec::new(),
+        }
+    }
+
     pub fn allocate_local(&mut self, name: Option<String>, value_type: Type) -> LocalIdentifier {
         self.locals.allocate(name, value_type)
     }
@@ -92,5 +106,11 @@ impl MirLowerer {
         self.current_block = None;
 
         Ok(())
+    }
+}
+
+impl Default for MirLowerer {
+    fn default() -> Self {
+        Self::new()
     }
 }
