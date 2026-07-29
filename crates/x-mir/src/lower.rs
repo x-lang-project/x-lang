@@ -71,6 +71,16 @@ impl MirLowerer {
             .ok_or(MirLowerError::MissingActiveBlockContext)
     }
 
+    pub(super) fn emit_statement_to(
+        &mut self,
+        block_identifier: BlockIdentifier,
+        statement: MirStatement,
+    ) -> Result<(), MirLowerError> {
+        self.block_mut(block_identifier)?.statements.push(statement);
+
+        Ok(())
+    }
+
     fn terminate_block(&mut self, term: MirTerminator) -> Result<(), MirLowerError> {
         self.active_block_mut()?.terminator = Some(term);
         self.current_block = None;
