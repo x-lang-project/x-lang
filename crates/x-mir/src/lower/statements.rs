@@ -52,7 +52,9 @@ impl MirLowerer {
                     .continue_target;
                 self.terminate_block(MirTerminator::Goto(target))?;
             }
-
+            Statement::Comment(text) => {
+                self.emit_statement(MirStatement::Comment(text))?;
+            }
             Statement::Block { statements } => {
                 self.lower_statements_until_terminated(statements)?;
             }
