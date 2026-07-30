@@ -54,6 +54,47 @@ fn contextual_rvalue(value: &Rvalue, contexts: &Contexts) -> bool {
     }
 }
 
+pub(super) fn validate(
+    body: &MirBody,
+    contexts: &Contexts,
+    invariants: &Invariants,
+) -> Result<(), MirLowerError> {
+    if contexts.contains_key(&body.return_local) {
+        return Err(unsupported(
+            "a dependent projection cannot be returned without an owner-aware ABI",
+        ));
+    }
+
+    for block in body.basic_blocks.values() {
+        for statement in &block.statements {
+            match statement {
+                MirStatement::ParallelFor {
+                    start,
+                    end,
+                    captures,
+                    ..
+                } if contextual_operand(start, contexts)
+                    || contextual_operand(end, contexts)
+                    || captures
+                        .iter()
+                        .any(|value| contextual_operand(value, contexts)) =>
+                {
+                    return Err(unsupported(
+                        "a dependent projection cannot escape through parallel captures",
+                    ));
+                }
+                _ => {}
+            }
+        }
+
+        if let Some(terminator) = &block.terminator {
+            validate_terminator(terminator, contexts)?;
+        }
+    }
+
+    Ok(())
+}
+
 fn validate_terminator(
     terminator: &MirTerminator,
     contexts: &Contexts,
