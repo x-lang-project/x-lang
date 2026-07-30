@@ -23,7 +23,7 @@ mod type_queries;
 mod validate;
 
 pub mod errors;
-
+pub mod expression_lowerer;
 pub mod lower;
 
 pub use call_targets::{CallSite, ResolvedCall};
