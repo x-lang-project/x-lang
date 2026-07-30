@@ -1,7 +1,4 @@
-use super::Contexts;
-use super::Invariants;
-use super::rewrite;
-use super::unsupported;
+use super::{Contexts, Invariants, dependencies, rewrite, unsupported};
 use crate::errors::MirLowerError;
 use crate::{MirBody, MirStatement, MirTerminator, Operand, Place, Rvalue};
 

@@ -2,10 +2,7 @@ mod freezing;
 
 use std::collections::{HashMap, HashSet};
 
-use super::Contexts;
-use super::Invariants;
-use super::rewrite;
-use super::unsupported;
+use super::{Contexts, Invariants, dependencies, rewrite, unsupported};
 use crate::errors::MirLowerError;
 use crate::{LocalIdentifier, MirBody, MirStatement, Operand, Place, Rvalue};
 use x_ast::Type;
