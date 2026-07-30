@@ -1,5 +1,6 @@
 mod contexts;
 
+mod escapes;
 mod rewrite;
 
 use std::collections::HashMap;
