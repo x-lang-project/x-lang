@@ -1,5 +1,7 @@
 mod contexts;
 
+mod rewrite;
+
 use std::collections::HashMap;
 
 use crate::errors::MirLowerError;
