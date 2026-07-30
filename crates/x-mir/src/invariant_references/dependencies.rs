@@ -34,7 +34,11 @@ pub(super) fn needs_context(place: &Place, body: &MirBody, invariants: &Invarian
 
                 projection = base;
             }
-
+            Place::Index { base, .. } => {
+                path.insert(0, None);
+                projection = base;
+            }
+            Place::Dereference { base, .. } => projection = base,
             _ => return false,
         }
     }
