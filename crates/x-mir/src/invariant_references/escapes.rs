@@ -65,6 +65,9 @@ pub(super) fn validate(
     for block in body.basic_blocks.values() {
         for statement in &block.statements {
             match statement {
+                MirStatement::Assign(destination, value) => {
+                    validate_assignment(destination, value, (body, contexts, invariants))?
+                }
                 MirStatement::ParallelFor {
                     start,
                     end,
@@ -87,6 +90,45 @@ pub(super) fn validate(
         if let Some(terminator) = &block.terminator {
             validate_terminator(terminator, contexts)?;
         }
+    }
+
+    Ok(())
+}
+
+fn validate_assignment(
+    destination: &Place,
+    value: &Rvalue,
+    environment: (&MirBody, &Contexts, &Invariants),
+) -> Result<(), MirLowerError> {
+    let (body, contexts, invariants) = environment;
+
+    if contextual_place(destination, contexts) && !matches!(destination, Place::Local(_)) {
+        return Err(unsupported(
+            "a dependent dereference was not specialised to its logical owner",
+        ));
+    }
+
+    if let Rvalue::AddressOf {
+        is_mut: true,
+        expression,
+        ..
+    } = value
+        && dependencies::needs_context(expression, body, invariants)
+        && !matches!(destination, Place::Local(identifier) if contexts.contains_key(identifier))
+    {
+        return Err(unsupported(
+            "a dependent projection cannot be stored outside a retained local",
+        ));
+    }
+
+    let alias = matches!(destination, Place::Local(identifier) if contexts.contains_key(identifier))
+        && matches!(value, Rvalue::Use(Operand::Copy(place) | Operand::Move(place))
+            if matches!(place.as_ref(), Place::Local(identifier) if contexts.contains_key(identifier)));
+
+    if !alias && contextual_rvalue(value, contexts) {
+        return Err(unsupported(
+            "dependent references cannot escape through calls, aggregates, casts or reference slots",
+        ));
     }
 
     Ok(())
