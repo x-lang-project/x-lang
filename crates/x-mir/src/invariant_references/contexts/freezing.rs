@@ -73,6 +73,7 @@ impl Builder<'_> {
         loop {
             let value_type = self.body.place_type(&base);
             let inner = match value_type {
+                Type::Reference { inner, .. } | Type::RawPointer { inner, .. } => *inner,
                 _ => return Ok(base),
             };
 
