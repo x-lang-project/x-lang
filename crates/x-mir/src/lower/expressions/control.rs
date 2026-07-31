@@ -35,7 +35,15 @@ impl MirLowerer {
     ) -> Result<Operand, MirLowerError> {
         let terminator = match (operation, arguments) {
             (ControlIntrinsic::Abort, []) => MirTerminator::Abort,
+            (ControlIntrinsic::Exit, [code]) => {
+                let code = self.lower_evaluated_operand(code.clone(), Some(&Type::I32))?;
 
+                if self.current_block.is_none() {
+                    return Ok(Operand::ConstantInteger(0));
+                }
+
+                MirTerminator::Exit { code }
+            }
             _ => {
                 return Err(MirLowerError::UnsupportedExpression(
                     backend_messages::abort_must_be_a_non_returning_mir_terminator(),
