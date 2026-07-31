@@ -8,6 +8,7 @@ use x_ast::{Expression, ExpressionKind, Type};
 use x_diagnostics::backend_messages;
 use x_diagnostics::mir_messages;
 
+mod places;
 mod values;
 
 pub(crate) struct ExpressionLowerer<'a> {
