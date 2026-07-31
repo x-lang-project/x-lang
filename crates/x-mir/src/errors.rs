@@ -56,6 +56,8 @@ impl MirLowerError {
     }
 }
 
+x_ast::impl_source_error!(MirLowerError);
+
 impl Display for MirLowerError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
         match self {
