@@ -16,6 +16,7 @@ mod scopes;
 mod statements;
 
 pub(crate) use helpers::*;
+pub use program::lower_program;
 
 pub struct MirLowerer {
     pub(crate) next_block: usize,

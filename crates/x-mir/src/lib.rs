@@ -35,8 +35,7 @@ pub use ir::{
     BasicBlock, BlockIdentifier, LocalDeclaration, LocalIdentifier, MirStatement, MirTerminator,
     Operand, Place, Rvalue,
 };
-pub use lower::FunctionInput;
-pub use lower::MirLowerer;
+pub use lower::{FunctionInput, MirLowerer, lower_program};
 pub use obligations::{
     ContractObligationError, ContractObligations, FunctionObligations, LoweredMemoryEffects,
     MutationObligation, TailTransferObligation,
