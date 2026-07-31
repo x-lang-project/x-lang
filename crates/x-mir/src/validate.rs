@@ -10,6 +10,15 @@ use types::validate_type;
 use x_diagnostics::backend_messages;
 
 pub use errors::MirValidationError;
+impl MirProgram {
+    pub fn validate(&self) -> Result<(), MirValidationError> {
+        validate_items(&self.items)?;
+
+        self.contract_obligations()
+            .map(|_| ())
+            .map_err(MirValidationError::ContractObligation)
+    }
+}
 
 fn validate_items(items: &[GlobalItem]) -> Result<(), MirValidationError> {
     for item in items {

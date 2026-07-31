@@ -55,3 +55,34 @@ impl MirLowerError {
         }
     }
 }
+
+impl Display for MirLowerError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Located(value) => Display::fmt(value, formatter),
+            Self::UnallocatedVariable(value0) => {
+                formatter.write_str(&backend_messages::mir_unallocated_variable_display(value0))
+            }
+            Self::InvalidMemoryPlace(value0) => {
+                formatter.write_str(&backend_messages::mir_invalid_memory_place_display(value0))
+            }
+            Self::TypePromotionMismatch { from, to } => formatter.write_str(
+                &backend_messages::mir_type_promotion_mismatch_display(from, to),
+            ),
+            Self::MissingActiveBlockContext => {
+                formatter.write_str(&backend_messages::mir_missing_active_block_context_display())
+            }
+            Self::InvalidStaticInitializer(_) => {
+                formatter.write_str(&backend_messages::mir_invalid_static_initializer_display())
+            }
+            Self::UnsupportedExpression(value0) => formatter.write_str(
+                &backend_messages::mir_unsupported_expression_display(value0),
+            ),
+            Self::InvalidContract(value0) => {
+                formatter.write_str(&backend_messages::mir_invalid_contract_display(value0))
+            }
+        }
+    }
+}
+
+impl error::Error for MirLowerError {}
