@@ -13,10 +13,13 @@
 
 use std::collections::{HashMap, HashSet};
 
+use function_context::FunctionContext;
 use x_ast::DeclarationKey;
 use x_ast::SourceSpan;
 use x_ast::StructDefinition;
 use x_ast::{Program, Statement, Type};
+
+mod function_context;
 
 mod purity;
 
