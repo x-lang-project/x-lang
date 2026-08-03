@@ -1,0 +1,20 @@
+[package]
+name = "x-typechecker"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+x-utils = { workspace = true }
+x-ast = { workspace = true }
+x-diagnostics = { workspace = true }
+x-parser = { workspace = true }
+x-std = { workspace = true }
+
+[lib]
+test = true
+doctest = true

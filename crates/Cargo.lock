@@ -625,6 +625,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-typechecker"
+version = "1.0.0"
+dependencies = [
+ "x-ast",
+ "x-diagnostics",
+ "x-parser",
+ "x-std",
+ "x-utils",
+]
+
+[[package]]
 name = "x-utils"
 version = "1.0.0"
 dependencies = [
