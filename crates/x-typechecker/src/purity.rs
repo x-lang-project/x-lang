@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use crate::FunctionSignature;
+use crate::TypeChecker;
 use x_ast::intrinsics::EffectCategory;
 use x_ast::{Expression, ExpressionKind, Type};
 
