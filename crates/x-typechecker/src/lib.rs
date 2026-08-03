@@ -19,3 +19,9 @@ use x_ast::StructDefinition;
 use x_ast::{Program, Statement, Type};
 
 mod symbols;
+
+pub use symbols::FunctionDefinition;
+pub use symbols::FunctionSignature;
+pub use symbols::MultiFunctionCandidate;
+pub use symbols::TraitInfo;
+pub use symbols::TypeAliasDefinition;

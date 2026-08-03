@@ -1,5 +1,11 @@
+mod definitions;
+
 mod mangling;
 mod records;
+
+pub use definitions::{
+    FunctionDefinition, FunctionSignature, MultiFunctionCandidate, TraitInfo, TypeAliasDefinition,
+};
 
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
