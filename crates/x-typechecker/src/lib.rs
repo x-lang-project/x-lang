@@ -18,6 +18,8 @@ use x_ast::SourceSpan;
 use x_ast::StructDefinition;
 use x_ast::{Program, Statement, Type};
 
+mod purity;
+
 mod symbols;
 
 pub use symbols::{
