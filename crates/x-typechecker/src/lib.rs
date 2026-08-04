@@ -24,6 +24,7 @@ mod function_context;
 mod purity;
 
 mod symbols;
+mod tail_helpers;
 
 mod types;
 
