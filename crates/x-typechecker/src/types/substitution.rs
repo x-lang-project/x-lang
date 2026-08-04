@@ -21,7 +21,15 @@ impl TypeChecker {
                 }
             }
             Type::Array(inner) => Type::Array(Box::new(self.substitute_type(inner, map))),
-
+            Type::FixedSizedArray(inner, length) => {
+                Type::FixedSizedArray(Box::new(self.substitute_type(inner, map)), *length)
+            }
+            Type::Tuple(elements) => Type::Tuple(
+                elements
+                    .iter()
+                    .map(|type_value| self.substitute_type(type_value, map))
+                    .collect(),
+            ),
             Type::Simd { element, lanes } => Type::Simd {
                 element: Box::new(self.substitute_type(element, map)),
                 lanes: *lanes,
