@@ -12,3 +12,26 @@ pub(crate) enum LocalProjection {
     Index(i64),
     AnyIndex,
 }
+
+pub(crate) enum ImpureOperation<'a> {
+    Panic,
+    ParallelLoop,
+    Assignment,
+    InlineAssembly,
+    GlobalRead(&'a str),
+    BuiltinCall {
+        name: &'a str,
+        effect: EffectCategory,
+    },
+}
+
+impl ImpureOperation<'_> {
+    fn effect(&self) -> EffectCategory {
+        match self {
+            Self::Panic => EffectCategory::Panic,
+            Self::ParallelLoop => EffectCategory::Parallel,
+            Self::Assignment | Self::GlobalRead(_) | Self::InlineAssembly => EffectCategory::Unsafe,
+            Self::BuiltinCall { effect, .. } => *effect,
+        }
+    }
+}
