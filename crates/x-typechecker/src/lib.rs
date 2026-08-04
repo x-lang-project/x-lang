@@ -25,6 +25,8 @@ mod purity;
 
 mod symbols;
 
+mod types;
+
 pub use symbols::{
     FunctionDefinition, FunctionSignature, MultiFunctionCandidate, SymbolTable, TraitInfo,
     TypeAliasDefinition,
