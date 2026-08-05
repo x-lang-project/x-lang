@@ -10,6 +10,17 @@ use crate::tail_helpers::qualified_path_suffix_matches;
 use x_ast::Type;
 
 impl TypeChecker {
+    pub fn register_internal_helpers(&mut self) {
+        let u8_pointer_mut = Type::RawPointer {
+            is_mut: true,
+            inner: Box::new(Type::U8),
+        };
+        self.symbols.add_function(
+            "__x_write_u8".to_string(),
+            crate::function_signature!(vec![u8_pointer_mut, Type::U8] => Type::Void),
+        );
+    }
+
     pub(crate) fn lookup_type_alias(&self, name: &str) -> Option<TypeAliasDefinition> {
         self.symbols
             .imported_aliases
