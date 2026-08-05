@@ -1,5 +1,12 @@
 use super::*;
 
+pub(super) fn trait_names_match(left: &str, right: &str) -> bool {
+    let left = normalise_trait_name(left);
+    let right = normalise_trait_name(right);
+
+    qualified_names_match(&left, &right)
+}
+
 pub(super) fn qualified_names_match(left: &str, right: &str) -> bool {
     left == right
         || ((!left.contains("::") || !right.contains("::"))
@@ -43,6 +50,70 @@ pub(super) fn angle_contents(text: &str) -> Option<&str> {
 
 pub(super) fn type_from_trait_argument(text: &str) -> Type {
     x_ast::type_from_name(text)
+}
+
+pub(super) fn normalise_trait_name(name: &str) -> String {
+    let mut depth: usize = 0;
+    let mut output = String::new();
+
+    for ch in name.trim().chars() {
+        match ch {
+            '<' => depth += 1,
+            '>' => depth = depth.saturating_sub(1),
+            _ if depth == 0 => output.push(ch),
+            _ => {}
+        }
+    }
+
+    output.trim().to_string()
+}
+
+pub(super) fn type_trait_target_matches(registered: &Type, requested: &Type) -> bool {
+    // Trait matching uses fully resolved declaration identities.
+    registered == requested
+}
+
+pub(super) fn substitute_trait_method_types(
+    method: &mut Statement,
+    checker: &mut TypeChecker,
+    substitutions: &HashMap<String, Type>,
+) {
+    struct Substituter<'a> {
+        checker: &'a mut TypeChecker,
+        substitutions: HashMap<String, Type>,
+    }
+    impl x_ast::TypeVisitorMut for Substituter<'_> {
+        fn visit_type(&mut self, value_type: &mut Type) {
+            *value_type = self
+                .checker
+                .substitute_type(value_type, &self.substitutions);
+        }
+
+        fn visit_statement(&mut self, statement: &mut Statement) {
+            let saved = self.substitutions.clone();
+
+            if let Statement::Function {
+                generic_parameters, ..
+            } = statement
+            {
+                for parameter in generic_parameters {
+                    if let x_ast::GenericParameter::Type { name, .. } = parameter {
+                        self.substitutions.remove(name);
+                    }
+                }
+            }
+
+            x_ast::walk_statement_types_mut(self, statement);
+            self.substitutions = saved;
+        }
+    }
+    x_ast::TypeVisitorMut::visit_statement(
+        &mut Substituter {
+            checker,
+            substitutions: substitutions.clone(),
+        },
+        method,
+    );
 }
 
 pub(super) fn trait_method_has_default_body(statement: &Statement) -> bool {
