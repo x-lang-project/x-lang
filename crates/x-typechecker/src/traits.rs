@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::iter;
 
-use crate::TypeChecker;
+use crate::{TypeChecker, helpers::split_top_level_commas};
 use identity::*;
 use x_ast::SourceError;
 use x_ast::TraitDefinition;
