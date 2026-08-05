@@ -1,11 +1,12 @@
 mod resolution;
 
+mod identity;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::iter;
 
 use crate::TypeChecker;
-
+use identity::*;
 use x_ast::SourceError;
 use x_ast::TraitDefinition;
 use x_ast::{Statement, Type};
