@@ -20,6 +20,7 @@ use x_ast::StructDefinition;
 use x_ast::{Program, Statement, Type};
 
 mod function_context;
+mod helpers;
 
 mod purity;
 
