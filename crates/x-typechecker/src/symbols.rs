@@ -1,3 +1,4 @@
+mod declarations;
 mod definitions;
 
 mod mangling;
