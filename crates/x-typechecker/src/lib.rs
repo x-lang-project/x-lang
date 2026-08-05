@@ -26,7 +26,7 @@ mod purity;
 
 mod symbols;
 mod tail_helpers;
-
+mod traits;
 mod types;
 
 pub use symbols::{
