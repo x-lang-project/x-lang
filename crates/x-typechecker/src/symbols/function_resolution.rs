@@ -36,4 +36,91 @@ impl SymbolTable {
 
         resolved
     }
+
+    pub(crate) fn resolve_multi_candidates(
+        &self,
+        name: &str,
+        base_name: &str,
+    ) -> Option<(String, Vec<MultiFunctionCandidate>)> {
+        let normalised_name = strip_generic_arguments_from_path(name);
+        let stripped_name = normalised_name.as_str();
+        let stripped_base = base_name.split('<').next().unwrap_or(base_name);
+
+        for key in [name, stripped_name] {
+            if let Some(candidates) = self.multi_functions.get(key) {
+                return Some((key.to_string(), candidates.clone()));
+            }
+        }
+
+        let requested = if name.contains("::") {
+            stripped_name
+        } else {
+            stripped_base
+        };
+
+        let mut matches = self.multi_functions.iter().filter(|(key, _)| {
+            (!name.contains("::") || key.contains("::"))
+                && (name.contains("::") || !self.qualified_imports.contains(*key))
+                && qualified_call_path_matches(key, requested)
+        });
+        let (key, candidates) = matches.next()?;
+
+        if matches.next().is_some() {
+            return None;
+        }
+
+        Some((key.clone(), candidates.clone()))
+    }
+
+    pub(crate) fn resolve_generic_function(
+        &self,
+        name: &str,
+        base_name: &str,
+    ) -> Option<(String, Arc<FunctionDefinition>)> {
+        let stripped_base = base_name.split('<').next().unwrap_or(base_name);
+        let normalised_name = strip_generic_arguments_from_path(name);
+
+        if let Some(callee) = self.generic_functions.get(name) {
+            return Some((name.to_string(), callee.clone()));
+        }
+
+        if let Some(callee) = self.generic_functions.get(&normalised_name) {
+            return Some((normalised_name, callee.clone()));
+        }
+
+        let suffix = format!("::{stripped_base}");
+
+        let requested = self
+            .imported_aliases
+            .get(&normalised_name)
+            .map(String::as_str)
+            .unwrap_or(&normalised_name);
+        let mut matches = self.generic_functions.iter().filter(|(key, _)| {
+            if name.contains("::") {
+                key.as_str() == requested
+            } else {
+                (!self.qualified_imports.contains(*key) && key.ends_with(&suffix))
+                    || key.as_str() == requested
+            }
+        });
+        let (key, function) = matches.next()?;
+
+        matches
+            .next()
+            .is_none()
+            .then(|| (key.clone(), function.clone()))
+    }
+}
+
+pub(crate) fn qualified_call_path_matches(registered: &str, requested: &str) -> bool {
+    if registered == requested {
+        return true;
+    }
+
+    let registered_normalised = strip_generic_arguments_from_path(registered);
+    let requested_normalised = strip_generic_arguments_from_path(requested);
+    let registered = registered_normalised.as_str();
+    let requested = requested_normalised.as_str();
+
+    qualified_path_suffix_matches(registered, requested)
 }
