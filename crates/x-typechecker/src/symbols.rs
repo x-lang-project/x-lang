@@ -3,6 +3,7 @@ mod definitions;
 
 mod mangling;
 mod records;
+mod scopes;
 
 pub use definitions::{
     FunctionDefinition, FunctionSignature, MultiFunctionCandidate, TraitInfo, TypeAliasDefinition,
