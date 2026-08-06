@@ -1,6 +1,6 @@
 mod declarations;
 mod definitions;
-
+mod function_resolution;
 mod mangling;
 mod records;
 mod scopes;
