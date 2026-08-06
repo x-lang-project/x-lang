@@ -5,6 +5,31 @@ use crate::helpers::strip_generic_arguments_from_path;
 use crate::tail_helpers::qualified_path_suffix_matches;
 
 impl SymbolTable {
+    pub(crate) fn resolve_function_call_name(
+        &self,
+        name: &str,
+        base_name: &str,
+        current_function: Option<&str>,
+    ) -> String {
+        if self.functions.contains_key(name) {
+            return name.to_owned();
+        }
+
+        let stripped_name = strip_generic_arguments_from_path(name);
+
+        if self.functions.contains_key(&stripped_name) {
+            return stripped_name;
+        }
+
+        let resolved = if name.contains("::") {
+            self.resolve_qualified_function_name(&stripped_name)
+        } else {
+            self.resolve_unqualified_function_name(base_name, current_function)
+        };
+
+        resolved.unwrap_or_else(|| name.to_owned())
+    }
+
     fn resolve_qualified_function_name(&self, name: &str) -> Option<String> {
         if self.functions.contains_key(name) {
             return Some(name.to_owned());
@@ -35,6 +60,42 @@ impl SymbolTable {
         }
 
         resolved
+    }
+
+    fn resolve_unqualified_function_name(
+        &self,
+        base_name: &str,
+        current_function: Option<&str>,
+    ) -> Option<String> {
+        if let Some(alias) = self.imported_aliases.get(base_name)
+            && self.functions.contains_key(alias)
+        {
+            return Some(alias.clone());
+        }
+
+        let stripped_base = base_name.split('<').next().unwrap_or(base_name);
+
+        if let Some(namespace) = current_function.and_then(x_ast::intrinsics::function_owner_name) {
+            let candidate = format!("{namespace}::{stripped_base}");
+
+            if self.functions.contains_key(&candidate) {
+                return Some(candidate);
+            }
+        }
+
+        let suffix = format!("::{stripped_base}");
+        let mut matches = self.functions.keys().filter(|key| {
+            key.ends_with(&suffix)
+                && !self.qualified_imports.contains(*key)
+                && !x_ast::intrinsics::function_owner_name(key).is_some_and(|owner| {
+                    self.records.fields().contains_key(owner)
+                        || self.records.templates().contains_key(owner)
+                        || self.struct_methods.contains_key(owner)
+                })
+        });
+        let only = matches.next()?;
+
+        matches.next().is_none().then(|| only.clone())
     }
 
     pub(crate) fn resolve_multi_candidates(
