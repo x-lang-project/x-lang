@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{FunctionDefinition, MultiFunctionCandidate, SymbolTable};
-
+use crate::helpers::strip_generic_arguments_from_path;
 use crate::tail_helpers::qualified_path_suffix_matches;
 
 impl SymbolTable {

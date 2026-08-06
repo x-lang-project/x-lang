@@ -16,6 +16,22 @@ macro_rules! function_signature {
     };
 }
 
+pub(crate) fn strip_generic_arguments_from_path(name: &str) -> String {
+    let mut output = String::with_capacity(name.len());
+    let mut depth: usize = 0;
+
+    for ch in name.chars() {
+        match ch {
+            '<' => depth += 1,
+            '>' if depth > 0 => depth -= 1,
+            _ if depth == 0 => output.push(ch),
+            _ => {}
+        }
+    }
+
+    output
+}
+
 pub(crate) fn split_top_level_commas(text: &str) -> Vec<&str> {
     let mut parts = Vec::new();
     let mut depth: usize = 0;
