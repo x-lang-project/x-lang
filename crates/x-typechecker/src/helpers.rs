@@ -1,6 +1,15 @@
 pub(crate) use x_utils::sanitize_symbol as sanitize_symbol_component;
 
 #[macro_export]
+macro_rules! primitive_type {
+    ($name:expr) => {{
+        let name = $name;
+        x_ast::Type::from_primitive_name(name)
+            .unwrap_or_else(|| x_ast::Type::Custom(name.to_string()))
+    }};
+}
+
+#[macro_export]
 macro_rules! function_signature {
     ($params:expr => $return_type:expr) => {
         $crate::function_signature!($params => $return_type, throws: false, is_static: false)
