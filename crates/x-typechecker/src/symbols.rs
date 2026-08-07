@@ -39,3 +39,39 @@ pub struct SymbolTable {
     pub(crate) type_aliases: HashMap<String, TypeAliasDefinition>,
     pub(crate) global_constants: HashSet<String>,
 }
+
+impl Default for SymbolTable {
+    fn default() -> Self {
+        Self {
+            variables: vec![HashMap::new()],
+            reserved_source_names: Default::default(),
+            qualified_function_cache: RwLock::new(HashMap::new()),
+            functions: Default::default(),
+            function_static_parameters: Default::default(),
+            records: Default::default(),
+            invariant_structs: Default::default(),
+            invariant_dependencies: Default::default(),
+            struct_methods: Default::default(),
+            generic_functions: Default::default(),
+            function_instantiations: Default::default(),
+            traits: Default::default(),
+            impls_for_type: Default::default(),
+            trait_ast_definitions: Default::default(),
+            multi_functions: Default::default(),
+            imported_aliases: Default::default(),
+            qualified_imports: Default::default(),
+            type_aliases: Default::default(),
+            global_constants: Default::default(),
+        }
+    }
+}
+
+impl SymbolTable {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn parse_primitive_str(type_name: &str) -> Type {
+        crate::primitive_type!(type_name)
+    }
+}
