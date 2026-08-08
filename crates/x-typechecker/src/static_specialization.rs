@@ -1,9 +1,10 @@
+mod substitution;
 mod traversal;
 use std::collections::{HashMap, HashSet};
 use std::slice;
 
 use crate::TypeChecker;
-
+use substitution::*;
 use traversal::*;
 use x_ast::DeclarationKey;
 use x_ast::Parameter;
