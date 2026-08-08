@@ -24,6 +24,7 @@ mod helpers;
 
 mod purity;
 
+mod structs;
 mod symbols;
 mod tail_helpers;
 mod traits;
