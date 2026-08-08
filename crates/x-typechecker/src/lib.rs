@@ -24,6 +24,7 @@ mod helpers;
 
 mod purity;
 
+mod static_specialization;
 mod structs;
 mod symbols;
 mod tail_helpers;
