@@ -4,6 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::slice;
 
 use crate::TypeChecker;
+use crate::specialization_key::SpecializationKey;
 use crate::specialization_key::StaticValue;
 use substitution::*;
 use traversal::*;

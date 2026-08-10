@@ -17,3 +17,9 @@ impl StaticValue {
         })
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(super) struct SpecializationKey {
+    pub function: String,
+    pub arguments: Vec<(String, StaticValue)>,
+}
