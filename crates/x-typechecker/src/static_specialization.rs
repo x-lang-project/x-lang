@@ -13,3 +13,9 @@ use x_ast::SourceError;
 use x_ast::SourceSpan;
 use x_ast::{Expression, ExpressionKind, Pattern, Statement, StringPart};
 use x_diagnostics::frontend_messages::FrontendMessage;
+
+struct StaticTemplate {
+    statement: Statement,
+    parameters: Vec<Parameter>,
+    origin: Option<SourceSpan>,
+}
