@@ -15,8 +15,18 @@ use x_ast::SourceSpan;
 use x_ast::{Expression, ExpressionKind, Pattern, Statement, StringPart};
 use x_diagnostics::frontend_messages::FrontendMessage;
 
+const MAX_STATIC_SPECIALIZATIONS: usize = 4096;
+
 struct StaticTemplate {
     statement: Statement,
     parameters: Vec<Parameter>,
     origin: Option<SourceSpan>,
+}
+
+struct StaticSpecialiser {
+    templates: HashMap<String, StaticTemplate>,
+    generated_names: HashMap<SpecializationKey, String>,
+    occupied_names: HashSet<String>,
+    generated: Vec<Statement>,
+    generated_origins: HashMap<DeclarationKey, SourceSpan>,
 }
