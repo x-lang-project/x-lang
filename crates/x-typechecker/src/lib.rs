@@ -24,7 +24,7 @@ mod helpers;
 
 mod purity;
 mod specialization_key;
-
+pub mod statement;
 mod static_specialization;
 mod structs;
 mod symbols;
