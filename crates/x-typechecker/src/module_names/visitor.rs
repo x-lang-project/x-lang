@@ -29,12 +29,56 @@ impl TypeVisitorMut for ModuleQualifier<'_> {
 
     fn visit_statement(&mut self, statement: &mut Statement) {
         match statement {
+            Statement::ImplDeclaration(definition) => self.implementation(definition),
+            Statement::TypeAlias {
+                value_type,
+                generic_parameters,
+                ..
+            } => {
+                self.scopes.push(Scope::default());
+                self.generics(generic_parameters);
+                self.visit_type(value_type);
+                self.scopes.pop();
+            }
             _ => x_ast::walk_statement_types_mut(self, statement),
         }
     }
 
     fn visit_expression(&mut self, expression: &mut Expression) {
         match &mut expression.kind {
+            ExpressionKind::AnonymousFunction {
+                parameters,
+                return_type,
+                body,
+            } => {
+                self.scopes.push(Scope {
+                    values: parameters.iter().cloned().collect(),
+                    ..Scope::default()
+                });
+                self.visit_type(&mut expression.value_type);
+                if let Some(value_type) = return_type {
+                    self.visit_type(value_type);
+                }
+
+                self.body(body);
+                self.scopes.pop();
+                return;
+            }
+            ExpressionKind::Block { statements, result } => {
+                self.visit_type(&mut expression.value_type);
+                self.value_body(statements, result.as_deref_mut(), None);
+                return;
+            }
+            ExpressionKind::If {
+                condition,
+                then_block,
+                else_block,
+            } => {
+                self.visit_type(&mut expression.value_type);
+                self.conditional(condition, then_block, else_block.as_mut());
+
+                return;
+            }
             ExpressionKind::Match { scrutinee, arms } => {
                 self.visit_type(&mut expression.value_type);
                 self.visit_expression(scrutinee);
