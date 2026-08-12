@@ -21,3 +21,5 @@ struct Scope {
     values: HashSet<String>,
     types: HashSet<String>,
 }
+
+mod scopes;
