@@ -48,6 +48,20 @@ impl ModuleQualifier<'_> {
         self.value_body(statements, None, None);
     }
 
+    pub(super) fn conditional(
+        &mut self,
+        condition: &mut Expression,
+        then_block: &mut [Statement],
+        else_block: Option<&mut Vec<Statement>>,
+    ) {
+        self.visit_expression(condition);
+        self.body(then_block);
+
+        if let Some(body) = else_block {
+            self.body(body);
+        }
+    }
+
     pub(super) fn generics(&mut self, generics: &mut [GenericParameter]) {
         if let Some(scope) = self.scopes.last_mut() {
             for parameter in generics.iter() {
