@@ -78,6 +78,27 @@ impl ModuleQualifier<'_> {
         }
     }
 
+    pub(super) fn trait_definition(&mut self, definition: &mut TraitDefinition) {
+        self.scopes.push(Scope {
+            types: HashSet::from(["Self".into()]),
+            ..Scope::default()
+        });
+        self.generics(&mut definition.generic_parameters);
+        for value_type in &mut definition.supertraits {
+            self.visit_type(value_type);
+        }
+
+        for value_type in definition.associated_types.values_mut() {
+            self.visit_type(value_type);
+        }
+
+        for method in definition.methods.values_mut().flatten() {
+            self.visit_statement(method);
+        }
+
+        self.scopes.pop();
+    }
+
     pub(super) fn implementation(&mut self, definition: &mut ImplDefinition) {
         self.scopes.push(Scope {
             types: HashSet::from(["Self".into()]),
