@@ -1,6 +1,13 @@
 use super::*;
 
 impl ModuleQualifier<'_> {
+    pub(super) fn value_is_local(&self, name: &str) -> bool {
+        self.scopes
+            .iter()
+            .rev()
+            .any(|scope| scope.values.contains(name))
+    }
+
     pub(super) fn type_is_local(&self, name: &str) -> bool {
         self.scopes
             .iter()
