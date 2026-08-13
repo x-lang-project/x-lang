@@ -39,6 +39,18 @@ impl ModuleQualifier<'_> {
 
         for statement in body {
             match statement {
+                Statement::Function { name, .. } => {
+                    scope.values.insert(name.clone());
+                }
+                Statement::TypeAlias { name, .. } => {
+                    scope.types.insert(name.clone());
+                }
+                Statement::StructDeclaration(definition) => {
+                    scope.types.insert(definition.name.clone());
+                }
+                Statement::TraitDeclaration(definition) => {
+                    scope.types.insert(definition.name.clone());
+                }
                 _ => {}
             }
         }
@@ -66,6 +78,12 @@ impl ModuleQualifier<'_> {
         if let Some(scope) = self.scopes.last_mut() {
             for parameter in generics.iter() {
                 match parameter {
+                    GenericParameter::Type { name, .. } => {
+                        scope.types.insert(name.clone());
+                    }
+                    GenericParameter::Const { name, .. } => {
+                        scope.values.insert(name.clone());
+                    }
                     _ => {}
                 }
             }
@@ -73,6 +91,18 @@ impl ModuleQualifier<'_> {
 
         for parameter in generics {
             match parameter {
+                GenericParameter::Type {
+                    bounds, default, ..
+                } => {
+                    for bound in bounds {
+                        self.visit_type(bound);
+                    }
+
+                    if let Some(value_type) = default {
+                        self.visit_type(value_type);
+                    }
+                }
+                GenericParameter::Const { value_type, .. } => self.visit_type(value_type),
                 _ => {}
             }
         }
