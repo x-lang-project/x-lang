@@ -29,6 +29,7 @@ impl TypeVisitorMut for ModuleQualifier<'_> {
 
     fn visit_statement(&mut self, statement: &mut Statement) {
         match statement {
+            Statement::StructDeclaration(definition) => self.structure(definition),
             Statement::TraitDeclaration(definition) => self.trait_definition(definition),
             Statement::ImplDeclaration(definition) => self.implementation(definition),
             Statement::TypeAlias {
