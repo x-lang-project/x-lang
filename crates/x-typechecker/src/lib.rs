@@ -34,6 +34,7 @@ mod tail_helpers;
 mod traits;
 mod types;
 
+pub use module_names::qualify_module;
 pub use symbols::{
     FunctionDefinition, FunctionSignature, MultiFunctionCandidate, SymbolTable, TraitInfo,
     TypeAliasDefinition,
