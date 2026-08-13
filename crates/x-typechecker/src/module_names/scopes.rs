@@ -168,6 +168,15 @@ impl ModuleQualifier<'_> {
         self.scopes.pop();
     }
 
+    pub(super) fn loop_body(&mut self, variable: &str, body: &mut [Statement]) {
+        self.scopes.push(Scope {
+            values: HashSet::from([variable.to_owned()]),
+            ..Scope::default()
+        });
+        self.body(body);
+        self.scopes.pop();
+    }
+
     pub(super) fn value_body(
         &mut self,
         statements: &mut [Statement],
