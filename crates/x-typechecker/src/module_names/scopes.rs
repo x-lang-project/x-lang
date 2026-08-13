@@ -78,6 +78,28 @@ impl ModuleQualifier<'_> {
         }
     }
 
+    pub(super) fn structure(&mut self, definition: &mut StructDefinition) {
+        self.scopes.push(Scope::default());
+        if let Some(parameters) = &mut definition.generic_parameters {
+            self.generics(parameters);
+        }
+
+        for (_, value_type) in &mut definition.fields {
+            self.visit_type(value_type);
+        }
+
+        if let Some(invariant) = &mut definition.invariant {
+            self.scopes.push(Scope {
+                values: HashSet::from([invariant.receiver.name.clone()]),
+                ..Scope::default()
+            });
+            self.visit_expression(&mut invariant.predicate);
+            self.scopes.pop();
+        }
+
+        self.scopes.pop();
+    }
+
     pub(super) fn trait_definition(&mut self, definition: &mut TraitDefinition) {
         self.scopes.push(Scope {
             types: HashSet::from(["Self".into()]),
