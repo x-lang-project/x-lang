@@ -3,6 +3,10 @@ use crate::types;
 use x_ast::Type;
 
 impl TypeChecker {
+    pub fn resolve(&self, value_type: &Type) -> Type {
+        self.resolve_inference(value_type).clone()
+    }
+
     // Follow substitution chains iteratively to bound stack use.
     fn resolve_inference<'a>(&'a self, mut value_type: &'a Type) -> &'a Type {
         while let Type::Infer(identifier) = value_type {

@@ -1,3 +1,5 @@
+mod provenance;
+
 use std::collections::HashSet;
 
 use crate::FunctionSignature;
@@ -65,6 +67,91 @@ impl ImpureOperation<'_> {
 }
 
 impl TypeChecker {
+    fn local_binding(&self, name: &str) -> Option<((usize, String), Type)> {
+        let function_scope = self.function_contexts.last()?.scope_depth;
+        let (resolved_name, value_type, is_global) = self
+            .symbols
+            .resolve_variable_with_scope(name, self.current_function_name().map(String::as_str))?;
+
+        if is_global {
+            return None;
+        }
+
+        let (depth, _) = self
+            .symbols
+            .variables
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, scope)| scope.contains_key(&resolved_name))?;
+
+        (depth >= function_scope).then(|| ((depth, resolved_name), self.resolve(&value_type)))
+    }
+
+    // Pointee ownership requires provenance beyond the local binding.
+    pub(crate) fn is_local_owned_assignment(&self, target: &Expression) -> bool {
+        match &target.kind {
+            ExpressionKind::Identifier(name) => self.local_binding(name).is_some(),
+            ExpressionKind::FieldAccess { object, .. } => {
+                !self.is_indirect_reference_slot(target, object)
+                    && self.is_local_projection_base(object)
+            }
+            ExpressionKind::ArrayAccess { array, .. } => {
+                !self.is_indirect_reference_slot(target, array)
+                    && self.is_local_projection_base(array)
+            }
+            ExpressionKind::Dereference { expression } => {
+                // Reference-slot writes can invalidate another binding's provenance.
+                !matches!(
+                    self.resolve(&target.value_type),
+                    Type::Reference { .. } | Type::RawPointer { .. }
+                ) && self.is_local_reference_value(expression)
+            }
+            _ => false,
+        }
+    }
+
+    fn is_indirect_reference_slot(&self, target: &Expression, base: &Expression) -> bool {
+        matches!(
+            self.resolve(&target.value_type),
+            Type::Reference { .. } | Type::RawPointer { .. }
+        ) && matches!(
+            self.resolve(&base.value_type),
+            Type::Reference { .. } | Type::RawPointer { .. }
+        )
+    }
+
+    fn is_local_projection_base(&self, base: &Expression) -> bool {
+        match self.resolve(&base.value_type) {
+            Type::Reference { .. } => self.is_local_reference_value(base),
+            // Unsized arrays are handles; fixed arrays own their inline storage.
+            Type::RawPointer { .. } | Type::Array(_) => false,
+            _ => self.is_local_owned_assignment(base),
+        }
+    }
+
+    pub(crate) fn is_local_reference_value(&self, value: &Expression) -> bool {
+        match &value.kind {
+            ExpressionKind::AddressOf {
+                is_mut: true,
+                expression,
+                ..
+            } => {
+                self.is_local_owned_assignment(expression)
+                    && !matches!(
+                        self.resolve(&expression.value_type),
+                        Type::Reference { .. } | Type::RawPointer { .. }
+                    )
+            }
+            ExpressionKind::Identifier(_)
+            | ExpressionKind::FieldAccess { .. }
+            | ExpressionKind::ArrayAccess { .. } => {
+                self.local_reference_paths(value).contains(&Vec::new())
+            }
+            _ => false,
+        }
+    }
+
     pub(crate) fn leave_purity_scope(&mut self) {
         let closing = self.symbols.variables.len().saturating_sub(1);
         self.pure_local_references
