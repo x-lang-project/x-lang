@@ -60,12 +60,63 @@ pub struct TypeChecker {
     pub(crate) current_namespace: Option<String>,
 }
 
+impl Default for TypeChecker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TypeChecker {
     pub fn symbols(&self) -> &SymbolTable {
         &self.symbols
     }
 
+    pub fn checked_program(&self) -> &Program {
+        &self.program
+    }
+
+    pub fn set_declaration_sources(&mut self, sources: &HashMap<DeclarationKey, SourceSpan>) {
+        self.declaration_sources.clone_from(sources);
+    }
+
     pub fn declaration_sources(&self) -> &HashMap<DeclarationKey, SourceSpan> {
         &self.declaration_sources
+    }
+
+    pub fn declare_variable(&mut self, name: String, value_type: Type) {
+        self.symbols.add_variable(name, value_type);
+    }
+
+    pub fn declare_type_alias(&mut self, name: String, definition: TypeAliasDefinition) {
+        self.symbols.type_aliases.insert(name, definition);
+    }
+
+    pub fn declare_generic_struct(&mut self, name: String, definition: StructDefinition) {
+        if let Some(invariant) = &definition.invariant {
+            self.register_struct_invariant(name.clone(), invariant);
+        }
+
+        self.symbols.records.declare_template(name, definition);
+    }
+
+    pub fn new() -> Self {
+        Self {
+            symbols: SymbolTable::new(),
+            declaration_sources: HashMap::new(),
+            program: Program {
+                statements: Vec::new(),
+            },
+            processed_files: HashSet::new(),
+            function_contexts: Vec::new(),
+            pure_local_references: HashMap::new(),
+            return_types: Vec::new(),
+            pending_monomorphs: Vec::new(),
+            effects: EffectContext::default(),
+            expression_depth: 0,
+            type_resolution_depth: 0,
+            substitutions: HashMap::new(),
+            next_infer_identifier: 0,
+            current_namespace: None,
+        }
     }
 }
