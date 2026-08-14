@@ -21,7 +21,7 @@ use x_ast::{Program, Statement, Type};
 
 mod function_context;
 mod helpers;
-
+mod indexing;
 mod inference;
 mod module_names;
 mod program;
