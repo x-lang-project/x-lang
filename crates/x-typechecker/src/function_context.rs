@@ -21,5 +21,9 @@ impl TypeChecker {
         self.effects.in_anonymous_function
     }
 
+    pub(crate) fn current_function_name(&self) -> Option<&String> {
+        self.function_contexts.last().map(|context| &context.name)
+    }
+
     // Anonymous functions inherit the enclosing namespace and effect policy.
 }
