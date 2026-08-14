@@ -3,6 +3,13 @@ use crate::types;
 use x_ast::Type;
 
 impl TypeChecker {
+    pub fn fresh_type(&mut self) -> Type {
+        let identifier = self.next_infer_identifier;
+        self.next_infer_identifier += 1;
+
+        Type::Infer(identifier)
+    }
+
     pub fn resolve(&self, value_type: &Type) -> Type {
         self.resolve_inference(value_type).clone()
     }
