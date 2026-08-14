@@ -10,6 +10,13 @@ macro_rules! primitive_type {
 }
 
 #[macro_export]
+macro_rules! is_integer_type {
+    ($ty:expr) => {
+        x_ast::Type::is_integer(&$ty)
+    };
+}
+
+#[macro_export]
 macro_rules! function_signature {
     ($params:expr => $return_type:expr) => {
         $crate::function_signature!($params => $return_type, throws: false, is_static: false)
