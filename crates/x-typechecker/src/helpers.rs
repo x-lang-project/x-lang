@@ -32,6 +32,22 @@ macro_rules! function_signature {
     };
 }
 
+#[macro_export]
+macro_rules! typed_function_signature {
+    ($params:expr, $return_type:expr, $is_pure:expr, $is_throws:expr, $is_static:expr $(,)?) => {
+        $crate::FunctionSignature {
+            parameter_types: ($params)
+                .iter()
+                .map(|param| param.value_type.clone())
+                .collect(),
+            return_type: ($return_type).clone(),
+            is_throws: $is_throws,
+            is_pure: $is_pure,
+            is_static: $is_static,
+        }
+    };
+}
+
 pub(crate) fn strip_generic_arguments_from_path(name: &str) -> String {
     let mut output = String::with_capacity(name.len());
     let mut depth: usize = 0;
