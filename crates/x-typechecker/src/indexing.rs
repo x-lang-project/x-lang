@@ -11,6 +11,8 @@ use x_ast::SourceError;
 use x_ast::{Pattern, Statement, Type};
 use x_diagnostics::frontend_messages::FrontendMessage;
 
+mod declarations;
+
 impl TypeChecker {
     fn qualify_indexed_name(&self, name: &str) -> String {
         match &self.current_namespace {
