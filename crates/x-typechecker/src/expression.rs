@@ -16,4 +16,5 @@ use x_ast::{
 use x_diagnostics::frontend_messages::ExecutableTypeReason;
 use x_diagnostics::frontend_messages::FrontendMessage;
 
+mod operators;
 mod places;
