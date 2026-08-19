@@ -1,3 +1,5 @@
+mod completion;
+
 mod references;
 
 use std::collections::HashMap;
@@ -6,6 +8,7 @@ use crate::purity::ImpureOperation;
 
 use crate::FunctionSignature;
 use crate::TypeChecker;
+use completion::CheckedType;
 
 use x_ast::MAX_AST_EXPRESSION_DEPTH;
 use x_ast::MatchArm;

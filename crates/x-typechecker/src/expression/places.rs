@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use super::CheckedType;
 use crate::TypeChecker;
 use crate::purity::{ImpureOperation, LocalProjection};
 use x_ast::StructInitialisation;
