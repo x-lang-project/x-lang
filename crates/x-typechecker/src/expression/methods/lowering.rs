@@ -1,3 +1,4 @@
+use super::DeclaredMethodCall;
 use crate::TypeChecker;
 use crate::expression::CheckedType;
 use x_ast::{CallTarget, Expression, ExpressionKind, Type};
