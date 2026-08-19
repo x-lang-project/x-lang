@@ -10,3 +10,20 @@ pub(in crate::expression) enum CheckedMethod {
         arguments: Vec<Expression>,
     },
 }
+
+impl CheckedMethod {
+    pub(in crate::expression) fn apply_to(self, kind: &mut ExpressionKind) -> CheckedType {
+        match self {
+            Self::Builtin(return_type) => CheckedType::Annotate(return_type),
+            Self::DirectCall {
+                return_type,
+                target,
+                arguments,
+            } => {
+                *kind = ExpressionKind::FunctionCall { target, arguments };
+
+                CheckedType::ResolveAnnotation(return_type)
+            }
+        }
+    }
+}
