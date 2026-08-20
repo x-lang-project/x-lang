@@ -30,7 +30,13 @@ pub(in crate::expression) fn infer_declared_type_substitutions(
                     name,
                     type_arguments,
                 } if pattern_name == name => Some(type_arguments),
-
+                Type::Custom(name)
+                    if checker.symbols.records.instantiations().iter().any(
+                        |((owner, _), generated)| owner == pattern_name && generated == name,
+                    ) =>
+                {
+                    checker.symbols.records.arguments(name)
+                }
                 _ => None,
             };
 
