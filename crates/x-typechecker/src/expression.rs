@@ -22,6 +22,7 @@ use x_diagnostics::frontend_messages::ExecutableTypeReason;
 use x_diagnostics::frontend_messages::FrontendMessage;
 
 mod generic_types;
+pub(crate) use generic_types::substitute_types_in_expression;
 
 mod intrinsics;
 mod methods;
