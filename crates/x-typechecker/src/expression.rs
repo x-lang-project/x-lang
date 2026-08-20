@@ -20,6 +20,7 @@ use x_ast::{
 use x_diagnostics::frontend_messages::ExecutableTypeReason;
 use x_diagnostics::frontend_messages::FrontendMessage;
 
+mod intrinsics;
 mod methods;
 mod operators;
 mod places;
