@@ -11,6 +11,7 @@ use crate::FunctionSignature;
 use crate::TypeChecker;
 use completion::CheckedType;
 
+use generic_types::*;
 use x_ast::MAX_AST_EXPRESSION_DEPTH;
 use x_ast::MatchArm;
 use x_ast::SourceError;
@@ -19,6 +20,8 @@ use x_ast::{
 };
 use x_diagnostics::frontend_messages::ExecutableTypeReason;
 use x_diagnostics::frontend_messages::FrontendMessage;
+
+mod generic_types;
 
 mod intrinsics;
 mod methods;
