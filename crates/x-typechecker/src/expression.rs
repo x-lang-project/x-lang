@@ -1,5 +1,6 @@
 mod completion;
 
+mod literals;
 mod references;
 
 use std::collections::HashMap;
