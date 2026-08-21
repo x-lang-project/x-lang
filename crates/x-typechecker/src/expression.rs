@@ -10,7 +10,7 @@ use crate::purity::ImpureOperation;
 use crate::FunctionSignature;
 use crate::TypeChecker;
 use completion::CheckedType;
-
+use expression_helpers::*;
 use generic_types::*;
 use x_ast::MAX_AST_EXPRESSION_DEPTH;
 use x_ast::MatchArm;
@@ -21,10 +21,13 @@ use x_ast::{
 use x_diagnostics::frontend_messages::ExecutableTypeReason;
 use x_diagnostics::frontend_messages::FrontendMessage;
 
+pub(crate) use expression_helpers::is_integer_literal;
 mod generic_types;
 pub(crate) use generic_types::substitute_types_in_expression;
 
+mod expression_helpers;
 mod intrinsics;
 mod methods;
 mod operators;
 mod places;
+pub(crate) use expression_helpers::is_integer_literal as is_integer_literal_for_context;
