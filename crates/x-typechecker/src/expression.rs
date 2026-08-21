@@ -27,6 +27,8 @@ pub(crate) use expression_helpers::is_integer_literal;
 mod generic_types;
 pub(crate) use generic_types::substitute_types_in_expression;
 
+mod calls;
+
 mod expression_helpers;
 mod intrinsics;
 mod methods;
