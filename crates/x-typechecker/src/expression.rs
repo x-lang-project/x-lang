@@ -26,7 +26,7 @@ mod evaluation;
 pub(crate) use expression_helpers::is_integer_literal;
 mod generic_types;
 pub(crate) use generic_types::substitute_types_in_expression;
-
+mod call_lifetimes;
 mod calls;
 
 mod expression_helpers;
