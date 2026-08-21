@@ -21,6 +21,8 @@ use x_ast::{
 use x_diagnostics::frontend_messages::ExecutableTypeReason;
 use x_diagnostics::frontend_messages::FrontendMessage;
 
+mod evaluation;
+
 pub(crate) use expression_helpers::is_integer_literal;
 mod generic_types;
 pub(crate) use generic_types::substitute_types_in_expression;
