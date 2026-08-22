@@ -89,6 +89,42 @@ impl TypeError {
     pub fn lookup(issue: FrontendMessage) -> Self {
         Self::LookupIssue(Box::new(issue))
     }
+
+    fn into_nested_failure(self) -> Result<CompilationFailure, Self> {
+        match self {
+            Self::Frontend(failure) => Ok(failure),
+            Self::Located(LocatedError { span, error }) => {
+                error.into_nested_failure().map_err(|error| {
+                    Self::Located(LocatedError {
+                        span,
+                        error: Box::new(error),
+                    })
+                })
+            }
+            other => Err(other),
+        }
+    }
+
+    pub fn map_expected(self, function: impl FnOnce(String) -> String) -> Self {
+        match self {
+            Self::Located(LocatedError { span, error }) => Self::Located(LocatedError {
+                span,
+                error: Box::new(error.map_expected(function)),
+            }),
+            TypeError::TypeMismatch {
+                got_span,
+                expected_span,
+                expected,
+                got,
+            } => TypeError::TypeMismatch {
+                got_span,
+                expected_span,
+                expected: function(expected),
+                got,
+            },
+            other => other,
+        }
+    }
 }
 
 x_ast::impl_source_error!(TypeError);
