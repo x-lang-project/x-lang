@@ -91,6 +91,8 @@ impl TypeError {
     }
 }
 
+x_ast::impl_source_error!(TypeError);
+
 impl Display for TypeError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
         match self {
