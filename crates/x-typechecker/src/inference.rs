@@ -1,5 +1,5 @@
-use crate::TypeChecker;
 use crate::types;
+use crate::{TypeChecker, errors::TypeError};
 use x_ast::Type;
 
 impl TypeChecker {

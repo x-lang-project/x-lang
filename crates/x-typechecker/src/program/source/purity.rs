@@ -1,5 +1,18 @@
+use crate::errors::TypeError;
 use x_ast::{ExpressionVisitor, Statement};
 use x_diagnostics::frontend_messages::FrontendMessage;
+
+pub(super) fn validate_pure_bodies(statement: &Statement) -> Result<(), TypeError> {
+    let mut visitor = PureBodies { missing: None };
+    visitor.visit_statement(statement);
+
+    match visitor.missing {
+        Some(name) => Err(TypeError::invalid(
+            FrontendMessage::UninspectablePureFunction { name },
+        )),
+        None => Ok(()),
+    }
+}
 
 struct PureBodies {
     missing: Option<String>,

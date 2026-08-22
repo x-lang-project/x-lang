@@ -1,6 +1,57 @@
 use super::*;
 
 impl TypeChecker {
+    pub(crate) fn resolve_struct_name(&self, name: &str) -> Result<String, TypeError> {
+        let is_registered = |name: &str| {
+            self.symbols.records.fields().contains_key(name)
+                || self.symbols.records.templates().contains_key(name)
+        };
+
+        if is_registered(name) {
+            return Ok(name.to_string());
+        }
+
+        if let Some(alias) = self.symbols.imported_aliases.get(name)
+            && is_registered(alias)
+        {
+            return Ok(alias.clone());
+        }
+
+        if let Some(resolved_namespace) = &self.current_namespace {
+            let candidate = format!("{resolved_namespace}::{name}");
+
+            if is_registered(&candidate) {
+                return Ok(candidate);
+            }
+        }
+
+        if let Some(current_function) = self.current_function_name()
+            && let Some(namespace) = intrinsics::function_owner_name(current_function)
+        {
+            let candidate = format!("{namespace}::{name}");
+
+            if is_registered(&candidate) {
+                return Ok(candidate);
+            }
+        }
+
+        let mut matches = self
+            .symbols
+            .records
+            .fields()
+            .keys()
+            .chain(self.symbols.records.templates().keys())
+            .filter(|candidate| qualified_call_path_matches(candidate, name));
+
+        if let Some(candidate) = matches.next()
+            && matches.next().is_none()
+        {
+            return Ok(candidate.clone());
+        }
+
+        Ok(name.to_string())
+    }
+
     pub(in crate::expression) fn multi_candidate_matches(
         &self,
         expected: &Type,

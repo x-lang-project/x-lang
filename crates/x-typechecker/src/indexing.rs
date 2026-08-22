@@ -1,12 +1,12 @@
+mod contracts;
 use std::collections::HashMap;
 
-use crate::FunctionDefinition;
 use crate::FunctionSignature;
-use crate::MultiFunctionCandidate;
-use crate::TraitInfo;
-use crate::TypeAliasDefinition;
-use crate::TypeChecker;
-
+use crate::{
+    FunctionDefinition, MultiFunctionCandidate, TraitInfo, TypeAliasDefinition, TypeChecker,
+    errors::TypeError,
+};
+use contracts::*;
 use x_ast::SourceError;
 use x_ast::{Pattern, Statement, Type};
 use x_diagnostics::frontend_messages::FrontendMessage;

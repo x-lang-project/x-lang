@@ -12,3 +12,5 @@ use x_ast::SourceError;
 use x_ast::intrinsics;
 use x_ast::intrinsics::{Intrinsic, LayoutIntrinsic};
 use x_diagnostics::frontend_messages::FrontendMessage;
+
+impl TypeChecker {}

@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use crate::TypeAliasDefinition;
 use crate::TypeChecker;
+use crate::errors::TypeError;
 use crate::tail_helpers::qualified_path_suffix_matches;
 use x_ast::Type;
 

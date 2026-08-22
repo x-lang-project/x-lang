@@ -21,6 +21,55 @@ struct MethodReceiver {
 }
 
 impl TypeChecker {
+    fn resolve_method_owner(
+        &self,
+        struct_name: &str,
+        method_base: &str,
+    ) -> Result<String, TypeError> {
+        Ok(
+            if self
+                .symbols
+                .get_struct_method(struct_name, method_base)
+                .is_some()
+            {
+                struct_name.to_owned()
+            } else {
+                self.symbols
+                    .records
+                    .instantiations()
+                    .iter()
+                    .find_map(|((origin, arguments), mangled)| {
+                        if mangled != struct_name {
+                            return None;
+                        }
+
+                        let arguments = arguments
+                            .iter()
+                            .map(|argument| argument.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        let typed_origin = format!("{origin}<{arguments}>");
+
+                        self.symbols
+                            .get_struct_method(&typed_origin, method_base)
+                            .is_some()
+                            .then_some(typed_origin)
+                            .or_else(|| {
+                                self.symbols
+                                    .get_struct_method(origin, method_base)
+                                    .is_some()
+                                    .then(|| origin.clone())
+                            })
+                    })
+                    .or_else(|| self.matching_method_owner(struct_name, method_base))
+                    .ok_or_else(|| TypeError::UnresolvedProperty {
+                        field: method_base.to_owned(),
+                        value_type: Type::Custom(struct_name.to_owned()),
+                    })?
+            },
+        )
+    }
+
     fn method_receiver_type_arguments(&self, receiver_base: &Type, struct_name: &str) -> Vec<Type> {
         if let Type::GenericInstance { type_arguments, .. } = receiver_base {
             type_arguments.clone()

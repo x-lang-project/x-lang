@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::FunctionSignature;
+use crate::{FunctionSignature, errors::TypeError};
 use x_ast::{Lifetime, Type};
 
 type Bindings = HashMap<String, Option<Lifetime>>;
@@ -9,6 +9,39 @@ struct CallBindings {
     lifetimes: Bindings,
     invariant: bool,
     pins: Vec<(String, Option<Lifetime>)>,
+}
+
+pub(super) fn instantiate(
+    signature: &FunctionSignature,
+    actual: &[Type],
+) -> Result<FunctionSignature, TypeError> {
+    let mut bindings = CallBindings::default();
+
+    for (expected, actual) in signature.parameter_types.iter().zip(actual) {
+        collect(expected, actual, &mut bindings);
+    }
+
+    for (name, pinned) in &bindings.pins {
+        if bindings.lifetimes.get(name) != Some(pinned) {
+            return Err(crate::type_mismatch!(
+                format!("invariant reference lifetime {pinned:?}"),
+                format!(
+                    "common argument lifetime {:?}",
+                    bindings.lifetimes.get(name)
+                )
+            ));
+        }
+    }
+
+    let mut instantiated = signature.clone();
+
+    for parameter in &mut instantiated.parameter_types {
+        substitute(parameter, &bindings.lifetimes);
+    }
+
+    substitute(&mut instantiated.return_type, &bindings.lifetimes);
+
+    Ok(instantiated)
 }
 
 fn collect(expected: &Type, actual: &Type, bindings: &mut CallBindings) {

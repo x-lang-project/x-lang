@@ -17,6 +17,34 @@ macro_rules! is_integer_type {
 }
 
 #[macro_export]
+macro_rules! type_mismatch {
+    ($expected:expr, $got:expr) => {
+        $crate::errors::TypeError::TypeMismatch {
+            got_span: x_diagnostics::Span {
+                source: x_diagnostics::SourceIdentifier(0),
+                start: 0,
+                end: 0,
+            },
+            expected_span: x_diagnostics::Span {
+                source: x_diagnostics::SourceIdentifier(0),
+                start: 0,
+                end: 0,
+            },
+            expected: ($expected).to_string(),
+            got: ($got).to_string(),
+        }
+    };
+    ($expected:expr, $got:expr, $got_span:expr, $expected_span:expr) => {
+        $crate::errors::TypeError::TypeMismatch {
+            got_span: $got_span,
+            expected_span: $expected_span,
+            expected: ($expected).to_string(),
+            got: ($got).to_string(),
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! function_signature {
     ($params:expr => $return_type:expr) => {
         $crate::function_signature!($params => $return_type, throws: false, is_static: false)

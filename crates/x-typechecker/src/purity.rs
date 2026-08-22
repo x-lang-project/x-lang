@@ -2,8 +2,7 @@ mod provenance;
 
 use std::collections::HashSet;
 
-use crate::FunctionSignature;
-use crate::TypeChecker;
+use crate::{FunctionSignature, TypeChecker, errors::TypeError};
 use x_ast::intrinsics::EffectCategory;
 use x_ast::{Expression, ExpressionKind, Type};
 
@@ -162,5 +161,36 @@ impl TypeChecker {
         self.function_contexts
             .last()
             .is_some_and(|context| context.is_pure)
+    }
+
+    pub(crate) fn check_pure_call(
+        &self,
+        callee_name: &str,
+        callee_signature: &FunctionSignature,
+    ) -> Result<(), TypeError> {
+        if !self.current_function_is_pure() || callee_signature.is_pure {
+            return Ok(());
+        }
+
+        Err(TypeError::PurityViolation {
+            caller: self.current_function_name().cloned().unwrap_or_default(),
+            callee: callee_name.to_string(),
+            missing: "pure callee".to_string(),
+        })
+    }
+
+    pub(crate) fn require_impure_operation(
+        &self,
+        operation: ImpureOperation<'_>,
+    ) -> Result<(), TypeError> {
+        if !self.current_function_is_pure() {
+            return Ok(());
+        }
+
+        Err(TypeError::ImpureOperation {
+            function: self.current_function_name().cloned().unwrap_or_default(),
+            operation: operation.description(),
+            category: operation.effect(),
+        })
     }
 }

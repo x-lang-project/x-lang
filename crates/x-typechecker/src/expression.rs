@@ -9,6 +9,7 @@ use crate::purity::ImpureOperation;
 
 use crate::FunctionSignature;
 use crate::TypeChecker;
+use crate::errors::TypeError;
 use completion::CheckedType;
 use expression_helpers::*;
 use generic_types::*;

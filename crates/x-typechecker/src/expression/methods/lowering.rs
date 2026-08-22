@@ -1,6 +1,6 @@
 use super::DeclaredMethodCall;
-use crate::TypeChecker;
 use crate::expression::CheckedType;
+use crate::{TypeChecker, errors::TypeError};
 use x_ast::{CallTarget, Expression, ExpressionKind, Type};
 
 pub(in crate::expression) enum CheckedMethod {

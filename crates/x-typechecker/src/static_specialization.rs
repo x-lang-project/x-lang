@@ -3,9 +3,11 @@ mod traversal;
 use std::collections::{HashMap, HashSet};
 use std::slice;
 
-use crate::TypeChecker;
-use crate::specialization_key::SpecializationKey;
-use crate::specialization_key::StaticValue;
+use crate::{
+    TypeChecker,
+    errors::TypeError,
+    specialization_key::{SpecializationKey, StaticValue},
+};
 use substitution::*;
 use traversal::*;
 use x_ast::DeclarationKey;

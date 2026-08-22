@@ -1,3 +1,4 @@
+use crate::errors::TypeError;
 use crate::{FunctionSignature, TypeChecker};
 use x_ast::SourceError;
 use x_ast::StringLiteral;
