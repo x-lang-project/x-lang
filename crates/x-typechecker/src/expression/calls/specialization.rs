@@ -1,6 +1,66 @@
 use super::*;
 
 impl TypeChecker {
+    pub(in crate::expression) fn monomorphise_generic_function(
+        &mut self,
+        generic_name: &str,
+        function: &FunctionDefinition,
+        explicit_arguments: &[Type],
+        actual_types: &[Type],
+    ) -> Result<(String, FunctionSignature), TypeError> {
+        let (substitutions, concrete_arguments) = self.infer_function_type_arguments(
+            generic_name,
+            function,
+            explicit_arguments,
+            actual_types,
+        )?;
+        self.validate_function_type_bounds(function, &substitutions, &concrete_arguments)?;
+
+        let key = (generic_name.to_string(), concrete_arguments.clone());
+        let existing = self.symbols.function_instantiations.get(&key).cloned();
+        let concrete_name = match &existing {
+            Some(name) => name.clone(),
+            None => self
+                .symbols
+                .vacant_generated_name(&monomorphised_function_name(
+                    generic_name,
+                    &concrete_arguments,
+                ))
+                .map_err(TypeError::Invariant)?,
+        };
+
+        let signature = FunctionSignature {
+            parameter_types: function
+                .parameters
+                .iter()
+                .map(|parameter| self.substitute_type(&parameter.value_type, &substitutions))
+                .collect(),
+            return_type: self.substitute_type(&function.return_type, &substitutions),
+            is_throws: function.is_throws,
+            is_pure: function.is_pure,
+            is_static: function.is_static,
+        };
+
+        if existing.is_none() {
+            self.symbols
+                .function_instantiations
+                .insert(key, concrete_name.clone());
+            self.symbols
+                .add_function(concrete_name.clone(), signature.clone());
+            self.symbols.function_static_parameters.insert(
+                concrete_name.clone(),
+                function
+                    .parameters
+                    .iter()
+                    .map(|parameter| parameter.is_static)
+                    .collect(),
+            );
+            self.enqueue_specialized_body(generic_name, &concrete_name, function, &substitutions);
+        }
+
+        Ok((concrete_name, signature))
+    }
+
     fn infer_function_type_arguments(
         &mut self,
         generic_name: &str,
@@ -84,6 +144,42 @@ impl TypeChecker {
         }
 
         Ok((substitutions, concrete_arguments))
+    }
+
+    fn validate_function_type_bounds(
+        &mut self,
+        function: &FunctionDefinition,
+        substitutions: &HashMap<String, Type>,
+        concrete_arguments: &[Type],
+    ) -> Result<(), TypeError> {
+        for (parameter, concrete_type) in function
+            .generic_parameters
+            .iter()
+            .filter(|parameter| matches!(parameter, GenericParameter::Type { .. }))
+            .zip(concrete_arguments.iter())
+        {
+            let GenericParameter::Type { bounds, name, .. } = parameter else {
+                continue;
+            };
+
+            for bound in bounds {
+                if !matches!(bound, Type::Custom(_) | Type::GenericInstance { .. }) {
+                    continue;
+                }
+
+                let bound_name = self.substitute_type(bound, substitutions).to_string();
+
+                if !self.type_implements_trait(concrete_type, &bound_name) {
+                    return Err(TypeError::lookup(FrontendMessage::UnsatisfiedTraitBound {
+                        concrete_type: concrete_type.to_string(),
+                        name: name.to_string(),
+                        bound_name: bound_name.to_string(),
+                    }));
+                }
+            }
+        }
+
+        Ok(())
     }
 
     fn enqueue_specialized_body(

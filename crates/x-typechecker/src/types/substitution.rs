@@ -1,6 +1,12 @@
 use super::*;
 
 impl TypeChecker {
+    pub(crate) fn multi_mangled_name(name: &str, parameter_types: &[Type]) -> String {
+        let suffix = mangle_type_components(parameter_types);
+
+        format!("{name}__multi_{suffix}")
+    }
+
     pub fn substitute_type(&mut self, value_type: &Type, map: &HashMap<String, Type>) -> Type {
         match value_type {
             Type::Custom(name) | Type::TypeParameter(name) => {

@@ -5,6 +5,19 @@ use super::*;
 use x_ast::GenericParameter;
 use x_ast::TypeVisitorMut;
 
+pub(super) fn monomorphised_function_name(
+    generic_name: &str,
+    concrete_arguments: &[Type],
+) -> String {
+    let suffix = mangle_type_components(concrete_arguments);
+
+    format!(
+        "{}__generic_{}",
+        generic_name,
+        sanitize_symbol_component(&suffix)
+    )
+}
+
 pub(super) fn explicit_type_argument_substitutions(
     type_arguments: &[Type],
     generic_parameters: &[GenericParameter],

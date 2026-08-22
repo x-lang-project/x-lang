@@ -9,6 +9,7 @@ pub use definitions::{
     FunctionDefinition, FunctionSignature, MultiFunctionCandidate, TraitInfo, TypeAliasDefinition,
 };
 pub(crate) use function_resolution::qualified_call_path_matches;
+pub(crate) use mangling::mangle_type_components;
 
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};

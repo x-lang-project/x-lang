@@ -7,6 +7,28 @@ use x_diagnostics::frontend_messages::FrontendIssue;
 mod purity;
 
 impl TypeChecker {
+    pub(super) fn check_source_statements(
+        &mut self,
+        statements: &mut [Statement],
+        source_names: &HashSet<String>,
+    ) -> Result<(), TypeError> {
+        for statement in statements {
+            // Only bodyless catalogue intrinsics skip source-body checking.
+            if matches!(statement, Statement::Function { body: None, .. })
+                && namespaced_statement_name(statement)
+                    .is_some_and(|name| !source_names.contains(name))
+            {
+                continue;
+            }
+
+            purity::validate_pure_bodies(statement)?;
+            self.resolve_overload_declaration(statement)?;
+            self.check_statement(statement)?;
+        }
+
+        Ok(())
+    }
+
     fn resolve_overload_declaration(&mut self, statement: &mut Statement) -> Result<(), TypeError> {
         if let Statement::Function {
             name,

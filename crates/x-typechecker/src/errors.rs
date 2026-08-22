@@ -90,6 +90,17 @@ impl TypeError {
         Self::LookupIssue(Box::new(issue))
     }
 
+    pub fn into_failure(self, source: &str, path: impl AsRef<Path>) -> CompilationFailure {
+        match self.into_nested_failure() {
+            Ok(failure) => failure.with_source_if_missing(source, path),
+            Err(other) => CompilationFailure::diagnostic(
+                source,
+                path,
+                other.into_diagnostic(SourceIdentifier(0)),
+            ),
+        }
+    }
+
     fn into_nested_failure(self) -> Result<CompilationFailure, Self> {
         match self {
             Self::Frontend(failure) => Ok(failure),
