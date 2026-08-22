@@ -35,3 +35,4 @@ mod methods;
 mod operators;
 mod places;
 pub(crate) use expression_helpers::is_integer_literal as is_integer_literal_for_context;
+pub const MAX_EXPRESSION_DEPTH: usize = MAX_AST_EXPRESSION_DEPTH;
