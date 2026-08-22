@@ -19,6 +19,7 @@ use x_ast::SourceSpan;
 use x_ast::StructDefinition;
 use x_ast::{Program, Statement, Type};
 
+pub mod errors;
 pub mod expression;
 mod function_context;
 mod helpers;
