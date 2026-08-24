@@ -23,6 +23,7 @@ members = [
   "x-hir",
   "x-mir",
   "x-typechecker",
+  "x-project",
 ]
 
 [workspace.dependencies]

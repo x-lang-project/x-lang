@@ -1,0 +1,22 @@
+[package]
+name = "x-project"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+x-diagnostics = { workspace = true }
+toml = { workspace = true }
+x-ast = { workspace = true }
+x-parser = { workspace = true }
+x-utils = { workspace = true }
+x-runtime = { workspace = true }
+sha2 = { workspace = true }
+
+[lib]
+test = true
+doctest = true
