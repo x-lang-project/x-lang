@@ -27,6 +27,13 @@ pub struct ModuleResolver {
     parsed_modules: HashMap<String, x_parser::ParsedModule>,
 }
 
+#[derive(Default)]
+struct SortTraversal {
+    visited: HashSet<String>,
+    active: HashSet<String>,
+    order: Vec<String>,
+}
+
 impl ModuleResolver {
     pub fn root_directory(&self) -> &Path {
         &self.root_directory
@@ -40,3 +47,5 @@ impl ModuleResolver {
         &self.order
     }
 }
+
+mod ordering;
