@@ -12,6 +12,6 @@
 )]
 
 pub mod module;
-
+pub mod source;
 pub use module::ModuleNode;
 pub use module::ModuleResolver;

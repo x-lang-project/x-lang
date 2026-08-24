@@ -2,6 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::iter;
 use std::path::{Path, PathBuf};
 
+use crate::source;
+
 use x_ast::Statement;
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::ProjectError;
