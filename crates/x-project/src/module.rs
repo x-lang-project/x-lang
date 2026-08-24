@@ -48,4 +48,5 @@ impl ModuleResolver {
     }
 }
 
+mod discovery;
 mod ordering;
