@@ -24,3 +24,47 @@ pub(super) fn decode_dependencies(
         })
         .collect()
 }
+
+pub(super) fn decode_os(
+    path: &Path,
+    root: &Path,
+    table: &toml::value::Table,
+) -> Result<OsBuildSettings, CompilationFailure> {
+    let required =
+        |key| required_manifest_string(path, "os", table, key).map(|path| root.join(path));
+    let optional = |key| {
+        table
+            .get(key)
+            .and_then(toml::Value::as_str)
+            .map(|path| root.join(path))
+    };
+    let tool = |key, fallback: &str| {
+        table
+            .get(key)
+            .and_then(toml::Value::as_str)
+            .unwrap_or(fallback)
+            .to_owned()
+    };
+
+    Ok(OsBuildSettings {
+        boot_asm: required("boot_asm")?,
+        crt0: required("crt0")?,
+        support: manifest_string_array(table, "support")
+            .into_iter()
+            .map(|path| root.join(path))
+            .collect(),
+        linker_script: required("linker_script")?,
+        kernel: required("kernel")?,
+        iso: optional("iso"),
+        iso_directory: optional("iso_dir"),
+        grub_cfg: optional("grub_cfg"),
+        nasm: tool("nasm", "nasm"),
+        cc: tool("cc", "clang"),
+        cxx: tool("cxx", "clang++"),
+        ld: tool("ld", "ld.lld"),
+        grub_mkrescue: table
+            .get("grub_mkrescue")
+            .and_then(toml::Value::as_str)
+            .map(String::from),
+    })
+}
