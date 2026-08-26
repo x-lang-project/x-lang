@@ -6,15 +6,47 @@ use x_diagnostics::ProjectError;
 
 mod schema;
 mod settings;
-pub use settings::DependencySettings;
-pub use settings::LinkSettings;
-pub use settings::OsBuildSettings;
-pub use settings::PackageKind;
-pub use settings::PackageSettings;
+pub use settings::{
+    BuildSettings, DependencySettings, EmulatorSettings, LinkSettings, OsBuildSettings,
+    PackageKind, PackageSettings, WorkspaceSettings,
+};
 
 pub use schema::required_manifest_string;
 
 pub use x_runtime::RUNTIME_ABI_VERSION;
+
+#[derive(Debug, Clone)]
+pub struct Manifest {
+    path: PathBuf,
+    source: String,
+    value: toml::Value,
+    settings: settings::ManifestSettings,
+}
+impl Manifest {
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn source(&self) -> &str {
+        &self.source
+    }
+
+    pub fn target(&self) -> Option<&str> {
+        self.settings.target.as_deref()
+    }
+
+    pub fn package(&self) -> Option<&PackageSettings> {
+        self.settings.package.as_ref()
+    }
+
+    pub fn workspace(&self) -> Option<&WorkspaceSettings> {
+        self.settings.workspace.as_ref()
+    }
+
+    pub fn dependencies(&self) -> &[DependencySettings] {
+        &self.settings.dependencies
+    }
+}
 
 pub use crate::source::read_utf8;
 
