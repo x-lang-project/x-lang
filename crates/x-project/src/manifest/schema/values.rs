@@ -1,5 +1,16 @@
 use super::*;
 
+pub(super) fn is_portable_package_relative_path(value: &str) -> bool {
+    if value.is_empty() || value.starts_with('/') || value.starts_with('\\') || value.contains(':')
+    {
+        return false;
+    }
+
+    !value
+        .split(['/', '\\'])
+        .any(|component| component == ".." || component.is_empty())
+}
+
 pub fn required_manifest_string<'a>(
     path: &Path,
     section: &str,
