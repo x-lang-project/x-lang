@@ -1,3 +1,5 @@
+use std::mem;
+
 use std::collections::{HashMap, HashSet};
 use std::iter;
 use std::path::{Path, PathBuf};
@@ -34,6 +36,11 @@ impl ModuleNode {
     }
 }
 
+pub struct CompilationModule {
+    pub node: ModuleNode,
+    pub parsed: x_parser::ParsedModule,
+}
+
 pub struct ModuleResolver {
     root_directory: PathBuf,
     modules: HashMap<String, ModuleNode>,
@@ -61,6 +68,40 @@ impl ModuleResolver {
 
     pub fn order(&self) -> &[String] {
         &self.order
+    }
+
+    pub fn new(entry_path: &Path) -> Self {
+        Self::with_parse_cache(entry_path, false)
+    }
+
+    pub fn new_for_compilation(entry_path: &Path) -> Self {
+        Self::with_parse_cache(entry_path, true)
+    }
+
+    pub fn take_parsed_modules(&mut self) -> HashMap<String, x_parser::ParsedModule> {
+        mem::take(&mut self.parsed_modules)
+    }
+
+    pub fn into_compilation_modules(
+        mut self,
+    ) -> Result<Vec<CompilationModule>, CompilationFailure> {
+        self.compute_sort_order()?;
+        let mut modules = Vec::with_capacity(self.order.len());
+
+        for name in self.order {
+            let node = self
+                .modules
+                .remove(&name)
+                .ok_or_else(|| contract_messages::resolved_module_missing(&name))?;
+            let parsed = match self.parsed_modules.remove(&name) {
+                Some(parsed) => parsed,
+                None => node.parse_for_compilation()?,
+            };
+
+            modules.push(CompilationModule { node, parsed });
+        }
+
+        Ok(modules)
     }
 
     fn with_parse_cache(entry_path: &Path, retain_parsed_modules: bool) -> Self {
