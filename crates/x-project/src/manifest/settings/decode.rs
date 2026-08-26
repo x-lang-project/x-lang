@@ -1,5 +1,27 @@
 use super::*;
 
+pub(super) fn decode_package(
+    path: &Path,
+    root: &Path,
+    table: &toml::value::Table,
+) -> Result<PackageSettings, CompilationFailure> {
+    Ok(PackageSettings {
+        name: required_manifest_string(path, "package", table, "name")?.into(),
+        version: required_manifest_string(path, "package", table, "version")?.into(),
+        entry: root.join(required_manifest_string(path, "package", table, "entry")?),
+        kind: table
+            .get("kind")
+            .and_then(toml::Value::as_str)
+            .map(|value| {
+                PackageKind::parse(value).ok_or_else(|| {
+                    x_diagnostics::ProjectError::package_kind_unsupported(path.display(), value)
+                })
+            })
+            .transpose()?
+            .unwrap_or(PackageKind::Binary),
+    })
+}
+
 pub(super) fn decode_dependencies(
     root: &Path,
     value: Option<&toml::Value>,

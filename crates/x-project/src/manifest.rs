@@ -10,6 +10,7 @@ pub use settings::DependencySettings;
 pub use settings::LinkSettings;
 pub use settings::OsBuildSettings;
 pub use settings::PackageKind;
+pub use settings::PackageSettings;
 
 pub use schema::required_manifest_string;
 

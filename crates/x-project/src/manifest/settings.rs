@@ -17,6 +17,20 @@ impl PackageKind {
             Self::Library => "lib",
         }
     }
+
+    pub fn parse(value: &str) -> Option<Self> {
+        [Self::Binary, Self::Library]
+            .into_iter()
+            .find(|kind| kind.as_str() == value)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PackageSettings {
+    pub name: String,
+    pub version: String,
+    pub entry: PathBuf,
+    pub kind: PackageKind,
 }
 
 #[derive(Debug, Clone)]
