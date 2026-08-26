@@ -11,6 +11,23 @@ pub(super) fn is_portable_package_relative_path(value: &str) -> bool {
         .any(|component| component == ".." || component.is_empty())
 }
 
+pub(super) fn reject_unknown_keys(
+    path: &Path,
+    section: &str,
+    table: &toml::value::Table,
+    allowed: &[&str],
+) -> Result<(), CompilationFailure> {
+    if let Some(key) = table.keys().find(|key| !allowed.contains(&key.as_str())) {
+        Err(ProjectError::unknown_manifest_field(
+            path.display(),
+            section,
+            key,
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 pub fn required_manifest_string<'a>(
     path: &Path,
     section: &str,
