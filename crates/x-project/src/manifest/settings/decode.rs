@@ -25,6 +25,36 @@ pub(super) fn decode_dependencies(
         .collect()
 }
 
+pub(super) fn decode_link(root: &Path, table: Option<&toml::value::Table>) -> LinkSettings {
+    let Some(table) = table else {
+        return LinkSettings::default();
+    };
+
+    let unique = |key| {
+        let mut values = Vec::new();
+
+        for value in manifest_string_array(table, key) {
+            if !value.is_empty() && !values.contains(&value) {
+                values.push(value);
+            }
+        }
+
+        values
+    };
+
+    LinkSettings {
+        libraries: unique("libs"),
+        library_paths: unique("lib_paths")
+            .into_iter()
+            .map(|path| root.join(path))
+            .collect(),
+        include_paths: unique("include_paths")
+            .into_iter()
+            .map(|path| root.join(path))
+            .collect(),
+    }
+}
+
 pub(super) fn decode_os(
     path: &Path,
     root: &Path,

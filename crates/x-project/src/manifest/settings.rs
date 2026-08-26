@@ -26,6 +26,13 @@ pub struct DependencySettings {
     pub declared_path: String,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct LinkSettings {
+    pub libraries: Vec<String>,
+    pub library_paths: Vec<PathBuf>,
+    pub include_paths: Vec<PathBuf>,
+}
+
 #[derive(Debug, Clone)]
 pub struct OsBuildSettings {
     pub boot_asm: PathBuf,

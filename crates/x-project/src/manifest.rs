@@ -7,6 +7,7 @@ use x_diagnostics::ProjectError;
 mod schema;
 mod settings;
 pub use settings::DependencySettings;
+pub use settings::LinkSettings;
 pub use settings::OsBuildSettings;
 pub use settings::PackageKind;
 
