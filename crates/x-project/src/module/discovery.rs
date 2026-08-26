@@ -34,4 +34,45 @@ pub(super) fn module_context(module_name: &str, path: &Path) -> String {
     ProjectError::module_context(module_name, path.display())
 }
 
+pub(super) fn read_module_source(
+    module_name: &str,
+    path: &Path,
+) -> Result<String, CompilationFailure> {
+    source::read_with_context(path, &module_context(module_name, path))
+}
+
+pub(super) fn parse_module_declarations(
+    source: &str,
+    source_path: &Path,
+) -> Result<(x_parser::ParsedModule, Vec<Vec<String>>), CompilationFailure> {
+    let parsed = x_parser::parse_module_with_spans(source, x_parser::ParseOptions::default())
+        .map_err(|error| {
+            error
+                .with_source(source, source_path)
+                .with_note(ProjectError::module_source_note(source_path.display()))
+        })?;
+
+    let imports = parsed
+        .program
+        .statements
+        .iter()
+        .filter_map(|statement| {
+            if let Statement::Import { module, item } = statement {
+                Some(
+                    module
+                        .split("::")
+                        .filter(|segment| !segment.is_empty())
+                        .chain(iter::once(item.as_str()))
+                        .map(str::to_owned)
+                        .collect(),
+                )
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    Ok((parsed, imports))
+}
+
 mod tree;
