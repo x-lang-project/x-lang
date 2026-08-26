@@ -63,6 +63,19 @@ impl ModuleResolver {
         &self.order
     }
 
+    fn with_parse_cache(entry_path: &Path, retain_parsed_modules: bool) -> Self {
+        let root_directory = entry_path.parent().unwrap_or(Path::new(".")).to_path_buf();
+
+        Self {
+            root_directory,
+            modules: HashMap::new(),
+            order: Vec::new(),
+            total_source_bytes: 0,
+            retain_parsed_modules,
+            parsed_modules: HashMap::new(),
+        }
+    }
+
     /// Discovery errors leave the graph, byte count and order unchanged.
     pub fn resolve_tree(
         &mut self,
