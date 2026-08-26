@@ -9,6 +9,10 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::ProjectError;
 use x_diagnostics::contract_messages;
 
+const MAX_PROJECT_SOURCE_BYTES: usize = 64 * 1024 * 1024;
+const MAX_PROJECT_MODULES: usize = 1_024;
+const MAX_MODULE_DEPTH: usize = 64;
+
 #[derive(Debug, Clone)]
 pub struct ModuleNode {
     pub name: String,
