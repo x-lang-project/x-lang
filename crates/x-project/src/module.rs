@@ -22,6 +22,18 @@ pub struct ModuleNode {
     pub imports: Vec<Vec<String>>,
 }
 
+impl ModuleNode {
+    pub fn parse_for_compilation(&self) -> Result<x_parser::ParsedModule, CompilationFailure> {
+        x_parser::parse_module_with_spans(&self.source, x_parser::ParseOptions::default()).map_err(
+            |error| {
+                error
+                    .with_source(&self.source, &self.path)
+                    .with_note(contract_messages::compiling_module_note(&self.name))
+            },
+        )
+    }
+}
+
 pub struct ModuleResolver {
     root_directory: PathBuf,
     modules: HashMap<String, ModuleNode>,
@@ -49,6 +61,24 @@ impl ModuleResolver {
 
     pub fn order(&self) -> &[String] {
         &self.order
+    }
+
+    /// Discovery errors leave the graph, byte count and order unchanged.
+    pub fn resolve_tree(
+        &mut self,
+        current_name: &str,
+        current_path: &Path,
+    ) -> Result<(), CompilationFailure> {
+        let discovery = self.discover_tree(current_name, current_path)?;
+
+        if !discovery.modules.is_empty() {
+            self.modules.extend(discovery.modules);
+            self.parsed_modules.extend(discovery.parsed_modules);
+            self.total_source_bytes = discovery.total_source_bytes;
+            self.order.clear();
+        }
+
+        Ok(())
     }
 }
 
