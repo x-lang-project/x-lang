@@ -11,6 +11,7 @@
     )
 )]
 
+pub mod manifest;
 pub mod module;
 pub mod source;
 pub use module::ModuleNode;
