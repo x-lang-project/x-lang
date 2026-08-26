@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use decode::*;
 use x_diagnostics::CompilationFailure;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16,3 +17,12 @@ impl PackageKind {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct DependencySettings {
+    pub name: String,
+    pub path: PathBuf,
+    pub declared_path: String,
+}
+
+mod decode;

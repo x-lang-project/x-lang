@@ -5,6 +5,7 @@ use x_diagnostics::ManifestPosition;
 use x_diagnostics::ProjectError;
 
 mod settings;
+pub use settings::DependencySettings;
 pub use settings::PackageKind;
 
 pub use x_runtime::RUNTIME_ABI_VERSION;
