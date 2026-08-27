@@ -40,6 +40,38 @@ pub fn required_manifest_string<'a>(
         .ok_or_else(|| ProjectError::manifest_string_field(path.display(), section, key))
 }
 
+pub(super) fn validate_string_array(
+    path: &Path,
+    field: &str,
+    value: Option<&toml::Value>,
+    required: bool,
+) -> Result<(), CompilationFailure> {
+    let Some(value) = value else {
+        return if required {
+            Err(ProjectError::required_manifest_field(path.display(), field))
+        } else {
+            Ok(())
+        };
+    };
+
+    let array = value
+        .as_array()
+        .ok_or_else(|| ProjectError::manifest_array_type(path.display(), field))?;
+
+    if array.iter().any(|item| item.as_str().is_none()) {
+        return Err(ProjectError::manifest_array_item_type(
+            path.display(),
+            field,
+        ));
+    }
+
+    if required && array.is_empty() {
+        return Err(ProjectError::manifest_array_empty(path.display(), field));
+    }
+
+    Ok(())
+}
+
 pub fn is_canonical_version(version: &str) -> bool {
     let mut parts = version.split('.');
 
