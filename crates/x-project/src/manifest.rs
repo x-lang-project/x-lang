@@ -11,6 +11,7 @@ pub use settings::{
     PackageKind, PackageSettings, WorkspaceSettings,
 };
 
+pub use schema::is_canonical_version;
 pub use schema::required_manifest_string;
 
 pub use x_runtime::RUNTIME_ABI_VERSION;

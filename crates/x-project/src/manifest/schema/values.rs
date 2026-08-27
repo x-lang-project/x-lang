@@ -39,3 +39,15 @@ pub fn required_manifest_string<'a>(
         .and_then(toml::Value::as_str)
         .ok_or_else(|| ProjectError::manifest_string_field(path.display(), section, key))
 }
+
+pub fn is_canonical_version(version: &str) -> bool {
+    let mut parts = version.split('.');
+
+    (0..3).all(|_| {
+        parts.next().is_some_and(|part| {
+            !part.is_empty()
+                && part.bytes().all(|byte| byte.is_ascii_digit())
+                && (part == "0" || !part.starts_with('0'))
+        })
+    }) && parts.next().is_none()
+}
