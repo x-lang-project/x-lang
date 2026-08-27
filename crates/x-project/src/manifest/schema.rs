@@ -3,8 +3,7 @@ use std::path::Path;
 
 use super::manifest_string_array;
 
-use freestanding::validate_build;
-use freestanding::validate_qemu;
+use freestanding::{validate_build, validate_os, validate_qemu};
 use target::*;
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::ProjectError;
