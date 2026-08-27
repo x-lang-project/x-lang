@@ -37,3 +37,17 @@ pub(super) fn validate_build(path: &Path, build: &toml::Value) -> Result<(), Com
 
     Ok(())
 }
+
+pub(super) fn validate_qemu(path: &Path, qemu: &toml::Value) -> Result<(), CompilationFailure> {
+    let qemu = qemu
+        .as_table()
+        .ok_or_else(|| ProjectError::emulator_table_required(path.display()))?;
+    reject_unknown_keys(path, "qemu", qemu, &["command", "memory"])?;
+    for key in ["command", "memory"] {
+        if qemu.get(key).is_some_and(|value| value.as_str().is_none()) {
+            return Err(ProjectError::emulator_string_required(path.display(), key));
+        }
+    }
+
+    Ok(())
+}
