@@ -9,6 +9,30 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::ProjectError;
 use x_utils::optimization::NativeOptimization;
 
+fn validate_dependencies(
+    path: &Path,
+    dependencies: &toml::Value,
+) -> Result<(), CompilationFailure> {
+    let dependencies = dependencies
+        .as_table()
+        .ok_or_else(|| ProjectError::dependencies_table(path.display()))?;
+
+    for (name, specification) in dependencies {
+        let specification = specification
+            .as_table()
+            .ok_or_else(|| ProjectError::dependency_path_table(path.display(), name))?;
+        reject_unknown_keys(
+            path,
+            &format!("dependencies.{name}"),
+            specification,
+            &["path"],
+        )?;
+        required_manifest_string(path, &format!("dependencies.{name}"), specification, "path")?;
+    }
+
+    Ok(())
+}
+
 fn validate_link(path: &Path, link: &toml::Value) -> Result<(), CompilationFailure> {
     let link = link
         .as_table()
