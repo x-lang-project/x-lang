@@ -9,6 +9,21 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::ProjectError;
 use x_utils::optimization::NativeOptimization;
 
+fn validate_workspace(
+    path: &Path,
+    workspace: &toml::value::Table,
+) -> Result<(), CompilationFailure> {
+    reject_unknown_keys(path, "workspace", workspace, &["members", "default_member"])?;
+    validate_string_array(path, "workspace.members", workspace.get("members"), true)?;
+    if let Some(default_member) = workspace.get("default_member")
+        && default_member.as_str().is_none()
+    {
+        return Err(ProjectError::workspace_default_member(path.display()));
+    }
+
+    Ok(())
+}
+
 fn validate_dependencies(
     path: &Path,
     dependencies: &toml::Value,
