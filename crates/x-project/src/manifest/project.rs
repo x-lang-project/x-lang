@@ -10,6 +10,45 @@ use x_utils::{
     project::manifest_in as first_existing_manifest, sanitize_symbol as crate_import_name,
 };
 
+#[derive(Debug, Clone)]
+pub struct ManifestCrate {
+    pub import_name: String,
+    pub entry_path: PathBuf,
+}
+
+fn register_manifest_crate(
+    crates: &mut BTreeMap<String, PathBuf>,
+    import_name: String,
+    entry_path: PathBuf,
+) -> Result<(), CompilationFailure> {
+    if !entry_path.is_file() {
+        return Err(ProjectError::package_entry_missing(
+            entry_path.display(),
+            import_name,
+        ));
+    }
+
+    let canonical = entry_path
+        .canonicalize()
+        .map_err(|error| ProjectError::package_entry_resolution(entry_path.display(), error))?;
+
+    if let Some(existing) = crates.get(&import_name) {
+        if existing == &canonical {
+            return Ok(());
+        }
+
+        return Err(ProjectError::package_import_ambiguous(
+            existing.display(),
+            canonical.display(),
+            import_name,
+        ));
+    }
+
+    crates.insert(import_name, canonical);
+
+    Ok(())
+}
+
 fn member_manifest_path(
     workspace_root: &Path,
     member: &str,
