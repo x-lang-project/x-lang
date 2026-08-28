@@ -13,7 +13,7 @@ pub use settings::{
 
 pub use schema::is_canonical_version;
 pub use schema::required_manifest_string;
-
+pub const LANGUAGE_EDITION: &str = "2026";
 pub use x_runtime::RUNTIME_ABI_VERSION;
 
 #[derive(Debug, Clone)]
