@@ -16,6 +16,29 @@ pub struct ManifestCrate {
     pub entry_path: PathBuf,
 }
 
+pub(super) fn default_member_manifest(
+    workspace_manifest: &Path,
+    workspace: Option<&super::WorkspaceSettings>,
+) -> Result<PathBuf, CompilationFailure> {
+    let workspace =
+        workspace.ok_or_else(|| ProjectError::workspace_missing(workspace_manifest.display()))?;
+
+    if workspace.members.is_empty() {
+        return Err(ProjectError::workspace_members_empty(
+            workspace_manifest.display(),
+        ));
+    }
+
+    let selected = workspace
+        .default_member
+        .as_deref()
+        .or_else(|| workspace.members.first().map(String::as_str))
+        .ok_or_else(|| ProjectError::workspace_selection_missing(workspace_manifest.display()))?;
+    let root = workspace_manifest.parent().unwrap_or(Path::new("."));
+
+    member_manifest_path(root, selected)
+}
+
 fn register_manifest_crate(
     crates: &mut BTreeMap<String, PathBuf>,
     import_name: String,
