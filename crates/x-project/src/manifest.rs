@@ -4,6 +4,7 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::ManifestPosition;
 use x_diagnostics::ProjectError;
 
+pub mod lock;
 pub mod project;
 mod schema;
 mod settings;
