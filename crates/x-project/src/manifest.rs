@@ -4,6 +4,7 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::ManifestPosition;
 use x_diagnostics::ProjectError;
 
+pub mod project;
 mod schema;
 mod settings;
 pub use settings::{
@@ -62,4 +63,14 @@ pub fn manifest_string_array(table: &toml::value::Table, key: &str) -> Vec<Strin
                 .collect()
         })
         .unwrap_or_default()
+}
+
+pub(super) fn resolve_manifest_relative_path(root: &Path, value: &str) -> PathBuf {
+    let path = Path::new(value);
+
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        root.join(path)
+    }
 }
