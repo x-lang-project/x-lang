@@ -49,6 +49,22 @@ impl Manifest {
     pub fn dependencies(&self) -> &[DependencySettings] {
         &self.settings.dependencies
     }
+
+    pub fn build_options(&self) -> BuildSettings {
+        self.settings.build
+    }
+
+    pub fn link_options(&self) -> &LinkSettings {
+        &self.settings.link
+    }
+
+    pub fn os_options(&self) -> Option<&OsBuildSettings> {
+        self.settings.os.as_ref()
+    }
+
+    pub fn emulator_options(&self) -> &EmulatorSettings {
+        &self.settings.emulator
+    }
 }
 
 pub use crate::source::read_utf8;
