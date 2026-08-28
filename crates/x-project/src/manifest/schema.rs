@@ -1,13 +1,93 @@
 use std::path::Component;
 use std::path::Path;
 
-use super::LANGUAGE_EDITION;
 use super::manifest_string_array;
+use super::{LANGUAGE_EDITION, RUNTIME_ABI_VERSION};
 use freestanding::{validate_build, validate_os, validate_qemu};
 use target::*;
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::ProjectError;
 use x_utils::optimization::NativeOptimization;
+
+pub fn validate_manifest_schema(
+    path: &Path,
+    value: &toml::Value,
+) -> Result<(), CompilationFailure> {
+    let root = value
+        .as_table()
+        .ok_or_else(|| ProjectError::manifest_tables_required(path.display()))?;
+    let is_os_manifest = root.get("os").is_some();
+    let allowed_root = if is_os_manifest {
+        &[
+            "package",
+            "workspace",
+            "toolchain",
+            "dependencies",
+            "link",
+            "target",
+            "build",
+            "os",
+            "qemu",
+        ][..]
+    } else {
+        &[
+            "package",
+            "workspace",
+            "toolchain",
+            "dependencies",
+            "link",
+            "target",
+        ][..]
+    };
+
+    reject_unknown_keys(path, "root", root, allowed_root)?;
+
+    let package = root.get("package").and_then(toml::Value::as_table);
+    let workspace = root.get("workspace").and_then(toml::Value::as_table);
+
+    if package.is_none() && workspace.is_none() {
+        return Err(ProjectError::package_or_workspace_missing(path.display()));
+    }
+
+    if let Some(package) = package {
+        validate_package(path, package)?;
+        validate_toolchain(path, root)?;
+    }
+
+    if let Some(workspace) = workspace {
+        validate_workspace(path, workspace)?;
+    }
+
+    if let Some(dependencies) = root.get("dependencies") {
+        validate_dependencies(path, dependencies)?;
+    }
+
+    if let Some(link) = root.get("link") {
+        validate_link(path, link)?;
+    }
+
+    if is_os_manifest && root.get("build").is_none() {
+        return Err(ProjectError::os_build_section_required(path.display()));
+    }
+
+    if let Some(build) = root.get("build") {
+        validate_build(path, build)?;
+    }
+
+    if let Some(os) = root.get("os") {
+        validate_os(path, os)?;
+    }
+
+    if let Some(qemu) = root.get("qemu") {
+        validate_qemu(path, qemu)?;
+    }
+
+    if let Some(target) = root.get("target") {
+        validate_target(path, target, is_os_manifest)?;
+    }
+
+    Ok(())
+}
 
 fn validate_package(path: &Path, package: &toml::value::Table) -> Result<(), CompilationFailure> {
     reject_unknown_keys(
