@@ -2,6 +2,11 @@ use std::collections::HashMap;
 
 use x_ast::{Layout, StructDefinition, StructInvariant, Type};
 
+#[derive(Default)]
+pub(crate) struct RecordCatalogue {
+    declarations: HashMap<String, RecordMetadata>,
+}
+
 pub(crate) struct RecordMetadata {
     fields: Vec<(String, Type)>,
     indices: HashMap<String, u32>,
