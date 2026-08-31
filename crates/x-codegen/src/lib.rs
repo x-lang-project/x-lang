@@ -13,5 +13,7 @@
 
 pub mod codegen;
 
+pub mod function;
+
 #[cfg(windows)]
 mod target_initializers;
