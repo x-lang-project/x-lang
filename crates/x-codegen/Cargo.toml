@@ -1,0 +1,32 @@
+[package]
+name = "x-codegen"
+version.workspace = true
+edition.workspace = true
+description = "LLVM code generation for X"
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lib]
+test = true
+doctest = true
+name = "x_codegen"
+path = "src/lib.rs"
+
+[dependencies]
+x-utils = { workspace = true }
+x-ast = { workspace = true }
+x-mir = { workspace = true }
+x-diagnostics = { workspace = true }
+x-logging = { workspace = true }
+x-runtime = { workspace = true }
+inkwell = { workspace = true }
+
+[features]
+default = ["llvm22-1"]
+llvm22-1 = ["inkwell/llvm22-1"]
+
+[target.'cfg(windows)'.dependencies]
+inkwell = { workspace = true, features = ["llvm22-1-no-llvm-linking"] }
