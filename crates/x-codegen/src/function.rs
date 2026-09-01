@@ -2,6 +2,8 @@ mod frame;
 
 mod invariants;
 
+mod typing;
+
 use std::collections::HashMap;
 
 use inkwell::basic_block;
