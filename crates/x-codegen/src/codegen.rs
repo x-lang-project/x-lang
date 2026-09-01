@@ -8,6 +8,7 @@ use inkwell::{
     execution_engine::ExecutionEngine, module::Module,
 };
 
+use crate::errors::CodeGenerationError;
 use x_logging::info;
 use x_mir::MirProgram;
 

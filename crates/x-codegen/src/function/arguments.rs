@@ -1,7 +1,7 @@
 use inkwell::values::{BasicValueEnum, IntValue, PointerValue};
 
 use super::FunctionCompiler;
-
+use crate::errors::CodeGenerationError;
 use x_ast::Type;
 use x_diagnostics::backend_messages;
 use x_mir::Operand;
