@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use inkwell::types::BasicTypeEnum;
 use inkwell::values::PointerValue;
 
+use super::FunctionCompiler;
+
 use x_ast::Type;
 use x_mir::{LocalIdentifier, MirBody};
 
