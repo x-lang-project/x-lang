@@ -8,6 +8,7 @@ mod invariants;
 
 mod printing;
 
+mod terminator;
 mod typing;
 
 use std::collections::HashMap;
