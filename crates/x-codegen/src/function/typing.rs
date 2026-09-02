@@ -57,6 +57,23 @@ impl FunctionCompiler<'_, '_> {
             })
     }
 
+    fn infer_place_value_type(&self, place: &Place) -> Option<Type> {
+        if let Place::Dereference { base, value_type } = place
+            && matches!(value_type, Type::Unknown | Type::Infer(_))
+        {
+            let pointee_type = match self.get_place_type(base) {
+                Type::RawPointer { inner, .. } | Type::Reference { inner, .. } => *inner,
+                _ => return None,
+            };
+
+            return Some(pointee_type);
+        }
+
+        let value_type = self.get_place_type(place);
+
+        (!matches!(value_type, Type::Infer(_) | Type::Unknown)).then_some(value_type)
+    }
+
     fn get_field_place_type(&self, base: &Place, field_name: &str, value_type: &Type) -> Type {
         if !matches!(value_type, Type::Unknown | Type::Infer(_)) {
             return value_type.clone();
@@ -136,6 +153,9 @@ impl FunctionCompiler<'_, '_> {
 
     pub(super) fn infer_rvalue_type(&self, rvalue: &Rvalue) -> Option<Type> {
         match rvalue {
+            Rvalue::Use(Operand::Copy(place) | Operand::Move(place)) => {
+                self.infer_place_value_type(place)
+            }
             Rvalue::Use(operand) => self.operand_ast_type(operand),
             Rvalue::Call {
                 function,
