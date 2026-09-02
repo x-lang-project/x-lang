@@ -4,6 +4,8 @@ mod frame;
 
 mod invariants;
 
+mod printing;
+
 mod typing;
 
 use std::collections::HashMap;
