@@ -14,7 +14,7 @@
 pub mod codegen;
 pub mod errors;
 pub mod function;
-
+mod function_helpers;
 pub mod operators;
 pub mod symbols;
 #[cfg(windows)]

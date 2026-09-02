@@ -1,5 +1,5 @@
 use super::FunctionCompiler;
-
+use crate::function_helpers::is_pointer_like_ast_type;
 use x_ast::Operator;
 use x_ast::Type;
 use x_mir::ResolvedCall;
