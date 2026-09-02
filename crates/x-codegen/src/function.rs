@@ -5,6 +5,7 @@ mod call_dispatch;
 mod frame;
 
 mod invariants;
+mod llvm;
 
 mod printing;
 
