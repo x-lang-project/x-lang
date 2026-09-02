@@ -1,5 +1,7 @@
 mod arguments;
 
+mod call_dispatch;
+
 mod frame;
 
 mod invariants;
