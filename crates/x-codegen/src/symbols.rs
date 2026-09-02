@@ -51,4 +51,49 @@ impl SymbolTable {
     }
 }
 
+pub fn collect_symbol_table(program: &MirProgram, config: MangleConfig) -> SymbolTable {
+    let mut symbols = Vec::new();
+
+    for item in &program.items {
+        match item {
+            GlobalItem::Static {
+                name, value_type, ..
+            } => {
+                let should_mangle = config.enabled;
+                symbols.push(GlobalSymbol {
+                    source_name: name.clone(),
+                    symbol_name: if should_mangle {
+                        format!("_XG{}", x_ast::symbol_name_component(name))
+                    } else {
+                        sanitize_symbol_segment(name)
+                    },
+                    kind: SymbolKind::Static,
+                    parameters: Vec::new(),
+                    return_type: Some(value_type.clone()),
+                    is_defined: true,
+                    is_exported: config.export_global_symbols,
+                });
+            }
+            _ => {}
+        }
+    }
+
+    SymbolTable { symbols }
+}
+
+pub fn mangle_function_name(name: &str, parameters: &[Type], return_value: &Type) -> String {
+    let mut output = format!("_XF{}", x_ast::symbol_name_component(name));
+    output.push('P');
+    output.push_str(&parameters.len().to_string());
+    for parameter in parameters {
+        output.push('_');
+        output.push_str(&mangle_type(parameter));
+    }
+
+    output.push('R');
+    output.push_str(&mangle_type(return_value));
+
+    output
+}
+
 pub use x_ast::type_symbol_component as mangle_type;

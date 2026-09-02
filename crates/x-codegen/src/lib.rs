@@ -28,7 +28,4 @@ pub use codegen::create_target_machine_for_initialized_target;
 pub use codegen::initialize_target_for_triple;
 pub use codegen::llvm_optimization_level;
 pub use errors::CodeGenerationError;
-pub use symbols::GlobalSymbol;
-pub use symbols::MangleConfig;
-pub use symbols::SymbolKind;
-pub use symbols::SymbolTable;
+pub use symbols::{GlobalSymbol, MangleConfig, SymbolKind, SymbolTable, collect_symbol_table};
