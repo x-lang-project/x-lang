@@ -56,6 +56,34 @@ pub fn collect_symbol_table(program: &MirProgram, config: MangleConfig) -> Symbo
 
     for item in &program.items {
         match item {
+            GlobalItem::Function {
+                name,
+                parameter_types,
+                return_type,
+                body,
+                meta,
+                ..
+            } => {
+                let should_mangle = config.enabled
+                    && body.is_some()
+                    && !meta.is_exported
+                    && name != x_ast::ENTRY_POINT_NAME;
+                symbols.push(GlobalSymbol {
+                    source_name: name.clone(),
+                    symbol_name: if should_mangle {
+                        mangle_function_name(name, parameter_types, return_type)
+                    } else {
+                        sanitize_symbol_segment(name)
+                    },
+                    kind: SymbolKind::Function,
+                    parameters: parameter_types.clone(),
+                    return_type: Some(return_type.clone()),
+                    is_defined: body.is_some(),
+                    is_exported: config.export_global_symbols
+                        || meta.is_exported
+                        || name == x_ast::ENTRY_POINT_NAME,
+                });
+            }
             GlobalItem::Static {
                 name, value_type, ..
             } => {
