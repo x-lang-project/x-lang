@@ -15,6 +15,10 @@ pub mod codegen;
 pub mod errors;
 pub mod function;
 
+pub mod symbols;
+#[cfg(windows)]
+mod target_initializers;
+
 pub use codegen::CheriPermissionClass;
 pub use codegen::CheriProjectionRecord;
 pub use codegen::CodeGeneration;
@@ -24,6 +28,7 @@ pub use codegen::create_target_machine_for_initialized_target;
 pub use codegen::initialize_target_for_triple;
 pub use codegen::llvm_optimization_level;
 pub use errors::CodeGenerationError;
-
-#[cfg(windows)]
-mod target_initializers;
+pub use symbols::GlobalSymbol;
+pub use symbols::MangleConfig;
+pub use symbols::SymbolKind;
+pub use symbols::SymbolTable;
