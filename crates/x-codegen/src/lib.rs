@@ -19,6 +19,10 @@ pub use codegen::CheriPermissionClass;
 pub use codegen::CheriProjectionRecord;
 pub use codegen::CodeGeneration;
 pub use codegen::CodeGenerationOptions;
+pub use codegen::create_target_machine;
+pub use codegen::create_target_machine_for_initialized_target;
+pub use codegen::initialize_target_for_triple;
+pub use codegen::llvm_optimization_level;
 pub use errors::CodeGenerationError;
 
 #[cfg(windows)]
