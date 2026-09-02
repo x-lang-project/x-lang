@@ -15,6 +15,7 @@ pub mod codegen;
 pub mod errors;
 pub mod function;
 
+pub mod operators;
 pub mod symbols;
 #[cfg(windows)]
 mod target_initializers;
