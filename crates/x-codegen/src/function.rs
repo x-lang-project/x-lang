@@ -8,7 +8,7 @@ mod invariants;
 mod llvm;
 
 mod printing;
-
+mod references;
 mod rvalues;
 mod slices;
 mod terminator;
