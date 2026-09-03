@@ -5,6 +5,8 @@ pub use optimize::initialize_target_for_triple;
 pub use optimize::llvm_optimization_level;
 mod records;
 
+mod types;
+
 use std::{cell::RefCell, collections::HashMap};
 
 use inkwell::targets;
