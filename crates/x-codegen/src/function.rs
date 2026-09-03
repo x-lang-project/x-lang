@@ -9,6 +9,7 @@ mod llvm;
 
 mod printing;
 
+mod rvalues;
 mod slices;
 mod terminator;
 mod typing;
