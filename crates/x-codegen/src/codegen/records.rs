@@ -26,4 +26,8 @@ impl RecordMetadata {
     pub(crate) fn fields(&self) -> &[(String, Type)] {
         &self.fields
     }
+
+    pub(crate) fn field_index(&self, name: &str) -> Option<u32> {
+        self.indices.get(name).copied()
+    }
 }
