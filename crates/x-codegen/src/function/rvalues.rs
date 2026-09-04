@@ -4,7 +4,8 @@ use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::values::BasicValueEnum;
 
 use super::FunctionCompiler;
-
+use super::numeric;
+use super::numeric::is_signed_integer_type;
 use crate::errors::CodeGenerationError;
 use crate::function_helpers::*;
 use x_ast::{Operator, Type, UnaryOperator};
