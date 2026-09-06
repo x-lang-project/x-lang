@@ -15,4 +15,8 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
     pub(super) fn b(&self) -> &Builder<'ctx> {
         &self.codegen.builder
     }
+
+    pub(super) fn m(&self) -> &Module<'ctx> {
+        &self.codegen.module
+    }
 }
