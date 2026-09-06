@@ -7,6 +7,7 @@ mod frame;
 mod invariants;
 mod llvm;
 
+mod memory;
 mod numeric;
 mod parallel;
 mod pointers;
