@@ -22,6 +22,42 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
         Ok(value_type)
     }
 
+    pub(super) fn memo_state(
+        &self,
+        return_type: BasicTypeEnum<'ctx>,
+        key_count: usize,
+    ) -> MemoState<'ctx> {
+        let prefix = format!("__x_memo_{}", memo_symbol(self.function_name));
+        let lock = memo_global(self, &format!("{prefix}_lock"), self.i8().into());
+        let capacity = self.memo_contract().capacity;
+        let valid = memo_array_global(
+            self,
+            &format!("{prefix}_valid"),
+            self.boolean_type().into(),
+            capacity,
+        );
+
+        let mut keys = Vec::with_capacity(key_count);
+
+        for index in 0..key_count {
+            keys.push(memo_array_global(
+                self,
+                &format!("{prefix}_key_{index}"),
+                self.i64().into(),
+                capacity,
+            ));
+        }
+
+        let values = memo_array_global(self, &format!("{prefix}_values"), return_type, capacity);
+
+        MemoState {
+            lock,
+            valid,
+            keys,
+            values,
+        }
+    }
+
     pub(super) fn memo_contract(&self) -> MemoiseCallContract {
         match &self.body.call_contract {
             Some(CallContract::Memoise(contract)) => contract.clone(),
