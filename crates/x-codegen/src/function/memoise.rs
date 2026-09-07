@@ -17,3 +17,23 @@ use x_mir::{
 };
 
 // Escape '_' too, so source names cannot collide.
+fn memo_symbol(name: &str) -> String {
+    let mut output = String::new();
+
+    for byte in name.bytes() {
+        if byte.is_ascii_alphanumeric() {
+            output.push(char::from(byte));
+        } else {
+            output.push_str(&format!("_{byte:02x}"));
+        }
+    }
+
+    output
+}
+
+struct MemoState<'ctx> {
+    lock: PointerValue<'ctx>,
+    valid: PointerValue<'ctx>,
+    keys: Vec<PointerValue<'ctx>>,
+    values: PointerValue<'ctx>,
+}
