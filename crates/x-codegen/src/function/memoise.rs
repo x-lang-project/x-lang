@@ -31,6 +31,13 @@ fn memo_symbol(name: &str) -> String {
     output
 }
 
+struct PreparedMemo<'ctx> {
+    return_type: BasicTypeEnum<'ctx>,
+    key_bits: Vec<IntValue<'ctx>>,
+    index: IntValue<'ctx>,
+    state: MemoState<'ctx>,
+}
+
 struct MemoState<'ctx> {
     lock: PointerValue<'ctx>,
     valid: PointerValue<'ctx>,
