@@ -16,7 +16,23 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
         &self.codegen.builder
     }
 
+    pub(super) fn context(&self) -> &'ctx Context {
+        self.codegen.context
+    }
+
     pub(super) fn m(&self) -> &Module<'ctx> {
         &self.codegen.module
+    }
+
+    pub(super) fn i8(&self) -> types::IntType<'ctx> {
+        self.context().i8_type()
+    }
+
+    pub(super) fn i64(&self) -> types::IntType<'ctx> {
+        self.context().i64_type()
+    }
+
+    pub(super) fn boolean_type(&self) -> types::IntType<'ctx> {
+        self.context().bool_type()
     }
 }
