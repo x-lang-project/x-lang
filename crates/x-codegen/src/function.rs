@@ -2,6 +2,7 @@ mod arguments;
 
 mod call_dispatch;
 
+mod constants;
 mod frame;
 mod intrinsics;
 mod invariants;
