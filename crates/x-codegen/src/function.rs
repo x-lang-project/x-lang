@@ -3,7 +3,7 @@ mod arguments;
 mod call_dispatch;
 
 mod frame;
-
+mod intrinsics;
 mod invariants;
 mod llvm;
 mod memoise;
