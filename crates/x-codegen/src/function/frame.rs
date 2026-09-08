@@ -20,6 +20,32 @@ pub struct LocalFrame<'ctx> {
 }
 
 impl<'ctx> LocalFrame<'ctx> {
+    pub(crate) fn storage_name(body: &MirBody, identifier: LocalIdentifier) -> Cow<'_, str> {
+        match body
+            .locals
+            .get(&identifier)
+            .and_then(|local| local.name.as_deref())
+        {
+            Some(name) => Cow::Borrowed(name),
+            None => Cow::Owned(format!("mir_temp_{}", identifier.0)),
+        }
+    }
+
+    pub fn insert(
+        &mut self,
+        identifier: LocalIdentifier,
+        value_type: Type,
+        pointer: PointerValue<'ctx>,
+    ) {
+        self.locals.insert(
+            identifier,
+            LocalStorage {
+                pointer,
+                value_type,
+            },
+        );
+    }
+
     pub fn pointer(&self, identifier: LocalIdentifier) -> Option<PointerValue<'ctx>> {
         self.locals.get(&identifier).map(|local| local.pointer)
     }
