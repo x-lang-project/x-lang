@@ -1,7 +1,7 @@
 use inkwell::values;
 
 use super::FunctionCompiler;
-
+use super::call_name::CallName;
 use crate::errors::CodeGenerationError;
 use crate::function_helpers::function_matches_arity;
 
