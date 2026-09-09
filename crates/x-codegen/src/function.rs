@@ -2,6 +2,7 @@ mod arguments;
 
 mod call_dispatch;
 
+mod calls;
 mod coercions;
 mod constants;
 mod frame;
