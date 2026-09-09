@@ -15,6 +15,29 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
             .ok_or_else(|| CodeGenerationError::MissingCalleeSymbol(name.to_string()))
     }
 
+    pub(super) fn resolve_callee(
+        &self,
+        callee: &str,
+        arity: Option<usize>,
+    ) -> Result<values::FunctionValue<'ctx>, CodeGenerationError> {
+        let call = CallName::parse(callee);
+        let base_name = call.base;
+
+        for candidate in call.resolution_candidates(self.function_name) {
+            if let Some(function) = self.resolve_named_callee(&candidate, arity) {
+                return Ok(function);
+            }
+        }
+
+        // Qualified names must not fall back to an unqualified callee.
+        if base_name.contains("::") {
+            return Err(CodeGenerationError::MissingCalleeSymbol(callee.to_string()));
+        }
+
+        self.resolve_unique_suffix_callee(base_name, arity)
+            .ok_or_else(|| CodeGenerationError::MissingCalleeSymbol(callee.to_string()))
+    }
+
     fn resolve_named_callee(
         &self,
         source_name: &str,

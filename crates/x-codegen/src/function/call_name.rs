@@ -7,6 +7,13 @@ pub(super) struct CallName<'a> {
 }
 
 impl<'a> CallName<'a> {
+    pub(super) fn parse(full: &'a str) -> Self {
+        Self {
+            full,
+            base: strip_explicit_type_arguments(full),
+        }
+    }
+
     pub(super) fn resolution_candidates(&self, caller: &str) -> Vec<String> {
         let mut candidates = Vec::new();
         push_unique_candidate(&mut candidates, self.full.to_string());
