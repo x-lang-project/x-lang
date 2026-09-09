@@ -15,6 +15,22 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
             .ok_or_else(|| CodeGenerationError::MissingCalleeSymbol(name.to_string()))
     }
 
+    fn resolve_named_callee(
+        &self,
+        source_name: &str,
+        arity: Option<usize>,
+    ) -> Option<values::FunctionValue<'ctx>> {
+        let llvm_name = self.codegen.llvm_function_symbol(source_name);
+
+        if let Some(function) = self.m().get_function(llvm_name)
+            && function_matches_arity(function, arity)
+        {
+            return Some(function);
+        }
+
+        None
+    }
+
     fn resolve_unique_suffix_callee(
         &self,
         base_name: &str,
