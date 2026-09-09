@@ -8,6 +8,13 @@ use x_diagnostics::backend_messages;
 use x_mir::MirProgram;
 
 impl<'ctx> CodeGeneration<'ctx> {
+    pub fn llvm_function_symbol<'a>(&'a self, source_name: &'a str) -> &'a str {
+        self.function_symbols
+            .get(source_name)
+            .map(String::as_str)
+            .unwrap_or(source_name)
+    }
+
     pub fn resolve_function_by_source_suffix(
         &self,
         base_name: &str,
