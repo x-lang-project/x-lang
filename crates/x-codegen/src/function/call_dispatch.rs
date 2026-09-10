@@ -1,3 +1,4 @@
+mod numeric;
 mod pointers;
 
 use inkwell::values::BasicValueEnum;
