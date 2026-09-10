@@ -18,12 +18,30 @@ enum CallEmission<'ctx> {
     Unsupported,
 }
 
+impl<'ctx> CallEmission<'ctx> {
+    fn emitted(value: Option<BasicValueEnum<'ctx>>) -> Self {
+        match value {
+            Some(value) => Self::Value(value),
+            None => Self::Void,
+        }
+    }
+}
+
 type DispatchAttempt<'ctx> = Result<CallEmission<'ctx>, CodeGenerationError>;
 
 #[derive(Debug, Clone, Copy)]
 struct DispatchCall<'b> {
     full: &'b str,
     identity: &'b intrinsics::BuiltinCall,
+}
+
+impl<'b> DispatchCall<'b> {
+    fn from_builtin(call: &'b intrinsics::BuiltinCall) -> Self {
+        Self {
+            full: &call.name,
+            identity: call,
+        }
+    }
 }
 
 impl<'ctx> FunctionCompiler<'_, 'ctx> {
