@@ -1,3 +1,5 @@
+mod pointers;
+
 use inkwell::values::BasicValueEnum;
 
 use super::FunctionCompiler;
