@@ -33,3 +33,9 @@ pub enum CodeGenerationError {
     LlvmVerificationFailure(String),
     InvalidMir(String),
 }
+
+impl From<LLVMString> for CodeGenerationError {
+    fn from(error: LLVMString) -> Self {
+        CodeGenerationError::LlvmInternalError(error.to_string())
+    }
+}
