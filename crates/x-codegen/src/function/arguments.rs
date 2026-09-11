@@ -29,6 +29,47 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
             arguments,
         }
     }
+
+    pub(super) fn expect_arguments<'b, const N: usize>(
+        function: &str,
+        arguments: &'b [Operand],
+    ) -> Result<&'b [Operand; N], CodeGenerationError> {
+        arguments.try_into().map_err(|_| {
+            CodeGenerationError::LlvmInternalError(
+                backend_messages::function_expects_n_argument_value_got_value(
+                    function,
+                    N,
+                    arguments.len(),
+                ),
+            )
+        })
+    }
+}
+
+impl<'a, 'ctx> Arguments<'a, 'ctx> {
+    pub(super) fn get(&self, index: usize) -> Result<Argument<'a, 'ctx>, CodeGenerationError> {
+        let operand = self.arguments.get(index).ok_or_else(|| {
+            CodeGenerationError::LlvmInternalError(
+                backend_messages::value_is_missing_argument_value(self.function, index + 1),
+            )
+        })?;
+
+        Ok(Argument {
+            compiler: self.compiler,
+            operand,
+        })
+    }
+
+    pub(super) fn exact<const N: usize>(
+        &self,
+    ) -> Result<[Argument<'a, 'ctx>; N], CodeGenerationError> {
+        let arguments = FunctionCompiler::expect_arguments::<N>(self.function, self.arguments)?;
+
+        Ok(arguments.each_ref().map(|operand| Argument {
+            compiler: self.compiler,
+            operand,
+        }))
+    }
 }
 
 impl<'a, 'ctx> Argument<'a, 'ctx> {
