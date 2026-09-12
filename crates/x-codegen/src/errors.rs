@@ -40,6 +40,73 @@ impl From<LLVMString> for CodeGenerationError {
     }
 }
 
+impl CodeGenerationError {
+    pub fn into_diagnostic(self, span: Span) -> Diagnostic {
+        match self {
+            CodeGenerationError::BuilderError(error) => {
+                backend_messages::codegen_builder_error(error, span)
+            }
+            CodeGenerationError::TypeNotFound(name) => {
+                backend_messages::codegen_type_not_found(name, span)
+            }
+            CodeGenerationError::UnsupportedType(value_type) => {
+                backend_messages::codegen_unsupported_type(value_type, span)
+            }
+            CodeGenerationError::FunctionSignatureMissing(name) => {
+                backend_messages::codegen_function_signature_missing(name, span)
+            }
+            CodeGenerationError::MissingTerminator(block) => {
+                backend_messages::codegen_missing_terminator(block, span)
+            }
+            CodeGenerationError::MissingEntryBlock => {
+                backend_messages::codegen_missing_entry_block(span)
+            }
+            CodeGenerationError::MissingLocalAllocation(identifier) => {
+                backend_messages::codegen_missing_local_allocation(identifier, span)
+            }
+            CodeGenerationError::MissingHardwareArgument(position) => {
+                backend_messages::codegen_missing_hardware_argument(position, span)
+            }
+            CodeGenerationError::UnsupportedOperator { operator } => {
+                backend_messages::codegen_unsupported_operator(operator, span)
+            }
+            CodeGenerationError::UnsupportedUnaryOperator { operator } => {
+                backend_messages::codegen_unsupported_unary_operator(operator, span)
+            }
+            CodeGenerationError::UnsupportedCast { to } => {
+                backend_messages::codegen_unsupported_cast(to, span)
+            }
+            CodeGenerationError::TypeHasNoSize(value_type) => {
+                backend_messages::codegen_type_has_no_size(value_type, span)
+            }
+            CodeGenerationError::MissingCalleeSymbol(name) => {
+                backend_messages::codegen_missing_callee_symbol(name, span)
+            }
+            CodeGenerationError::JitExecutionFailure(name) => {
+                backend_messages::codegen_jit_execution_failure(name, span)
+            }
+            CodeGenerationError::LlvmInternalError(detail) => {
+                backend_messages::codegen_llvm_internal_error(detail, span)
+            }
+            CodeGenerationError::JitInitializationFailure(detail) => {
+                backend_messages::codegen_jit_initialization_failure(detail, span)
+            }
+            CodeGenerationError::MissingMirBlock(block) => {
+                backend_messages::codegen_missing_mir_block(block, span)
+            }
+            CodeGenerationError::MissingLlvmBlock(block) => {
+                backend_messages::codegen_missing_llvm_block(block, span)
+            }
+            CodeGenerationError::LlvmVerificationFailure(detail) => {
+                backend_messages::codegen_llvm_verification_failure(detail, span)
+            }
+            CodeGenerationError::InvalidMir(detail) => {
+                backend_messages::codegen_invalid_mir(detail, span)
+            }
+        }
+    }
+}
+
 impl Display for CodeGenerationError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
         match self {
