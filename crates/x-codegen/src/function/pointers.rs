@@ -1,3 +1,5 @@
+mod address;
+
 use inkwell::values::{BasicValueEnum, PointerValue};
 
 use super::FunctionCompiler;

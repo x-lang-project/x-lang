@@ -39,3 +39,9 @@ impl From<LLVMString> for CodeGenerationError {
         CodeGenerationError::LlvmInternalError(error.to_string())
     }
 }
+
+impl From<BuilderError> for CodeGenerationError {
+    fn from(error: BuilderError) -> Self {
+        Self::BuilderError(error)
+    }
+}

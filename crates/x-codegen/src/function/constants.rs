@@ -1,3 +1,4 @@
+mod aggregates;
 mod arrays;
 use std::collections::HashMap;
 
@@ -45,6 +46,8 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
     ) -> Result<Option<BasicValueEnum<'ctx>>, CodeGenerationError> {
         match rvalue {
             Rvalue::Use(operand) => self.literal_operand(operand, value_type, constants),
+
+            Rvalue::Tuple(elements) => self.literal_tuple(elements, value_type, constants),
 
             _ => Ok(None),
         }

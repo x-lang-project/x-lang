@@ -18,6 +18,32 @@ struct AssignmentTarget<'place, 'ctx> {
     llvm_type: BasicTypeEnum<'ctx>,
 }
 
+impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    fn copy_constant_initializer(
+        &self,
+        value: values::BasicValueEnum<'ctx>,
+        target: &AssignmentTarget<'_, 'ctx>,
+    ) -> Result<(), CodeGenerationError> {
+        let initializer = self.m().add_global(
+            value.get_type(),
+            Some(self.codegen.pointer_address_space()),
+            "__x_constant_initializer",
+        );
+        initializer.set_linkage(module::Linkage::Private);
+        initializer.set_constant(true);
+        initializer.set_unnamed_address(values::UnnamedAddress::Global);
+        initializer.set_initializer(&value);
+        let size = value
+            .get_type()
+            .size_of()
+            .ok_or_else(|| CodeGenerationError::TypeHasNoSize(target.ast_type.clone()))?;
+        self.b()
+            .build_memcpy(target.pointer, 1, initializer.as_pointer_value(), 1, size)?;
+
+        Ok(())
+    }
+}
+
 fn should_reallocate_call_target(place: &Place, original_place_type: &Type) -> bool {
     should_specialize_assignment_target(place, original_place_type)
 }

@@ -1,3 +1,4 @@
+mod access;
 mod descriptors;
 
 use inkwell::IntPredicate;
@@ -10,6 +11,9 @@ use x_ast::Type;
 use x_ast::intrinsics::{BuiltinCall, BuiltinKind, SliceOperation};
 use x_diagnostics::backend_messages;
 use x_mir::Operand;
+
+mod i32;
+mod scalar;
 
 #[derive(Clone)]
 struct SliceValue<'ctx> {

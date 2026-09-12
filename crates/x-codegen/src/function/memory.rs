@@ -17,6 +17,30 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
         self.pointer_memory_element_type(call, arguments, 0)
     }
 
+    pub(super) fn element_count_to_bytes(
+        &self,
+        count: values::IntValue<'ctx>,
+        element_type: &Type,
+        name: &str,
+    ) -> Result<values::IntValue<'ctx>, CodeGenerationError> {
+        let element_size = self.ast_type_size_bytes(element_type)?;
+        let size_type = self
+            .codegen
+            .resolve_llvm_type(&Type::USize)?
+            .into_int_type();
+        let count = if count.get_type() == size_type {
+            count
+        } else {
+            self.integer_cast(count, size_type, &format!("{name}_count"))?
+        };
+
+        if element_size == 1 {
+            return Ok(count);
+        }
+
+        self.integer_mul(count, size_type.const_int(element_size, false), name)
+    }
+
     fn ast_type_size_bytes(&self, value_type: &Type) -> Result<u64, CodeGenerationError> {
         self.codegen
             .resolve_type_layout(value_type)

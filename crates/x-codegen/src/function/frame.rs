@@ -54,3 +54,19 @@ impl<'ctx> LocalFrame<'ctx> {
         self.locals.get(&identifier).map(|local| &local.value_type)
     }
 }
+
+impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    pub(super) fn replace_local_storage(
+        &mut self,
+        identifier: LocalIdentifier,
+        value_type: Type,
+        llvm_type: BasicTypeEnum<'ctx>,
+    ) -> Result<(), CodeGenerationError> {
+        let name = LocalFrame::storage_name(self.body, identifier);
+        let pointer = self.alloca(llvm_type, &name)?;
+
+        self.frame.insert(identifier, value_type, pointer);
+
+        Ok(())
+    }
+}

@@ -1,3 +1,5 @@
+mod exceptions;
+
 use inkwell::attributes::{Attribute, AttributeLoc};
 
 use super::FunctionCompiler;
@@ -12,6 +14,79 @@ struct CallContinuation<'a> {
 }
 
 impl FunctionCompiler<'_, '_> {
+    fn compile_goto_terminator(
+        &self,
+        target_block_identifier: &BlockIdentifier,
+    ) -> Result<(), CodeGenerationError> {
+        let next_basic_block = self
+            .llvm_blocks
+            .get(&target_block_identifier.0)
+            .copied()
+            .ok_or(CodeGenerationError::MissingLlvmBlock(
+                target_block_identifier.0,
+            ))?;
+        self.br(next_basic_block)?;
+
+        Ok(())
+    }
+
+    fn compile_return_terminator(&self) -> Result<(), CodeGenerationError> {
+        if self.body.is_memoised {
+            self.emit_memo_store()?;
+        }
+
+        let mir_return_type = self
+            .body
+            .locals
+            .get(&self.body.return_local)
+            .ok_or_else(|| {
+                CodeGenerationError::LlvmInternalError(
+                    backend_messages::missing_return_slot_layout_tracking_record(),
+                )
+            })?
+            .value_type
+            .clone();
+
+        if self.body.is_throws {
+            let payload = if mir_return_type == Type::Void {
+                self.codegen.resolve_llvm_type(&Type::Void)?.const_zero()
+            } else if let Some(return_pointer) = self.frame.pointer(self.body.return_local) {
+                let element_type = self.codegen.resolve_llvm_type(&mir_return_type)?;
+
+                self.load(element_type, return_pointer, "throws_success_value")?
+            } else {
+                self.codegen
+                    .resolve_llvm_type(&mir_return_type)?
+                    .const_zero()
+            };
+
+            let result =
+                self.throws_result(true, payload, self.pointer_type().const_null().into())?;
+            self.return_value(Some(&result))?;
+        } else if mir_return_type == Type::Void {
+            if self.function_name == x_ast::ENTRY_POINT_NAME {
+                let current = self.current_function()?;
+
+                if current.get_type().get_return_type().is_some() {
+                    let status = self.i32().const_zero();
+                    self.return_value(Some(&status))?;
+                } else {
+                    self.return_value(None)?;
+                }
+            } else {
+                self.return_value(None)?;
+            }
+        } else if let Some(return_pointer) = self.frame.pointer(self.body.return_local) {
+            let element_type = self.codegen.resolve_llvm_type(&mir_return_type)?;
+            let return_value = self.load(element_type, return_pointer, "ret_val")?;
+            self.return_value(Some(&return_value))?;
+        } else {
+            self.return_value(None)?;
+        }
+
+        Ok(())
+    }
+
     fn return_type_or_void(&self) -> &Type {
         self.body
             .locals

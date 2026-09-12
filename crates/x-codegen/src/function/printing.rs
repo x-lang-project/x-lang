@@ -55,3 +55,41 @@ impl ScalarPrintFormat {
         }
     }
 }
+
+impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    fn emit_newline_if_needed(&self, newline: bool) -> Result<(), CodeGenerationError> {
+        if newline {
+            self.emit_putchar_newline()
+        } else {
+            Ok(())
+        }
+    }
+
+    fn emit_putchar_newline(&self) -> Result<(), CodeGenerationError> {
+        let putchar = self.required_function("putchar")?;
+
+        self.call(
+            putchar,
+            &[self.i32().const_int('\n' as u64, false).into()],
+            "println.newline",
+        )?;
+
+        Ok(())
+    }
+
+    fn emit_print_cstr_pointer(
+        &self,
+        str_pointer: values::PointerValue<'ctx>,
+    ) -> Result<(), CodeGenerationError> {
+        let printf = self.required_function("printf")?;
+        let format = self.global_string_pointer("%s", "print.str.format")?;
+
+        self.call(
+            printf,
+            &[format.as_pointer_value().into(), str_pointer.into()],
+            "print.str",
+        )?;
+
+        Ok(())
+    }
+}
