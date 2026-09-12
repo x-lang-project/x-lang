@@ -40,6 +40,77 @@ impl From<LLVMString> for CodeGenerationError {
     }
 }
 
+impl Display for CodeGenerationError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::BuilderError(value0) => {
+                formatter.write_str(&backend_messages::codegen_builder_error_display(value0))
+            }
+            Self::TypeNotFound(value0) => {
+                formatter.write_str(&backend_messages::codegen_type_not_found_display(value0))
+            }
+            Self::UnsupportedType(value0) => {
+                formatter.write_str(&backend_messages::codegen_unsupported_type_display(value0))
+            }
+            Self::FunctionSignatureMissing(value0) => formatter
+                .write_str(&backend_messages::codegen_function_signature_missing_display(value0)),
+            Self::MissingTerminator(value0) => formatter.write_str(
+                &backend_messages::codegen_missing_terminator_display(value0),
+            ),
+            Self::MissingEntryBlock => {
+                formatter.write_str(&backend_messages::codegen_missing_entry_block_display())
+            }
+            Self::MissingLocalAllocation(value0) => formatter.write_str(
+                &backend_messages::codegen_missing_local_allocation_display(value0),
+            ),
+            Self::MissingHardwareArgument(value0) => formatter
+                .write_str(&backend_messages::codegen_missing_hardware_argument_display(value0)),
+            Self::UnsupportedOperator { operator } => formatter.write_str(
+                &backend_messages::codegen_unsupported_operator_display(operator),
+            ),
+            Self::UnsupportedUnaryOperator { operator } => formatter
+                .write_str(&backend_messages::codegen_unsupported_unary_operator_display(operator)),
+            Self::UnsupportedCast { to } => {
+                formatter.write_str(&backend_messages::codegen_unsupported_cast_display(to))
+            }
+            Self::TypeHasNoSize(value0) => {
+                formatter.write_str(&backend_messages::codegen_type_has_no_size_display(value0))
+            }
+            Self::MissingCalleeSymbol(value0) => formatter.write_str(
+                &backend_messages::codegen_missing_callee_symbol_display(value0),
+            ),
+            Self::JitExecutionFailure(value0) => formatter.write_str(
+                &backend_messages::codegen_jit_execution_failure_display(value0),
+            ),
+            Self::LlvmInternalError(value0) => formatter.write_str(
+                &backend_messages::codegen_llvm_internal_error_display(value0),
+            ),
+            Self::JitInitializationFailure(value0) => formatter
+                .write_str(&backend_messages::codegen_jit_initialization_failure_display(value0)),
+            Self::MissingMirBlock(value0) => {
+                formatter.write_str(&backend_messages::codegen_missing_mir_block_display(value0))
+            }
+            Self::MissingLlvmBlock(value0) => formatter.write_str(
+                &backend_messages::codegen_missing_llvm_block_display(value0),
+            ),
+            Self::LlvmVerificationFailure(value0) => formatter
+                .write_str(&backend_messages::codegen_llvm_verification_failure_display(value0)),
+            Self::InvalidMir(value0) => {
+                formatter.write_str(&backend_messages::codegen_invalid_mir_display(value0))
+            }
+        }
+    }
+}
+
+impl error::Error for CodeGenerationError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        match self {
+            Self::BuilderError(error) => Some(error),
+            _ => None,
+        }
+    }
+}
+
 impl From<BuilderError> for CodeGenerationError {
     fn from(error: BuilderError) -> Self {
         Self::BuilderError(error)
