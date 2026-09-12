@@ -23,6 +23,8 @@ use crate::errors::CodeGenerationError;
 use x_logging::info;
 use x_mir::MirProgram;
 
+pub(crate) const CHERI_CAPABILITY_ADDRESS_SPACE: u16 = 200;
+
 pub struct CodeGeneration<'ctx> {
     pub context: &'ctx Context,
     pub builder: Builder<'ctx>,
@@ -42,6 +44,18 @@ pub enum CheriPermissionClass {
     Unique,
     Mutable,
     Shared,
+}
+
+impl CheriPermissionClass {
+    pub const fn from_qualifiers(qualifiers: x_ast::ReferenceQualifiers) -> Self {
+        if qualifiers.is_unique {
+            Self::Unique
+        } else if qualifiers.is_mut {
+            Self::Mutable
+        } else {
+            Self::Shared
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -64,6 +78,10 @@ pub struct CodeGenerationOptions {
 impl<'ctx> CodeGeneration<'ctx> {
     pub fn pointer_address_space(&self) -> AddressSpace {
         AddressSpace::from(self.options.pointer_address_space)
+    }
+
+    pub fn record_cheri_projection(&self, record: CheriProjectionRecord) {
+        self.cheri_projection_records.borrow_mut().push(record);
     }
 
     pub fn cheri_projection_records(&self) -> Vec<CheriProjectionRecord> {
