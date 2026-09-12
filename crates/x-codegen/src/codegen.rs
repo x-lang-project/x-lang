@@ -6,6 +6,7 @@ pub use optimize::create_target_machine_for_initialized_target;
 pub use optimize::initialize_target_for_triple;
 pub use optimize::llvm_optimization_level;
 mod records;
+mod runtime;
 
 mod symbols;
 mod types;
