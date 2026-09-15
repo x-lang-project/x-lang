@@ -50,4 +50,10 @@ impl RecordMetadata {
     pub(crate) fn field_index(&self, name: &str) -> Option<u32> {
         self.indices.get(name).copied()
     }
+
+    pub(crate) fn field_type(&self, name: &str) -> Option<&Type> {
+        self.field_index(name)
+            .and_then(|index| self.fields.get(index as usize))
+            .map(|(_, value_type)| value_type)
+    }
 }
