@@ -9,6 +9,29 @@ use crate::errors::CodeGenerationError;
 use x_ast::Type;
 
 impl<'ctx> CodeGeneration<'ctx> {
+    fn resolve_simd_type(
+        &self,
+        value_type: &Type,
+        element: &Type,
+        lanes: usize,
+    ) -> Result<BasicTypeEnum<'ctx>, CodeGenerationError> {
+        if lanes == 0 {
+            return Err(CodeGenerationError::UnsupportedType(value_type.clone()));
+        }
+
+        let element_llvm_type = self.resolve_llvm_type(element)?;
+
+        match element_llvm_type {
+            BasicTypeEnum::IntType(integer_type) => Ok(integer_type.vec_type(lanes as u32).into()),
+            BasicTypeEnum::FloatType(float_type) => Ok(float_type.vec_type(lanes as u32).into()),
+            _ => Err(CodeGenerationError::UnsupportedType(value_type.clone())),
+        }
+    }
+
+    pub(super) fn pointer_type(&self) -> types::PointerType<'ctx> {
+        self.context.ptr_type(self.pointer_address_space())
+    }
+
     pub(super) fn primitive_llvm_type(&self, value_type: &Type) -> Option<BasicTypeEnum<'ctx>> {
         Some(match value_type {
             Type::I8 | Type::U8 | Type::Character | Type::Void => self.context.i8_type().into(),
@@ -40,13 +63,26 @@ impl<'ctx> CodeGeneration<'ctx> {
         }
 
         match value_type {
+            Type::Simd { element, lanes } => self.resolve_simd_type(value_type, element, *lanes),
+            Type::Tuple(element_types) => {
+                let llvm_fields = element_types
+                    .iter()
+                    .map(|value_type| self.resolve_llvm_type(value_type))
+                    .collect::<Result<Vec<_>, _>>()?;
+
+                Ok(self.context.struct_type(&llvm_fields, false).into())
+            }
+            Type::Custom(struct_name)
+            | Type::GenericInstance {
+                name: struct_name, ..
+            } => {
+                if let Some(current_struct_type) = self.resolve_struct_type(struct_name) {
+                    Ok(current_struct_type.into())
+                } else {
+                    Err(CodeGenerationError::UnsupportedType(value_type.clone()))
+                }
+            }
             _ => Err(CodeGenerationError::UnsupportedType(value_type.clone())),
         }
-    }
-}
-
-impl<'ctx> CodeGeneration<'ctx> {
-    pub(super) fn pointer_type(&self) -> types::PointerType<'ctx> {
-        self.context.ptr_type(self.pointer_address_space())
     }
 }
