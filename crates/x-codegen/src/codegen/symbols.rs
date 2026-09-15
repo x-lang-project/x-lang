@@ -1,3 +1,5 @@
+use std::collections;
+
 use inkwell::values::FunctionValue;
 
 use super::CodeGeneration;
@@ -13,6 +15,10 @@ impl<'ctx> CodeGeneration<'ctx> {
             .get(source_name)
             .map(String::as_str)
             .unwrap_or(source_name)
+    }
+
+    pub(crate) fn has_exact_source_function(&self, source_name: &str) -> bool {
+        self.function_symbols.contains_key(source_name)
     }
 
     pub fn resolve_function_by_source_suffix(
@@ -42,5 +48,44 @@ impl<'ctx> CodeGeneration<'ctx> {
         let first = matches.next()?;
 
         matches.next().is_none().then_some(first)
+    }
+
+    pub fn llvm_global_symbol<'a>(&'a self, source_name: &'a str) -> &'a str {
+        self.global_symbols
+            .get(source_name)
+            .map(String::as_str)
+            .unwrap_or(source_name)
+    }
+
+    pub(super) fn prepare_symbol_tables(
+        &mut self,
+        mir_program: &MirProgram,
+    ) -> Result<(), CodeGenerationError> {
+        let table = collect_symbol_table(
+            mir_program,
+            MangleConfig {
+                enabled: self.options.mangle_symbols,
+                export_global_symbols: self.options.export_global_symbols,
+            },
+        );
+        let mut identities = collections::HashMap::new();
+
+        for symbol in &table.symbols {
+            if let Some(previous) = identities.insert(&symbol.symbol_name, symbol)
+                && (previous.source_name != symbol.source_name || previous.kind != symbol.kind)
+            {
+                return Err(CodeGenerationError::InvalidMir(
+                    backend_messages::llvm_symbol_identity_collision(
+                        &symbol.symbol_name,
+                        &previous.source_name,
+                        &symbol.source_name,
+                    ),
+                ));
+            }
+        }
+        self.function_symbols = table.function_map().into_iter().collect();
+        self.global_symbols = table.static_map().into_iter().collect();
+
+        Ok(())
     }
 }
