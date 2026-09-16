@@ -9,6 +9,48 @@ use x_ast::Type;
 use x_mir::Operand;
 
 impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    pub(super) fn emit_slice_sum(
+        &self,
+        slice: SliceValue<'ctx>,
+        initial: Option<&Operand>,
+    ) -> Result<BasicValueEnum<'ctx>, CodeGenerationError> {
+        if !slice.element.is_int_type() && !slice.element.is_float_type() {
+            return Err(CodeGenerationError::UnsupportedType(slice.element_ast));
+        }
+
+        let initial = initial
+            .map(|operand| self.load_operand_value_with_type(operand, &slice.element_ast))
+            .transpose()?
+            .unwrap_or_else(|| slice.element.const_zero());
+        let accumulator = self.alloca(slice.element, "slice_sum_acc")?;
+        self.store(accumulator, initial)?;
+        self.counted_loop("slice_sum", slice.len, &mut |index| {
+            let pointer = self.gep(slice.element, slice.data, index, "slice_sum_elem_ptr")?;
+            let value = self.load(slice.element, pointer, "slice_sum_elem")?;
+            let current = self.load(slice.element, accumulator, "slice_sum_acc_load")?;
+            let result = if slice.element.is_int_type() {
+                self.integer_add(
+                    current.into_int_value(),
+                    value.into_int_value(),
+                    "slice_sum_next_acc",
+                )?
+                .into()
+            } else {
+                self.b()
+                    .build_float_add(
+                        current.into_float_value(),
+                        value.into_float_value(),
+                        "slice_sum_next_acc",
+                    )?
+                    .into()
+            };
+
+            self.store(accumulator, result)
+        })?;
+
+        self.load(slice.element, accumulator, "slice_sum_result")
+    }
+
     fn scalar_element_equal(
         &self,
         left: BasicValueEnum<'ctx>,

@@ -67,4 +67,40 @@ impl CodeGeneration<'_> {
 
         self.resolve_type_layout(&Type::Custom(name.into()))
     }
+
+    pub(crate) fn resolve_named_field_offset(
+        &self,
+        name: &str,
+        field: &str,
+    ) -> Result<u64, CodeGenerationError> {
+        let canonical = self
+            .resolve_struct_name(name)
+            .ok_or_else(|| CodeGenerationError::TypeNotFound(name.into()))?;
+        let index = self
+            .records
+            .get(canonical)
+            .and_then(|record| record.field_index(field))
+            .ok_or_else(|| {
+                CodeGenerationError::InvalidMir(
+                    backend_messages::unknown_field_field_in_structure_name(field, name),
+                )
+            })?;
+        let structure = self
+            .resolve_struct_type(canonical)
+            .ok_or_else(|| CodeGenerationError::TypeNotFound(canonical.into()))?;
+
+        if structure.is_opaque() || index >= structure.count_fields() {
+            return Err(CodeGenerationError::InvalidMir(
+                backend_messages::field_name_field_has_no_concrete_layout(name, field),
+            ));
+        }
+
+        self.target_data()
+            .offset_of_element(&structure, index)
+            .ok_or_else(|| {
+                CodeGenerationError::InvalidMir(
+                    backend_messages::cannot_determine_offset_of_name_field(name, field),
+                )
+            })
+    }
 }

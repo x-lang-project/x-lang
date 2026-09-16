@@ -91,4 +91,37 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
             Err(CodeGenerationError::UnsupportedCast { to: to.clone() })
         }
     }
+
+    pub(super) fn compile_cast_rvalue(
+        &self,
+        expression: &Operand,
+        to: &Type,
+    ) -> Result<BasicValueEnum<'ctx>, CodeGenerationError> {
+        let value = self.load_operand_value(expression)?;
+        let source_ast_type = self.operand_ast_type(expression).unwrap_or(Type::Unknown);
+        let target_llvm_type = self.codegen.resolve_llvm_type(to)?;
+
+        match to {
+            Type::I8
+            | Type::U8
+            | Type::I16
+            | Type::U16
+            | Type::I32
+            | Type::U32
+            | Type::I64
+            | Type::U64
+            | Type::ISize
+            | Type::USize
+            | Type::Character => {
+                self.compile_integer_cast(value, to, &source_ast_type, target_llvm_type)
+            }
+            Type::F32 | Type::F64 => {
+                self.compile_float_cast(value, to, &source_ast_type, target_llvm_type)
+            }
+            Type::RawPointer { .. } | Type::Reference { .. } => {
+                self.compile_pointer_cast(value, to, target_llvm_type)
+            }
+            _ => Err(CodeGenerationError::UnsupportedCast { to: to.clone() }),
+        }
+    }
 }

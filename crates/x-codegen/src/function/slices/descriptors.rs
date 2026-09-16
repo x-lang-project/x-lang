@@ -8,6 +8,114 @@ use x_diagnostics::backend_messages;
 use x_mir::Operand;
 
 impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    pub(super) fn slice_receiver(
+        &self,
+        function: &str,
+        arguments: &[Operand],
+    ) -> Result<SliceValue<'ctx>, CodeGenerationError> {
+        let receiver_argument = arguments.first().ok_or_else(|| {
+            CodeGenerationError::LlvmInternalError(
+                backend_messages::function_expects_a_slice_receiver(function),
+            )
+        })?;
+
+        if self.operand_ast_type(receiver_argument) == Some(Type::String) {
+            let descriptor = self
+                .load_operand_value(receiver_argument)?
+                .into_pointer_value();
+            let (data, length) = self.load_slice_descriptor(descriptor)?;
+
+            return Ok(SliceValue {
+                data,
+                len: length,
+                element: self.codegen.resolve_llvm_type(&Type::U8)?,
+                element_ast: Type::U8,
+            });
+        }
+
+        let Some((value_type, slot)) = self.slice_receiver_storage(receiver_argument)? else {
+            return Err(CodeGenerationError::UnsupportedType(
+                self.operand_ast_type(receiver_argument)
+                    .unwrap_or(Type::Unknown),
+            ));
+        };
+
+        if let Type::FixedSizedArray(element_ast, length) = value_type {
+            return self.fixed_array_slice(*element_ast, length, slot);
+        }
+
+        let element_ast = match value_type {
+            Type::Array(element_ast) => *element_ast,
+            Type::String => Type::U8,
+            other => return Err(CodeGenerationError::UnsupportedType(other)),
+        };
+
+        let element = self.codegen.resolve_llvm_type(&element_ast)?;
+        let receiver = self
+            .load(
+                self.pointer_type().into(),
+                slot,
+                "slice_descriptor_receiver",
+            )?
+            .into_pointer_value();
+        let (data, length) = self.load_slice_descriptor(receiver)?;
+
+        Ok(SliceValue {
+            data,
+            len: length,
+            element,
+            element_ast,
+        })
+    }
+
+    fn fixed_array_slice(
+        &self,
+        element_ast: Type,
+        length: usize,
+        data: PointerValue<'ctx>,
+    ) -> Result<SliceValue<'ctx>, CodeGenerationError> {
+        if self.codegen.soa_fields(&element_ast).is_some() {
+            return Err(CodeGenerationError::UnsupportedType(element_ast));
+        }
+
+        let element = self.codegen.resolve_llvm_type(&element_ast)?;
+
+        Ok(SliceValue {
+            data,
+            len: self.usize_type().const_int(length as u64, false),
+            element,
+            element_ast,
+        })
+    }
+
+    fn slice_receiver_storage(
+        &self,
+        argument: &Operand,
+    ) -> Result<Option<(Type, PointerValue<'ctx>)>, CodeGenerationError> {
+        let (Operand::Copy(place) | Operand::Move(place)) = argument else {
+            return Ok(None);
+        };
+
+        let mut value_type = self.get_place_type(place);
+        let mut slot = self.resolve_place_pointer(place)?;
+
+        while let Type::Reference { inner, .. } = value_type {
+            slot = self
+                .load(self.pointer_type().into(), slot, "slice_reference_receiver")?
+                .into_pointer_value();
+            value_type = *inner;
+        }
+
+        if let Type::RawPointer { inner, .. } = value_type {
+            slot = self
+                .load(self.pointer_type().into(), slot, "slice_raw_receiver")?
+                .into_pointer_value();
+            value_type = *inner;
+        }
+
+        Ok(Some((value_type, slot)))
+    }
+
     pub(in crate::function) fn emit_slice_descriptor(
         &self,
         data: BasicValueEnum<'ctx>,

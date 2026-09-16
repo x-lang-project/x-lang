@@ -1,3 +1,4 @@
+mod aggregates;
 mod arguments;
 mod assignment;
 mod call_dispatch;
@@ -13,6 +14,7 @@ mod memoise;
 mod memory;
 mod numeric;
 mod parallel;
+mod places;
 mod pointers;
 mod printing;
 mod references;

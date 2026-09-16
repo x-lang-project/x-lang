@@ -44,6 +44,32 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
             )
         })
     }
+
+    pub(super) fn value_argument(
+        &self,
+        argument: &Operand,
+        value_type: &Type,
+    ) -> Result<BasicValueEnum<'ctx>, CodeGenerationError> {
+        self.load_operand_value_with_type(argument, value_type)
+    }
+
+    pub(super) fn integer_argument(
+        &self,
+        argument: &Operand,
+        value_type: &Type,
+    ) -> Result<IntValue<'ctx>, CodeGenerationError> {
+        Ok(self.value_argument(argument, value_type)?.into_int_value())
+    }
+
+    pub(super) fn pointer_argument(
+        &self,
+        argument: &Operand,
+        name: &str,
+    ) -> Result<PointerValue<'ctx>, CodeGenerationError> {
+        let value = self.load_operand_value(argument)?;
+
+        self.coerce_value_to_pointer(value, name)
+    }
 }
 
 impl<'a, 'ctx> Arguments<'a, 'ctx> {
@@ -73,6 +99,21 @@ impl<'a, 'ctx> Arguments<'a, 'ctx> {
 }
 
 impl<'a, 'ctx> Argument<'a, 'ctx> {
+    pub(super) fn value(
+        &self,
+        value_type: &Type,
+    ) -> Result<BasicValueEnum<'ctx>, CodeGenerationError> {
+        self.compiler.value_argument(self.operand, value_type)
+    }
+
+    pub(super) fn integer(&self, value_type: &Type) -> Result<IntValue<'ctx>, CodeGenerationError> {
+        self.compiler.integer_argument(self.operand, value_type)
+    }
+
+    pub(super) fn pointer(&self, name: &str) -> Result<PointerValue<'ctx>, CodeGenerationError> {
+        self.compiler.pointer_argument(self.operand, name)
+    }
+
     pub(super) fn operand(&self) -> &'a Operand {
         self.operand
     }

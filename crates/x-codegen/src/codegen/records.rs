@@ -15,6 +15,10 @@ pub(crate) struct RecordMetadata {
 }
 
 impl RecordCatalogue {
+    pub(crate) fn get(&self, name: &str) -> Option<&RecordMetadata> {
+        self.declarations.get(name)
+    }
+
     pub(crate) fn resolve_name(&self, requested: &str) -> Option<&str> {
         if let Some((name, _)) = self.declarations.get_key_value(requested) {
             return Some(name);

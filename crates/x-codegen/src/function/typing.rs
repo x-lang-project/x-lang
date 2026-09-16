@@ -85,6 +85,13 @@ impl FunctionCompiler<'_, '_> {
         };
 
         match base_type {
+            Type::Custom(struct_name)
+            | Type::GenericInstance {
+                name: struct_name, ..
+            } => self
+                .codegen
+                .resolve_struct_field_type(&struct_name, field_name)
+                .unwrap_or_else(|| value_type.clone()),
             _ => value_type.clone(),
         }
     }

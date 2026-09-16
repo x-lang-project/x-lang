@@ -28,6 +28,28 @@ impl<'ctx> CodeGeneration<'ctx> {
         }
     }
 
+    fn resolve_fixed_array_type(
+        &self,
+        inner_type: &Type,
+        size: usize,
+    ) -> Result<BasicTypeEnum<'ctx>, CodeGenerationError> {
+        if let Some(fields) = self.soa_fields(inner_type) {
+            let transposed_fields = fields
+                .iter()
+                .map(|(_, field_type)| {
+                    self.resolve_llvm_type(field_type)
+                        .map(|value_type| value_type.array_type(size as u32).into())
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            return Ok(self.context.struct_type(&transposed_fields, false).into());
+        }
+
+        let element_llvm_type = self.resolve_llvm_type(inner_type)?;
+
+        Ok(element_llvm_type.array_type(size as u32).into())
+    }
+
     pub(super) fn pointer_type(&self) -> types::PointerType<'ctx> {
         self.context.ptr_type(self.pointer_address_space())
     }
@@ -63,6 +85,9 @@ impl<'ctx> CodeGeneration<'ctx> {
         }
 
         match value_type {
+            Type::FixedSizedArray(inner_type, size) => {
+                self.resolve_fixed_array_type(inner_type, *size)
+            }
             Type::Simd { element, lanes } => self.resolve_simd_type(value_type, element, *lanes),
             Type::Tuple(element_types) => {
                 let llvm_fields = element_types

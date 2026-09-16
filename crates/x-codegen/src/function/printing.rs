@@ -57,12 +57,141 @@ impl ScalarPrintFormat {
 }
 
 impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    pub(super) fn emit_print_char(&self, arguments: &[Operand]) -> Result<(), CodeGenerationError> {
+        let Some(argument) = arguments.first() else {
+            return Err(CodeGenerationError::LlvmInternalError(
+                backend_messages::io_print_char_expects_one_character_argument(),
+            ));
+        };
+
+        let putchar = self.required_function("putchar")?;
+
+        let value = self.load_operand_value_with_type(argument, &Type::Character)?;
+        let integer_value = value.into_int_value();
+        let i32_value = if integer_value.get_type().get_bit_width() == 32 {
+            integer_value
+        } else {
+            self.integer_z_extend(integer_value, self.i32(), "print_char_i32")?
+        };
+
+        self.call(putchar, &[i32_value.into()], "print_char")?;
+
+        Ok(())
+    }
+
+    pub(super) fn emit_print(&self, arguments: &[Operand]) -> Result<(), CodeGenerationError> {
+        let Some(argument) = arguments.first() else {
+            return Err(CodeGenerationError::LlvmInternalError(
+                backend_messages::print_expects_one_argument(),
+            ));
+        };
+
+        self.emit_print_value(argument, false)
+    }
+
+    pub(super) fn emit_println(&self, arguments: &[Operand]) -> Result<(), CodeGenerationError> {
+        let [argument] = arguments else {
+            return Err(CodeGenerationError::LlvmInternalError(
+                backend_messages::println_expects_exactly_one_argument(),
+            ));
+        };
+
+        self.emit_print_value(argument, true)
+    }
+
+    fn emit_print_value(
+        &self,
+        argument: &Operand,
+        newline: bool,
+    ) -> Result<(), CodeGenerationError> {
+        match self.operand_ast_type(argument).unwrap_or(Type::Unknown) {
+            Type::Character => {
+                self.emit_print_char(slice::from_ref(argument))?;
+
+                self.emit_newline_if_needed(newline)
+            }
+            Type::String => {
+                self.emit_print_str(slice::from_ref(argument))?;
+
+                self.emit_newline_if_needed(newline)
+            }
+            Type::Boolean => self.emit_print_boolean(argument, newline),
+            value_type => match ScalarPrintFormat::for_type(&value_type) {
+                Some(format) => self.emit_printf(argument, format, newline),
+                None => Err(CodeGenerationError::LlvmInternalError(
+                    backend_messages::print_does_not_support_value_of_type_type(value_type),
+                )),
+            },
+        }
+    }
+
+    fn emit_print_boolean(
+        &self,
+        argument: &Operand,
+        newline: bool,
+    ) -> Result<(), CodeGenerationError> {
+        let value = self
+            .load_operand_value_with_type(argument, &Type::Boolean)?
+            .into_int_value();
+
+        let true_text = self.global_string_pointer("true", "print.bool.true")?;
+        let false_text = self.global_string_pointer("false", "print.bool.false")?;
+        let selected = self.select_pointer(
+            value,
+            true_text.as_pointer_value(),
+            false_text.as_pointer_value(),
+            "print.bool.text",
+        )?;
+
+        self.emit_print_cstr_pointer(selected)?;
+
+        self.emit_newline_if_needed(newline)
+    }
+
     fn emit_newline_if_needed(&self, newline: bool) -> Result<(), CodeGenerationError> {
         if newline {
             self.emit_putchar_newline()
         } else {
             Ok(())
         }
+    }
+
+    fn emit_printf(
+        &self,
+        argument: &Operand,
+        format: ScalarPrintFormat,
+        newline: bool,
+    ) -> Result<(), CodeGenerationError> {
+        let printf = self.required_function("printf")?;
+        let fmt_pointer = self.global_string_pointer(format.format(newline), "print.fmt")?;
+        let actual_load_type = if matches!(self.operand_ast_type(argument), Some(Type::F32)) {
+            Type::F32
+        } else {
+            format.load_type()
+        };
+
+        let mut value = self.load_operand_value_with_type(argument, &actual_load_type)?;
+
+        if value.is_float_value() {
+            let float_value = value.into_float_value();
+
+            if float_value.get_type() == self.context().f32_type() {
+                value = self
+                    .float_ext(float_value, self.context().f64_type(), "print.f64")?
+                    .into();
+            }
+        }
+
+        self.call(
+            printf,
+            &[
+                fmt_pointer.as_pointer_value().into(),
+                BasicMetadataValueEnum::from(value),
+            ],
+            "print.printf",
+        )?;
+
+        Ok(())
     }
 
     fn emit_putchar_newline(&self) -> Result<(), CodeGenerationError> {
@@ -73,6 +202,22 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
             &[self.i32().const_int('\n' as u64, false).into()],
             "println.newline",
         )?;
+
+        Ok(())
+    }
+
+    pub(super) fn emit_print_str(&self, arguments: &[Operand]) -> Result<(), CodeGenerationError> {
+        let Some(argument) = arguments.first() else {
+            return Err(CodeGenerationError::LlvmInternalError(
+                backend_messages::io_print_str_expects_one_string_argument(),
+            ));
+        };
+
+        let value = self.load_operand_value_with_type(argument, &Type::String)?;
+        let descriptor = value.into_pointer_value();
+        let (data, length) = self.load_slice_descriptor(descriptor)?;
+        let write = self.required_function(x_runtime::abi::WRITE_STDOUT)?;
+        self.call(write, &[data.into(), length.into()], "print.str.bytes")?;
 
         Ok(())
     }

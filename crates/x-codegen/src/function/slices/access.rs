@@ -38,4 +38,19 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
 
         self.option_pointer(has_items, pointer, "slice_last_option")
     }
+
+    pub(super) fn emit_slice_get(
+        &self,
+        function: &str,
+        arguments: &[Operand],
+        slice: SliceValue<'ctx>,
+    ) -> Result<BasicValueEnum<'ctx>, CodeGenerationError> {
+        let [_, index] = self.arguments(function, arguments).exact()?;
+        let index = index.integer(&Type::USize)?;
+
+        let in_bounds = self.icmp(IntPredicate::ULT, index, slice.len, "slice_get_in_bounds")?;
+        let element_pointer = self.gep(slice.element, slice.data, index, "slice_get_ptr")?;
+
+        self.option_pointer(in_bounds, element_pointer, "slice_get_option")
+    }
 }

@@ -1,3 +1,4 @@
+mod calls;
 mod exceptions;
 
 use inkwell::attributes::{Attribute, AttributeLoc};
@@ -14,6 +15,40 @@ struct CallContinuation<'a> {
 }
 
 impl FunctionCompiler<'_, '_> {
+    fn compile_switch_terminator(
+        &self,
+        discriminant: &Operand,
+        targets: &[(i64, BlockIdentifier)],
+        otherwise: &BlockIdentifier,
+    ) -> Result<(), CodeGenerationError> {
+        let switch_value = self.load_operand_value(discriminant)?.into_int_value();
+        let default_basic_block = self
+            .llvm_blocks
+            .get(&otherwise.0)
+            .copied()
+            .ok_or(CodeGenerationError::MissingLlvmBlock(otherwise.0))?;
+        let cases: Result<Vec<_>, CodeGenerationError> = targets
+            .iter()
+            .map(|(value, target_identifier)| {
+                let block = self
+                    .llvm_blocks
+                    .get(&target_identifier.0)
+                    .copied()
+                    .ok_or(CodeGenerationError::MissingLlvmBlock(target_identifier.0))?;
+
+                Ok((
+                    switch_value.get_type().const_int(*value as u64, true),
+                    block,
+                ))
+            })
+            .collect();
+        let cases = cases?;
+        self.b()
+            .build_switch(switch_value, default_basic_block, &cases)?;
+
+        Ok(())
+    }
+
     fn compile_goto_terminator(
         &self,
         target_block_identifier: &BlockIdentifier,
@@ -26,6 +61,84 @@ impl FunctionCompiler<'_, '_> {
                 target_block_identifier.0,
             ))?;
         self.br(next_basic_block)?;
+
+        Ok(())
+    }
+
+    pub fn compile_terminator(
+        &self,
+        terminator: &MirTerminator,
+    ) -> Result<(), CodeGenerationError> {
+        match terminator {
+            MirTerminator::Return => self.compile_return_terminator()?,
+            MirTerminator::Goto(target_block_identifier) => {
+                self.compile_goto_terminator(target_block_identifier)?
+            }
+            MirTerminator::SwitchInteger {
+                discriminant,
+                targets,
+                otherwise,
+            } => self.compile_switch_terminator(discriminant, targets, otherwise)?,
+            MirTerminator::Unreachable => {
+                self.unreachable()?;
+            }
+            MirTerminator::Abort => self.trap()?,
+            MirTerminator::Exit { code } => {
+                let code = self.load_operand_value_with_type(code, &Type::I32)?;
+                let runtime = self.required_function(x_runtime::abi::PROCESS_EXIT)?;
+                self.call(runtime, &[code.into()], "process_exit")?;
+                self.unreachable()?;
+            }
+            MirTerminator::Throw { error } => self.compile_throw_terminator(error)?,
+            MirTerminator::TailCall {
+                function,
+                arguments,
+            } => self.compile_tail_call(function, arguments)?,
+
+            MirTerminator::Call {
+                function,
+                arguments,
+                destination,
+                target,
+            } => self.compile_call_terminator(
+                function,
+                arguments,
+                CallContinuation {
+                    destination,
+                    target,
+                },
+            )?,
+
+            MirTerminator::TryCall {
+                function,
+                arguments,
+                destination,
+                target,
+            } => self.compile_try_call_terminator(
+                function,
+                arguments,
+                CallContinuation {
+                    destination,
+                    target,
+                },
+            )?,
+
+            MirTerminator::CatchCall {
+                function,
+                arguments,
+                fallback,
+                destination,
+                target,
+            } => self.compile_catch_call_terminator(
+                function,
+                arguments,
+                fallback,
+                CallContinuation {
+                    destination,
+                    target,
+                },
+            )?,
+        }
 
         Ok(())
     }

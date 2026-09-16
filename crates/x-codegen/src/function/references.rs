@@ -178,6 +178,11 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
                 }
 
                 let field_index = match &base_type {
+                    Type::Custom(name) | Type::GenericInstance { name, .. } => self
+                        .codegen
+                        .records
+                        .get(name)
+                        .and_then(|record| record.field_index(field_name)),
                     Type::Tuple(_) => field_name.parse::<u32>().ok(),
                     _ => None,
                 };

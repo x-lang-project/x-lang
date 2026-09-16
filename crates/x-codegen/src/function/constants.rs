@@ -12,6 +12,20 @@ use x_diagnostics::backend_messages;
 use x_mir::{LocalIdentifier, MirStatement, Operand, Place, Rvalue};
 
 impl<'ctx> FunctionCompiler<'_, 'ctx> {
+    pub(crate) fn compile_block_statements(
+        &mut self,
+        statements: &[MirStatement],
+    ) -> Result<(), CodeGenerationError> {
+        let mut constants = BlockConstants::default();
+
+        for statement in statements {
+            self.compile_statement_with_constants(statement, Some(&constants))?;
+            constants.observe(self, statement)?;
+        }
+
+        Ok(())
+    }
+
     pub(super) fn constant_aggregate_initializer(
         &self,
         rvalue: &Rvalue,
@@ -30,6 +44,12 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
         constants: &HashMap<LocalIdentifier, BasicValueEnum<'ctx>>,
     ) -> Result<Option<BasicValueEnum<'ctx>>, CodeGenerationError> {
         match operand {
+            Operand::ConstantInteger(_)
+            | Operand::ConstantBoolean(_)
+            | Operand::ConstantCharacter(_)
+            | Operand::ConstantFloat(_) => self
+                .load_operand_value_with_type(operand, value_type)
+                .map(Some),
             Operand::Copy(place) | Operand::Move(place) => match &**place {
                 Place::Local(identifier) => Ok(constants.get(identifier).copied()),
                 _ => Ok(None),
@@ -46,9 +66,11 @@ impl<'ctx> FunctionCompiler<'_, 'ctx> {
     ) -> Result<Option<BasicValueEnum<'ctx>>, CodeGenerationError> {
         match rvalue {
             Rvalue::Use(operand) => self.literal_operand(operand, value_type, constants),
-
+            Rvalue::StructInstantiate { name, fields } => {
+                self.literal_struct(name, fields, constants)
+            }
             Rvalue::Tuple(elements) => self.literal_tuple(elements, value_type, constants),
-
+            Rvalue::Array(elements) => self.literal_array_rvalue(elements, value_type, constants),
             _ => Ok(None),
         }
     }
