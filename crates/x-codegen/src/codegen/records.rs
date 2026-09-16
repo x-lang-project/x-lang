@@ -15,6 +15,25 @@ pub(crate) struct RecordMetadata {
 }
 
 impl RecordCatalogue {
+    pub(crate) fn register(&mut self, definition: &StructDefinition) {
+        let indices = definition
+            .fields
+            .iter()
+            .enumerate()
+            .map(|(index, (name, _))| (name.clone(), index as u32))
+            .collect();
+
+        self.declarations.insert(
+            definition.name.clone(),
+            RecordMetadata {
+                fields: definition.fields.clone(),
+                indices,
+                layout: definition.layout,
+                invariant: definition.invariant.clone(),
+            },
+        );
+    }
+
     pub(crate) fn get(&self, name: &str) -> Option<&RecordMetadata> {
         self.declarations.get(name)
     }
