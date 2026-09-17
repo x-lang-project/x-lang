@@ -2,10 +2,12 @@ use inkwell::attributes::{Attribute, AttributeLoc};
 use inkwell::values::FunctionValue;
 
 use super::CodeGeneration;
-
+use memory_contracts::*;
 use x_ast::Type;
 use x_mir::CallContract;
 use x_mir::FunctionMeta;
+
+mod memory_contracts;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum LlvmEnumAttribute {
