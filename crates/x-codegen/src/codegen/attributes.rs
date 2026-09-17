@@ -33,6 +33,84 @@ impl LlvmEnumAttribute {
 }
 
 impl<'ctx> CodeGeneration<'ctx> {
+    pub(super) fn apply_function_semantic_attributes(
+        &self,
+        function: FunctionValue<'ctx>,
+        parameters: &[Type],
+        meta: &FunctionMeta,
+    ) {
+        // Memoised caches access memory even when the source body is pure.
+        if meta.is_memoised {
+            self.add_function_string_attribute(function, "xlang.memoise", "true");
+            let capacity = match &meta.call_contract {
+                Some(CallContract::Memoise(contract)) => contract.capacity,
+                None => x_mir::DEFAULT_MEMOISE_CAPACITY,
+            };
+
+            self.add_function_string_attribute(
+                function,
+                "xlang.memoise.capacity",
+                &capacity.to_string(),
+            );
+        }
+
+        if meta.is_pure {
+            self.add_function_string_attribute(function, "xlang.pure", "true");
+
+            if !meta.is_memoised && parameters.iter().all(pure_no_memory_parameter) {
+                self.add_enum_attribute(
+                    function,
+                    AttributeLoc::Function,
+                    LlvmEnumAttribute::Memory,
+                );
+                self.add_enum_attribute(
+                    function,
+                    AttributeLoc::Function,
+                    LlvmEnumAttribute::NoUnwind,
+                );
+            }
+        }
+
+        if meta.is_multi {
+            self.add_function_string_attribute(function, "xlang.multi", "true");
+        }
+
+        if meta.is_static || meta.has_static_parameters {
+            self.add_function_string_attribute(function, "xlang.static", "true");
+        }
+
+        if meta.is_throws {
+            self.add_function_string_attribute(function, "xlang.throws", "true");
+        }
+
+        let unique_noalias_proved = unique_noalias_is_proved(parameters, &self.records);
+
+        for (index, parameter) in parameters.iter().enumerate() {
+            if matches!(
+                parameter,
+                Type::Reference {
+                    is_unique: true,
+                    ..
+                }
+            ) {
+                self.add_parameter_string_attribute(function, index as u32, "xlang.unique", "true");
+                self.add_enum_attribute(
+                    function,
+                    AttributeLoc::Param(index as u32),
+                    LlvmEnumAttribute::NonNull,
+                );
+
+                if unique_noalias_proved {
+                    self.add_enum_attribute(
+                        function,
+                        AttributeLoc::Param(index as u32),
+                        LlvmEnumAttribute::NoAlias,
+                    );
+                }
+            }
+        }
+    }
+
     fn add_enum_attribute(
         &self,
         function: FunctionValue<'ctx>,
@@ -76,5 +154,15 @@ impl<'ctx> CodeGeneration<'ctx> {
     ) {
         let attribute = self.context.create_string_attribute(name, value);
         function.add_attribute(AttributeLoc::Function, attribute);
+    }
+}
+
+fn c_integer_extension_attribute(value_type: &Type) -> Option<LlvmEnumAttribute> {
+    match value_type {
+        Type::I8 | Type::I16 => Some(LlvmEnumAttribute::SignExtend),
+        Type::U8 | Type::U16 | Type::Boolean | Type::Character => {
+            Some(LlvmEnumAttribute::ZeroExtend)
+        }
+        _ => None,
     }
 }
