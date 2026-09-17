@@ -23,3 +23,53 @@ pub(super) trait MirProgramItems {
     fn functions(&self) -> impl Iterator<Item = FunctionDeclaration<'_>>;
     fn function_bodies(&self) -> impl Iterator<Item = (&str, &MirBody)>;
 }
+
+impl MirProgramItems for MirProgram {
+    fn structs(&self) -> impl Iterator<Item = &StructDefinition> {
+        self.items.iter().filter_map(|item| match item {
+            GlobalItem::Struct(definition) => Some(definition),
+            _ => None,
+        })
+    }
+
+    fn statics(&self) -> impl Iterator<Item = StaticItem<'_>> {
+        self.items.iter().filter_map(|item| match item {
+            GlobalItem::Static {
+                name,
+                value_type,
+                initializer,
+                is_constant,
+            } => Some(StaticItem {
+                name,
+                value_type,
+                initializer: initializer.as_ref(),
+                is_constant: *is_constant,
+            }),
+            _ => None,
+        })
+    }
+
+    fn functions(&self) -> impl Iterator<Item = FunctionDeclaration<'_>> {
+        self.items.iter().filter_map(|item| match item {
+            GlobalItem::Function {
+                name,
+                parameter_types,
+                return_type,
+                body,
+                meta,
+            } => Some(FunctionDeclaration {
+                name,
+                parameter_types,
+                return_type,
+                body: body.as_ref(),
+                meta,
+            }),
+            _ => None,
+        })
+    }
+
+    fn function_bodies(&self) -> impl Iterator<Item = (&str, &MirBody)> {
+        self.functions()
+            .filter_map(|function| function.body.map(|body| (function.name, body)))
+    }
+}

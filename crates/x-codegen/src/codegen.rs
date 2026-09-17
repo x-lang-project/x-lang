@@ -13,7 +13,7 @@ pub use optimize::{
 };
 mod records;
 mod runtime;
-
+mod structs;
 mod symbols;
 mod types;
 
