@@ -1,5 +1,6 @@
 mod attributes;
 
+mod jit;
 mod obligations;
 mod optimize;
 pub use optimize::{
