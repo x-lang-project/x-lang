@@ -1,5 +1,7 @@
 mod attributes;
 
+mod items;
+pub use items::FunctionDeclaration;
 mod jit;
 mod obligations;
 mod optimize;
