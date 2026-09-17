@@ -1,6 +1,7 @@
 mod attributes;
 
 mod optimize;
+pub use optimize::OptimizationPolicy;
 pub use optimize::create_target_machine;
 pub use optimize::create_target_machine_for_initialized_target;
 pub use optimize::initialize_target_for_triple;
