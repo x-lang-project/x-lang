@@ -1,5 +1,5 @@
 mod attributes;
-
+mod functions;
 mod globals;
 mod items;
 pub use items::FunctionDeclaration;
