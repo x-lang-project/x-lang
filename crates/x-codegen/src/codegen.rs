@@ -1,11 +1,12 @@
 mod attributes;
 
 mod optimize;
-pub use optimize::OptimizationPolicy;
-pub use optimize::create_target_machine;
-pub use optimize::create_target_machine_for_initialized_target;
-pub use optimize::initialize_target_for_triple;
-pub use optimize::llvm_optimization_level;
+pub use optimize::{
+    ObjectEmissionOptions, OptimizationPolicy, create_target_machine,
+    create_target_machine_for_initialized_target, initialize_target_for_triple,
+    llvm_optimization_level, write_ir_to_object, write_module_to_object,
+    write_module_to_object_with_target_machine,
+};
 mod records;
 mod runtime;
 
