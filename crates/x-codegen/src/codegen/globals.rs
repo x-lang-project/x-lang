@@ -73,6 +73,27 @@ impl<'ctx> CodeGeneration<'ctx> {
         };
 
         let value: BasicValueEnum<'ctx> = match (value_type, initializer) {
+            (Type::Boolean, Operand::ConstantBoolean(value)) => self
+                .context
+                .bool_type()
+                .const_int(*value as u64, false)
+                .into(),
+            (Type::Character, Operand::ConstantCharacter(value)) => self
+                .context
+                .i8_type()
+                .const_int(*value as u64, false)
+                .into(),
+            (value_type, Operand::ConstantInteger(value)) if value_type.is_integer() => self
+                .resolve_llvm_type(value_type)?
+                .into_int_type()
+                .const_int(
+                    *value as u64,
+                    matches!(
+                        value_type,
+                        Type::I8 | Type::I16 | Type::I32 | Type::I64 | Type::ISize
+                    ),
+                )
+                .into(),
             (Type::F32, Operand::ConstantFloat(value)) => {
                 self.context.f32_type().const_float(*value).into()
             }
