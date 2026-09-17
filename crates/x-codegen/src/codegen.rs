@@ -1,5 +1,6 @@
 mod attributes;
 
+mod obligations;
 mod optimize;
 pub use optimize::{
     ObjectEmissionOptions, OptimizationPolicy, create_target_machine,
