@@ -2,8 +2,8 @@ use inkwell::module::Linkage;
 use inkwell::types::BasicType;
 use inkwell::values::FunctionValue;
 
-use crate::codegen::CodeGeneration;
 use crate::codegen::items::FunctionDeclaration;
+use crate::codegen::{CodeGeneration, is_exported_entry_symbol};
 use crate::errors::CodeGenerationError;
 use x_ast::Type;
 use x_mir::{FunctionMeta, LocalIdentifier, MirBody};

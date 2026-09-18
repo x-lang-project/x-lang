@@ -95,3 +95,7 @@ impl<'ctx> CodeGeneration<'ctx> {
         self.cheri_projection_records.borrow().clone()
     }
 }
+
+fn is_exported_entry_symbol(name: &str) -> bool {
+    matches!(name, x_ast::ENTRY_POINT_NAME | "kmain" | "_start")
+}
