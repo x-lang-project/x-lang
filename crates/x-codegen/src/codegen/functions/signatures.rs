@@ -39,6 +39,25 @@ impl<'ctx> CodeGeneration<'ctx> {
             .collect()
     }
 
+    pub(in crate::codegen) fn internalize_private_definition(
+        &self,
+        name: &str,
+        body: Option<&MirBody>,
+        meta: &FunctionMeta,
+    ) {
+        if self.options.export_global_symbols || meta.is_exported {
+            return;
+        }
+
+        if body.is_none() || is_exported_entry_symbol(self.llvm_function_symbol(name)) {
+            return;
+        }
+
+        if let Some(function) = self.module.get_function(self.llvm_function_symbol(name)) {
+            function.set_linkage(Linkage::Internal);
+        }
+    }
+
     pub fn declare_function_signature(
         &self,
         declaration: FunctionDeclaration<'_>,
