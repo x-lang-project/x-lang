@@ -111,6 +111,23 @@ impl<'ctx> CodeGeneration<'ctx> {
         }
     }
 
+    pub(super) fn apply_external_c_abi_attributes(
+        &self,
+        function: FunctionValue<'ctx>,
+        parameters: &[Type],
+        return_value: &Type,
+    ) {
+        for (index, parameter) in parameters.iter().enumerate() {
+            if let Some(name) = c_integer_extension_attribute(parameter) {
+                self.add_enum_attribute(function, AttributeLoc::Param(index as u32), name);
+            }
+        }
+
+        if let Some(name) = c_integer_extension_attribute(return_value) {
+            self.add_enum_attribute(function, AttributeLoc::Return, name);
+        }
+    }
+
     fn add_enum_attribute(
         &self,
         function: FunctionValue<'ctx>,
