@@ -2,6 +2,22 @@ use crate::errors::CodeGenerationError;
 use crate::symbols::{SymbolKind, SymbolTable};
 use x_ast::Type;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BindingFormat {
+    CHeader,
+    Json,
+}
+
+pub fn generate_bindings(
+    table: &SymbolTable,
+    format: BindingFormat,
+) -> Result<String, CodeGenerationError> {
+    match format {
+        BindingFormat::CHeader => generate_c_header(table),
+        BindingFormat::Json => Ok(generate_json(table)),
+    }
+}
+
 fn generate_c_header(table: &SymbolTable) -> Result<String, CodeGenerationError> {
     let mut output = String::from("#pragma once\n#include <stdbool.h>\n#include <stdint.h>\n\n");
 
@@ -44,6 +60,45 @@ fn generate_c_header(table: &SymbolTable) -> Result<String, CodeGenerationError>
     }
 
     Ok(output)
+}
+
+fn generate_json(table: &SymbolTable) -> String {
+    let mut output = String::from("{\n  \"symbols\": [\n");
+
+    for (index, symbol) in table.symbols.iter().enumerate() {
+        if index > 0 {
+            output.push_str(",\n");
+        }
+
+        let parameters = symbol
+            .parameters
+            .iter()
+            .map(|value_type| format!("\"{}\"", json_escape(&value_type.to_string())))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let return_type = symbol
+            .return_type
+            .as_ref()
+            .map(|value_type| format!("\"{}\"", json_escape(&value_type.to_string())))
+            .unwrap_or_else(|| "null".to_string());
+        output.push_str(&format!(
+            "    {{ \"source_name\": \"{}\", \"symbol_name\": \"{}\", \"kind\": \"{}\", \"params\": [{}], \"return_type\": {}, \"defined\": {}, \"exported\": {} }}",
+            json_escape(&symbol.source_name),
+            json_escape(&symbol.symbol_name),
+            match symbol.kind {
+                SymbolKind::Function => "function",
+                SymbolKind::Static => "static",
+            },
+            parameters,
+            return_type,
+            symbol.is_defined,
+            symbol.is_exported
+        ));
+    }
+
+    output.push_str("\n  ]\n}\n");
+
+    output
 }
 
 fn c_type(value_type: &Type) -> Result<String, CodeGenerationError> {

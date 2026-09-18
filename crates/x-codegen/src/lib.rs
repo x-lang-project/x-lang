@@ -21,6 +21,7 @@ pub mod symbols;
 #[cfg(windows)]
 mod target_initializers;
 
+pub use bindings::{BindingFormat, generate_bindings};
 pub use codegen::{
     CheriPermissionClass, CheriProjectionRecord, CodeGeneration, CodeGenerationOptions,
     FunctionDeclaration, ObjectEmissionOptions, OptimizationPolicy, create_target_machine,
