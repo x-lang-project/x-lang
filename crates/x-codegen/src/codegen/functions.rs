@@ -1,3 +1,4 @@
+mod body;
 mod locals;
 mod signatures;
 
