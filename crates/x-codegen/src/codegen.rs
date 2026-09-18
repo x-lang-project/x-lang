@@ -63,6 +63,14 @@ impl CheriPermissionClass {
             Self::Shared
         }
     }
+
+    pub const fn trace_name(self) -> &'static str {
+        match self {
+            Self::Unique => "unique",
+            Self::Mutable => "mutable",
+            Self::Shared => "shared",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -82,7 +90,97 @@ pub struct CodeGenerationOptions {
     pub pointer_address_space: u16,
 }
 
+impl CodeGenerationOptions {
+    pub const fn cheri_purecap() -> Self {
+        Self {
+            mangle_symbols: false,
+            export_global_symbols: false,
+            pointer_address_space: CHERI_CAPABILITY_ADDRESS_SPACE,
+        }
+    }
+}
+
 impl<'ctx> CodeGeneration<'ctx> {
+    pub fn new(
+        context: &'ctx Context,
+        module_name: &str,
+        optimisation_level: OptimizationLevel,
+    ) -> Result<Self, CodeGenerationError> {
+        Self::with_options(
+            context,
+            module_name,
+            optimisation_level,
+            CodeGenerationOptions::default(),
+        )
+    }
+
+    pub fn with_options(
+        context: &'ctx Context,
+        module_name: &str,
+        optimisation_level: OptimizationLevel,
+        options: CodeGenerationOptions,
+    ) -> Result<Self, CodeGenerationError> {
+        let host_triple = targets::TargetMachine::get_default_triple();
+        let host_machine = create_target_machine(&host_triple, 0)?;
+
+        Ok(Self::with_target_machine(
+            context,
+            module_name,
+            optimisation_level,
+            options,
+            &host_machine,
+        ))
+    }
+
+    pub fn with_target_machine(
+        context: &'ctx Context,
+        module_name: &str,
+        optimisation_level: OptimizationLevel,
+        options: CodeGenerationOptions,
+        machine: &targets::TargetMachine,
+    ) -> Self {
+        let module = context.create_module(module_name);
+        let builder = context.create_builder();
+        module.set_data_layout(&machine.get_target_data().get_data_layout());
+        info!("Created LLVM module {module_name}");
+
+        CodeGeneration {
+            context,
+            builder,
+            module,
+            execution_engine: RefCell::new(None),
+            jit_optimization_level: optimisation_level,
+            records: records::RecordCatalogue::default(),
+            options,
+            function_symbols: HashMap::new(),
+            global_symbols: HashMap::new(),
+            cheri_projection_records: RefCell::new(Vec::new()),
+            contract_obligations: RefCell::new(x_mir::ContractObligations::default()),
+        }
+    }
+
+    pub fn generate(&mut self, mir_program: &MirProgram) -> Result<(), CodeGenerationError> {
+        mir_program
+            .validate()
+            .map_err(|error| CodeGenerationError::InvalidMir(error.to_string()))?;
+        *self.contract_obligations.borrow_mut() = mir_program
+            .contract_obligations()
+            .map_err(|error| CodeGenerationError::InvalidMir(error.to_string()))?;
+        self.prepare_symbol_tables(mir_program)?;
+        self.register_stdlib_stubs();
+        self.declare_struct_types(mir_program)?;
+        self.declare_static_storage_items(mir_program)?;
+        self.declare_function_signatures(mir_program)?;
+        self.compile_function_bodies(mir_program)?;
+        self.ensure_optional_main();
+        self.discharge_lowered_effect_obligations();
+        self.module
+            .verify()
+            .map_err(|error| CodeGenerationError::LlvmVerificationFailure(error.to_string()))?;
+
+        Ok(())
+    }
+
     pub fn pointer_address_space(&self) -> AddressSpace {
         AddressSpace::from(self.options.pointer_address_space)
     }
