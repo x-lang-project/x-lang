@@ -38,4 +38,55 @@ impl<'ctx> CodeGeneration<'ctx> {
             })
             .collect()
     }
+
+    pub fn declare_function_signature(
+        &self,
+        declaration: FunctionDeclaration<'_>,
+    ) -> Result<FunctionValue<'ctx>, CodeGenerationError> {
+        let FunctionDeclaration {
+            name,
+            body,
+            parameter_types: parameters,
+            return_type: return_value,
+            meta,
+        } = declaration;
+
+        let llvm_parameter_types = parameters
+            .iter()
+            .map(|value_type| self.resolve_llvm_type(value_type).map(Into::into))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let abi_return = if meta.is_throws {
+            Type::Tuple(vec![Type::Boolean, return_value.clone(), Type::String])
+        } else {
+            return_value.clone()
+        };
+
+        let actual_function_type = if name == x_ast::ENTRY_POINT_NAME && abi_return == Type::Void {
+            self.context
+                .i32_type()
+                .fn_type(&llvm_parameter_types, false)
+        } else if abi_return == Type::Void {
+            self.context
+                .void_type()
+                .fn_type(&llvm_parameter_types, false)
+        } else {
+            self.resolve_llvm_type(&abi_return)?
+                .fn_type(&llvm_parameter_types, false)
+        };
+
+        let llvm_name = self.llvm_function_symbol(name);
+        let function = self.module.get_function(llvm_name).unwrap_or_else(|| {
+            self.module
+                .add_function(llvm_name, actual_function_type, None)
+        });
+
+        if body.is_none() {
+            self.apply_external_c_abi_attributes(function, parameters, return_value);
+        }
+
+        self.apply_function_semantic_attributes(function, parameters, meta);
+
+        Ok(function)
+    }
 }
