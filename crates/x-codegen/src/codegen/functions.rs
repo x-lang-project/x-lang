@@ -1,3 +1,4 @@
+mod locals;
 mod signatures;
 
 use inkwell::values::FunctionValue;
