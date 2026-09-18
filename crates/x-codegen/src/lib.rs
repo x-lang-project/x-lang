@@ -11,6 +11,7 @@
     )
 )]
 
+pub mod bindings;
 pub mod codegen;
 pub mod errors;
 pub mod function;
