@@ -83,6 +83,25 @@ pub struct CheriProjectionRecord {
     pub permission_class: CheriPermissionClass,
 }
 
+impl CheriProjectionRecord {
+    pub fn to_tsv(&self) -> String {
+        let offset = self
+            .offset
+            .map(|value| value.to_string())
+            .unwrap_or_else(|| "dynamic".to_string());
+
+        format!(
+            "x-cheri-v1\t{}\t{}\t{}\t{}\t{}\t{}",
+            self.function,
+            self.path,
+            self.root_size,
+            offset,
+            self.referent_size,
+            self.permission_class.trace_name()
+        )
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct CodeGenerationOptions {
     pub mangle_symbols: bool,
