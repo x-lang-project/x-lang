@@ -44,6 +44,13 @@ impl<'ctx> CodeGeneration<'ctx> {
         self.builder.position_at_end(entry_alloca_basic_block);
     }
 
+    pub(in crate::codegen) fn sorted_basic_block_identifiers(body: &MirBody) -> Vec<usize> {
+        let mut identifiers: Vec<usize> = body.basic_blocks.keys().map(|block| block.0).collect();
+        identifiers.sort_unstable();
+
+        identifiers
+    }
+
     pub(in crate::codegen) fn declare_llvm_blocks(
         &self,
         function: FunctionValue<'ctx>,
@@ -59,6 +66,51 @@ impl<'ctx> CodeGeneration<'ctx> {
         }
 
         blocks
+    }
+
+    pub(in crate::codegen) fn finalize_function_body(
+        &self,
+        function: FunctionValue<'ctx>,
+        function_name: &str,
+    ) -> Result<(), CodeGenerationError> {
+        let obligations = self.contract_obligations.borrow();
+        let certified = obligations.functions.get(function_name);
+        let fallback_has_calls = function.get_basic_blocks().iter().any(|block| {
+            block.get_instructions().any(|instruction| {
+                matches!(
+                    instruction.get_opcode(),
+                    InstructionOpcode::Call | InstructionOpcode::CallBr | InstructionOpcode::Invoke
+                )
+            })
+        });
+        let permits_no_memory = certified.is_some_and(|entry| {
+            entry.source_pure && entry.memory.permits_memory_none() && !fallback_has_calls
+        });
+
+        if certified.is_some() || fallback_has_calls {
+            function.remove_enum_attribute(
+                AttributeLoc::Function,
+                Attribute::get_named_enum_kind_id("memory"),
+            );
+        }
+
+        if permits_no_memory {
+            function.add_attribute(
+                AttributeLoc::Function,
+                self.context
+                    .create_enum_attribute(Attribute::get_named_enum_kind_id("memory"), 0),
+            );
+        }
+
+        if cfg!(debug_assertions) && !function.verify(true) {
+            return Err(CodeGenerationError::LlvmVerificationFailure(
+                backend_messages::generated_function_function_name_failed_llvm_verification(
+                    function_name,
+                ),
+            ));
+        }
+
+        Ok(())
     }
 }
 
