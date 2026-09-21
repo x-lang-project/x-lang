@@ -6,6 +6,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
+use library::Library;
+
 use x_diagnostics::{CompilationFailure, LinkDiagnostic};
 use x_utils::target::TinyCcWindows;
 
@@ -15,6 +17,21 @@ mod library;
 
 pub(super) fn failure(detail: impl fmt::Display) -> CompilationFailure {
     LinkDiagnostic::TinyCcFailure.into_failure(detail)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum OutputKind {
+    Executable,
+    Object,
+}
+
+impl OutputKind {
+    pub(super) const fn abi(self) -> c_int {
+        match self {
+            Self::Executable => 2,
+            Self::Object => 3,
+        }
+    }
 }
 
 pub(super) fn c_path(path: &Path) -> Result<CString, CompilationFailure> {
