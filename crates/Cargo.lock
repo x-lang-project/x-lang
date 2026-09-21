@@ -826,6 +826,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-link"
+version = "1.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha2",
+ "windows-sys",
+ "x-diagnostics",
+ "x-logging",
+ "x-runtime",
+ "x-utils",
+]
+
+[[package]]
 name = "x-logging"
 version = "1.0.0"
 dependencies = [

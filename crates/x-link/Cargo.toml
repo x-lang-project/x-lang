@@ -1,0 +1,29 @@
+[package]
+name = "x-link"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lib]
+test = true
+doctest = true
+name = "x_link"
+path = "src/lib.rs"
+
+[features]
+tinycc-session = []
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+x-utils = { workspace = true }
+x-diagnostics = { workspace = true }
+x-logging = { workspace = true }
+x-runtime = { workspace = true }
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true }

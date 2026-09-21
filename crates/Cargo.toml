@@ -25,6 +25,7 @@ members = [
   "x-typechecker",
   "x-project",
   "x-codegen",
+  "x-link",
 ]
 
 [workspace.dependencies]
