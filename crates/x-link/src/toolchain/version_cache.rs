@@ -38,6 +38,74 @@ struct Entry {
     version: String,
 }
 
+#[cfg(windows)]
+fn executable_identity(candidate: &Path) -> io::Result<Identity> {
+    let mut file = File::open(candidate)?;
+    let path = resolved_file_path(&file)?;
+    let mut magic = [0; 2];
+    file.read_exact(&mut magic)?;
+    if magic != *b"MZ"
+        || path
+            .extension()
+            .is_none_or(|extension| !extension.eq_ignore_ascii_case("exe"))
+    {
+        return Err(io::Error::other(
+            "version cache requires a native executable",
+        ));
+    }
+
+    identity_from_file(path, &file)
+}
+
+#[cfg(windows)]
+fn file_identity(candidate: &Path) -> io::Result<Identity> {
+    use std::os::windows::fs::OpenOptionsExt;
+
+    let file = fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(0x02000000)
+        .open(candidate)?;
+
+    identity_from_file(resolved_file_path(&file)?, &file)
+}
+
+#[cfg(windows)]
+fn identity_from_file(path: PathBuf, file: &File) -> io::Result<Identity> {
+    use std::os::windows::io::AsRawHandle;
+
+    let mut info = FileInformation::default();
+    let mut basic = BasicInformation::default();
+    // SAFETY: the buffers match the Windows ABI and file owns the handle throughout.
+    unsafe {
+        if GetFileInformationByHandle(file.as_raw_handle(), &mut info) == 0
+            || GetFileInformationByHandleEx(
+                file.as_raw_handle(),
+                0,
+                (&mut basic as *mut BasicInformation).cast(),
+                std::mem::size_of::<BasicInformation>() as u32,
+            ) == 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+    }
+    if basic.changed == 0 || info.file_identifier_high == 0 && info.file_identifier_low == 0 {
+        return Err(io::Error::other(
+            "filesystem does not expose compiler change identity",
+        ));
+    }
+
+    Ok(Identity {
+        path,
+        size: (u64::from(info.size_high) << 32) | u64::from(info.size_low),
+        volume: info.volume,
+        file_identifier: (u64::from(info.file_identifier_high) << 32)
+            | u64::from(info.file_identifier_low),
+        modified: basic.modified,
+        changed: basic.changed,
+        usn: file_usn(file)?,
+    })
+}
+
 #[cfg(not(windows))]
 fn executable_identity(_: &Path) -> io::Result<Identity> {
     Err(io::Error::other(
