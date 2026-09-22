@@ -15,7 +15,10 @@ use sha2::{Digest, Sha256};
 #[cfg(windows)]
 use crate::windows_file::*;
 
+use storage::*;
 use x_utils::tools::clang_is_pinned;
+
+static NEXT_ENTRY: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 struct Identity {
@@ -33,3 +36,5 @@ struct Entry {
     identity: Identity,
     version: String,
 }
+
+mod storage;
