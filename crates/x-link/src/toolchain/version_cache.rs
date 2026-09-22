@@ -38,6 +38,20 @@ struct Entry {
     version: String,
 }
 
+#[cfg(not(windows))]
+fn executable_identity(_: &Path) -> io::Result<Identity> {
+    Err(io::Error::other(
+        "native version cache is supported on Windows",
+    ))
+}
+
+#[cfg(not(windows))]
+fn file_identity(_: &Path) -> io::Result<Identity> {
+    Err(io::Error::other(
+        "native file identity cache is supported on Windows",
+    ))
+}
+
 #[cfg(windows)]
 #[link(name = "kernel32")]
 unsafe extern "system" {
