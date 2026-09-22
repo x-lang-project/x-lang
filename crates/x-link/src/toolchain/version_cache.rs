@@ -38,6 +38,14 @@ struct Entry {
     version: String,
 }
 
+pub(super) fn file_identity_bytes(candidate: &Path) -> Option<Vec<u8>> {
+    serde_json::to_vec(&file_identity(candidate).ok()?).ok()
+}
+
+pub(super) fn identity_bytes(candidate: &Path) -> Option<Vec<u8>> {
+    serde_json::to_vec(&executable_identity(candidate).ok()?).ok()
+}
+
 pub(super) fn version(candidate: &Path, query: impl FnOnce() -> Option<String>) -> Option<String> {
     let root = env::var_os("X_RUNTIME_CACHE_DIR")
         .map(PathBuf::from)
