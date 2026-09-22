@@ -38,6 +38,60 @@ struct Entry {
     version: String,
 }
 
+pub(super) fn version(candidate: &Path, query: impl FnOnce() -> Option<String>) -> Option<String> {
+    let root = env::var_os("X_RUNTIME_CACHE_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| env::temp_dir().join("x-lang-runtime-cache-v1"))
+        .join("toolchain-versions-v1");
+
+    cached_version(candidate, &root, query)
+}
+
+fn cached_version(
+    candidate: &Path,
+    root: &Path,
+    query: impl FnOnce() -> Option<String>,
+) -> Option<String> {
+    let Some(identity) = executable_identity(candidate).ok() else {
+        return query();
+    };
+
+    let Ok(key) = serde_json::to_vec(&identity) else {
+        return query();
+    };
+
+    let hash = Sha256::digest(key)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    let path = root.join(format!("{hash}.json"));
+
+    if let Some(entry) = fs::read(&path)
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<Entry>(&bytes).ok())
+        .filter(|entry| {
+            entry.identity == identity
+                && clang_is_pinned(&entry.version)
+                && executable_identity(candidate).ok().as_ref() == Some(&identity)
+        })
+    {
+        return Some(entry.version);
+    }
+
+    let version = query()?;
+
+    if clang_is_pinned(&version) && executable_identity(candidate).ok().as_ref() == Some(&identity)
+    {
+        let entry = Entry {
+            identity,
+            version: version.clone(),
+        };
+        let _ = save_entry(root, &path, &entry);
+    }
+
+    Some(version)
+}
+
 #[cfg(windows)]
 fn executable_identity(candidate: &Path) -> io::Result<Identity> {
     let mut file = File::open(candidate)?;
