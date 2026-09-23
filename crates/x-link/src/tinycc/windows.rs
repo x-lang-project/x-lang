@@ -6,6 +6,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
+use crate::NativeToolchain;
 use library::Library;
 
 use x_diagnostics::{CompilationFailure, LinkDiagnostic};
