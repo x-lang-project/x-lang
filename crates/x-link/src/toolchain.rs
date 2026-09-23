@@ -7,4 +7,5 @@ use x_diagnostics::link_messages;
 use x_utils::tools::LLVM_VERSION as REQUIRED_CLANG_VERSION;
 use x_utils::tools::{LLVM_PREFIX_ENV, clang_is_pinned};
 
+mod discovery_state;
 mod version_cache;
