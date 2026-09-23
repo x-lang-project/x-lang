@@ -11,6 +11,8 @@ use library::Library;
 use x_diagnostics::{CompilationFailure, LinkDiagnostic};
 use x_utils::target::TinyCcWindows;
 
+mod cache;
+
 mod library;
 
 // TinyCC has process-global state; keep states and callbacks inside this lock.
