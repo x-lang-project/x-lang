@@ -6,7 +6,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use crate::NativeToolchain;
+use super::LinkOutcome;
+use crate::{LinkOptions, NativeToolchain};
 use library::Library;
 
 use x_diagnostics::{CompilationFailure, LinkDiagnostic};
@@ -20,9 +21,35 @@ mod prepared;
 pub(super) mod session;
 
 // TinyCC has process-global state; keep states and callbacks inside this lock.
+static TINYCC: Mutex<()> = Mutex::new(());
 
 pub(super) fn failure(detail: impl fmt::Display) -> CompilationFailure {
     LinkDiagnostic::TinyCcFailure.into_failure(detail)
+}
+
+pub(super) fn supported_options(options: &LinkOptions<'_>) -> bool {
+    options.optimisation_level == 0
+        && !options.freestanding
+        && !options.gc_sections
+        && options.libs.is_empty()
+        && options.lib_paths.is_empty()
+        && options.include_paths.is_empty()
+        && options.passthrough_arguments.is_empty()
+        && options
+            .target_triple
+            .is_none_or(|target| target == TinyCcWindows::HOST_TRIPLE)
+        && ["CPATH", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH"]
+            .iter()
+            .all(|name| env::var_os(name).is_none_or(|value| value.is_empty()))
+        && env::var_os("X_RUNTIME_CACHE_DIR")
+            .unwrap_or_else(|| env::temp_dir().into_os_string())
+            .is_ascii()
+}
+
+pub(super) struct Configuration {
+    directory: PathBuf,
+    object_type: OutputKind,
+    ucrt: PathBuf,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
