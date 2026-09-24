@@ -39,6 +39,53 @@ pub(super) fn read_guard(path: &Path) -> Result<File, CompilationFailure> {
         .map_err(failure)
 }
 
+impl Resources {
+    pub(super) fn snapshot(source: &Path) -> Result<Self, CompilationFailure> {
+        let base = env::var_os("X_RUNTIME_CACHE_DIR")
+            .map(PathBuf::from)
+            .unwrap_or_else(env::temp_dir)
+            .join("x-tinycc-private-sessions");
+        fs::create_dir_all(&base).map_err(failure)?;
+        let base = base.canonicalize().map_err(failure)?;
+        let root = create_directory(&base, &NEXT_SESSION)?;
+        let mut resources = Self {
+            root,
+            base,
+            guards: Vec::new(),
+        };
+        let mut pending = ["include", "lib", "libtcc"]
+            .map(|name| source.join(name))
+            .to_vec();
+
+        while let Some(path) = pending.pop() {
+            let metadata = path.symlink_metadata().map_err(failure)?;
+
+            if metadata.file_attributes() & 0x400 != 0 {
+                return Err(failure("session package snapshot contains a reparse point"));
+            }
+
+            let destination = resources
+                .root
+                .join(path.strip_prefix(source).map_err(failure)?);
+
+            if metadata.is_dir() {
+                fs::create_dir(&destination).map_err(failure)?;
+
+                for entry in fs::read_dir(path).map_err(failure)? {
+                    pending.push(entry.map_err(failure)?.path());
+                }
+            } else if metadata.is_file() {
+                fs::copy(&path, &destination).map_err(failure)?;
+                resources.guards.push(read_guard(&destination)?);
+            } else {
+                return Err(failure("unsupported file type in session package snapshot"));
+            }
+        }
+
+        Ok(resources)
+    }
+}
+
 impl Drop for Resources {
     fn drop(&mut self) {
         self.guards.clear();
