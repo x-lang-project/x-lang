@@ -82,6 +82,10 @@ pub(super) struct State<'a> {
 }
 
 impl State<'_> {
+    pub(super) fn without_standard_libraries(&mut self) -> Result<(), CompilationFailure> {
+        self.result(unsafe { (self.library.set_options)(self.state, c"-nostdlib".as_ptr()) })
+    }
+
     fn result(&self, code: c_int) -> Result<(), CompilationFailure> {
         if code < 0 {
             Err(failure(self.errors.0.join("\n")))

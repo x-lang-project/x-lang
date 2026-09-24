@@ -15,7 +15,7 @@ use x_utils::target::TinyCcWindows;
 mod cache;
 
 mod library;
-
+mod prepared;
 #[cfg(feature = "tinycc-session")]
 pub(super) mod session;
 
