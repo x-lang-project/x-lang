@@ -16,6 +16,9 @@ mod cache;
 
 mod library;
 
+#[cfg(feature = "tinycc-session")]
+pub(super) mod session;
+
 // TinyCC has process-global state; keep states and callbacks inside this lock.
 
 pub(super) fn failure(detail: impl fmt::Display) -> CompilationFailure {
