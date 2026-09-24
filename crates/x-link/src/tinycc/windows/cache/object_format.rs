@@ -1,5 +1,9 @@
 use super::*;
 
+pub(crate) fn elf_object(bytes: &[u8]) -> bool {
+    bytes.get(..6) == Some(b"\x7fELF\x02\x01") && bytes.get(16..20) == Some(&[1, 0, 62, 0])
+}
+
 pub(crate) fn zero_pe_timestamp(path: &Path) -> Result<bool, CompilationFailure> {
     let bytes = fs::read(path).map_err(failure)?;
     let offset = bytes
