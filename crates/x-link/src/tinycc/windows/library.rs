@@ -98,6 +98,12 @@ impl State<'_> {
         self.result(unsafe { (self.library.output_type)(self.state, kind.abi()) })
     }
 
+    pub(super) fn compile(&mut self, source: &str) -> Result<(), CompilationFailure> {
+        let source = CString::new(source).map_err(failure)?;
+
+        self.result(unsafe { (self.library.compile_string)(self.state, source.as_ptr()) })
+    }
+
     pub(super) fn add_file(&mut self, path: &Path) -> Result<(), CompilationFailure> {
         let path = c_path(path)?;
 
