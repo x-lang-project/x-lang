@@ -68,6 +68,16 @@ impl OutputKind {
     }
 }
 
+fn header_object_output_type(header: &str) -> Option<c_int> {
+    header.lines().find_map(|line| {
+        let mut words = line.split_whitespace();
+
+        (words.next() == Some("#define") && words.next() == Some("TCC_OUTPUT_OBJ"))
+            .then(|| words.next()?.parse::<c_int>().ok())
+            .flatten()
+    })
+}
+
 pub(super) fn c_path(path: &Path) -> Result<CString, CompilationFailure> {
     // TinyCC's fopen needs DOS/UNC paths instead of extended-length paths.
     let text = path
