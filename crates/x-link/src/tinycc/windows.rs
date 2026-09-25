@@ -14,7 +14,8 @@ use x_diagnostics::{CompilationFailure, LinkDiagnostic};
 use x_utils::target::TinyCcWindows;
 
 mod cache;
-
+#[cfg(feature = "tinycc-session")]
+pub(super) mod generated;
 mod library;
 mod prepared;
 #[cfg(feature = "tinycc-session")]
