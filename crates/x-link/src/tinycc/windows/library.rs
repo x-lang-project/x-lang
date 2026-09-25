@@ -1,5 +1,8 @@
 use super::*;
 
+const LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR: u32 = 0x100;
+const LOAD_LIBRARY_SEARCH_DEFAULT_DIRS: u32 = 0x1000;
+
 type New = unsafe extern "C" fn() -> *mut c_void;
 type Delete = unsafe extern "C" fn(*mut c_void);
 type SetPath = unsafe extern "C" fn(*mut c_void, *const c_char);
@@ -33,6 +36,16 @@ pub(super) struct Library {
 impl Library {
     pub(super) fn dll_identity(&self) -> &[u8] {
         &self.dll_identity
+    }
+
+    #[cfg(feature = "tinycc-session")]
+    pub(super) fn use_resource_directory(
+        &mut self,
+        directory: &Path,
+    ) -> Result<(), CompilationFailure> {
+        self.directory = c_path(directory)?;
+
+        Ok(())
     }
 
     pub(super) fn state(&self) -> Result<State<'_>, CompilationFailure> {
@@ -86,6 +99,12 @@ impl State<'_> {
         self.result(unsafe { (self.library.set_options)(self.state, c"-nostdlib".as_ptr()) })
     }
 
+    #[cfg(feature = "tinycc-session")]
+    pub(super) fn without_standard_includes(&mut self) -> Result<(), CompilationFailure> {
+        // Generated input needs no headers; disable environment-dependent include searches.
+        self.result(unsafe { (self.library.set_options)(self.state, c"-nostdinc".as_ptr()) })
+    }
+
     fn result(&self, code: c_int) -> Result<(), CompilationFailure> {
         if code < 0 {
             Err(failure(self.errors.0.join("\n")))
@@ -114,5 +133,14 @@ impl State<'_> {
         let path = c_path(path)?;
 
         self.result(unsafe { (self.library.output_file)(self.state, path.as_ptr()) })
+    }
+}
+
+impl Drop for State<'_> {
+    fn drop(&mut self) {
+        // The boxed callback buffer and Library still live during tcc_delete.
+        unsafe {
+            (self.library.delete)(self.state);
+        }
     }
 }
