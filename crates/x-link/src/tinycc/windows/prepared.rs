@@ -1,5 +1,19 @@
 use super::*;
 
+/// Hold the DLL and package guards inside TinyCC's lock until every state is dropped.
+pub(super) struct PreparedRuntime {
+    // Fields drop in declaration order; release package guards and DLL before the lock.
+    runtime: cache::RuntimeObject,
+    pub(super) library: Library,
+    _guard: std::sync::MutexGuard<'static, ()>,
+}
+
+impl PreparedRuntime {
+    pub(super) fn executable(&self) -> Result<library::State<'_>, CompilationFailure> {
+        executable_state(&self.library, &self.runtime.path)
+    }
+}
+
 pub(super) fn executable_state<'a>(
     library: &'a Library,
     runtime: &Path,

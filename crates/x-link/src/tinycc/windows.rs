@@ -9,7 +9,7 @@ use std::sync::Mutex;
 use super::LinkOutcome;
 use crate::{LinkOptions, NativeToolchain};
 use library::Library;
-
+use prepared::PreparedRuntime;
 use x_diagnostics::{CompilationFailure, LinkDiagnostic};
 use x_utils::target::TinyCcWindows;
 
