@@ -20,6 +20,7 @@ mod library;
 mod prepared;
 #[cfg(feature = "tinycc-session")]
 pub(super) mod session;
+const UCRT: &str = x_runtime::source::WINDOWS_UCRT;
 
 // TinyCC has process-global state; keep states and callbacks inside this lock.
 static TINYCC: Mutex<()> = Mutex::new(());
@@ -76,6 +77,12 @@ fn header_object_output_type(header: &str) -> Option<c_int> {
             .then(|| words.next()?.parse::<c_int>().ok())
             .flatten()
     })
+}
+
+fn object_output_type(header: &str) -> Result<OutputKind, CompilationFailure> {
+    match header_object_output_type(header) {
+        _ => Err(failure("unsupported libtcc object-output ABI")),
+    }
 }
 
 fn link_objects(
