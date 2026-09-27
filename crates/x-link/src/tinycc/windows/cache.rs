@@ -7,6 +7,8 @@ use super::*;
 
 mod identity;
 
+static NEXT_OBJECT: AtomicU64 = AtomicU64::new(0);
+const CORE: &str = x_runtime::source::HOSTED;
 const PROBE: &str = r#"__asm__(".text\n.globl __X_PROBE__\n__X_PROBE__:\npush %rcx\npush %rax\nlea 24(%rsp),%rcx\ncmp $4096,%rax\njb 2f\n1:\nsub $4096,%rcx\ntestb $0,(%rcx)\nsub $4096,%rax\ncmp $4096,%rax\njae 1b\n2:\nsub %rax,%rcx\ntestb $0,(%rcx)\npop %rax\npop %rcx\nret\n");"#;
 
 pub(super) struct RuntimeObject {
@@ -32,6 +34,38 @@ impl Drop for RuntimeObject {
 
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+fn package_files(directory: &Path) -> Result<Vec<PathBuf>, CompilationFailure> {
+    let mut pending = ["include", "lib", "libtcc"]
+        .map(|name| directory.join(name))
+        .to_vec();
+    let mut files = vec![directory.join("libtcc.dll")];
+
+    while let Some(path) = pending.pop() {
+        let metadata = path.symlink_metadata().map_err(failure)?;
+
+        if metadata.file_attributes() & 0x400 != 0 {
+            return Err(failure("TinyCC cache package contains a symbolic link"));
+        }
+
+        if metadata.is_dir() {
+            for entry in fs::read_dir(path).map_err(failure)? {
+                pending.push(entry.map_err(failure)?.path());
+            }
+        } else if metadata.is_file() {
+            files.push(path);
+        }
+    }
+
+    files.sort();
+
+    Ok(files)
+}
+
+fn update_part(hash: &mut Sha256, bytes: &[u8]) {
+    hash.update((bytes.len() as u64).to_le_bytes());
+    hash.update(bytes);
 }
 
 fn file_signature(path: &Path) -> Result<Vec<u8>, CompilationFailure> {
