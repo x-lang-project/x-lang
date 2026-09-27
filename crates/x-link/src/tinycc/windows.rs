@@ -78,6 +78,23 @@ fn header_object_output_type(header: &str) -> Option<c_int> {
     })
 }
 
+fn link_objects(
+    runtime: &PreparedRuntime,
+    config: &Configuration,
+    objects: &[String],
+    output: &Path,
+) -> Result<(), CompilationFailure> {
+    let mut state = runtime.executable()?;
+
+    for object in objects {
+        state.add_file(Path::new(object))?;
+    }
+
+    prepared::attach_support(&mut state, &config.directory, &config.ucrt)?;
+
+    state.output_file(output)
+}
+
 pub(super) fn c_path(path: &Path) -> Result<CString, CompilationFailure> {
     // TinyCC's fopen needs DOS/UNC paths instead of extended-length paths.
     let text = path
