@@ -81,8 +81,64 @@ fn header_object_output_type(header: &str) -> Option<c_int> {
 
 fn object_output_type(header: &str) -> Result<OutputKind, CompilationFailure> {
     match header_object_output_type(header) {
+        Some(3) => Ok(OutputKind::Object),
+        Some(4) => Err(failure(
+            "TinyCC 0.9.27 is unsupported by the in-process linker; use a current development package (TCC_OUTPUT_OBJ=3)",
+        )),
         _ => Err(failure("unsupported libtcc object-output ABI")),
     }
+}
+
+fn validate_options_abi(header: &str) -> Result<(), CompilationFailure> {
+    if header
+        .split_whitespace()
+        .zip(header.split_whitespace().skip(1))
+        .any(|(value_type, name)| value_type == "int" && name.starts_with("tcc_set_options("))
+    {
+        Ok(())
+    } else {
+        Err(failure("TinyCC requires int-returning tcc_set_options"))
+    }
+}
+
+impl Configuration {
+    fn from_environment() -> Result<Option<Self>, CompilationFailure> {
+        let Some(directory) = env::var_os("X_TCC_DIR") else {
+            return Ok(None);
+        };
+
+        let directory = PathBuf::from(directory).canonicalize().map_err(failure)?;
+        let header = fs::read_to_string(directory.join("libtcc/libtcc.h")).map_err(failure)?;
+        // TinyCC 0.9.27 overflows its stack on the C11 runtime; reject it before loading.
+        let object_type = object_output_type(&header)?;
+        validate_options_abi(&header)?;
+        if !directory.join("libtcc.dll").is_file()
+            || !directory.join("include").is_dir()
+            || !directory.join("lib").is_dir()
+        {
+            return Err(failure(
+                "X_TCC_DIR must contain libtcc.dll, libtcc/libtcc.h, include and lib",
+            ));
+        }
+
+        Ok(Some(Self {
+            directory,
+            object_type,
+            ucrt: library::system_crt()?,
+        }))
+    }
+}
+
+pub(super) fn configured(options: &LinkOptions<'_>) -> Result<bool, CompilationFailure> {
+    if !supported_options(options) {
+        return Ok(false);
+    }
+
+    let Some(config) = Configuration::from_environment()? else {
+        return Ok(false);
+    };
+
+    Ok(config.directory.as_os_str().is_ascii() && config.ucrt.as_os_str().is_ascii())
 }
 
 fn link_objects(
@@ -114,16 +170,4 @@ pub(super) fn c_path(path: &Path) -> Result<CString, CompilationFailure> {
     };
 
     CString::new(text).map_err(failure)
-}
-
-fn validate_options_abi(header: &str) -> Result<(), CompilationFailure> {
-    if header
-        .split_whitespace()
-        .zip(header.split_whitespace().skip(1))
-        .any(|(value_type, name)| value_type == "int" && name.starts_with("tcc_set_options("))
-    {
-        Ok(())
-    } else {
-        Err(failure("TinyCC requires int-returning tcc_set_options"))
-    }
 }
