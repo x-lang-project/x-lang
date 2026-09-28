@@ -11,6 +11,18 @@ use sha2::{Digest, Sha256};
 
 use crate::{LinkOptions, NativeToolchain};
 
+use dependencies::*;
 use policy::*;
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+struct Stamp {
+    path: PathBuf,
+    modified_nanoseconds: u128,
+    len: u64,
+    directory: bool,
+    identity: Option<Vec<u8>>,
+}
+
+mod dependencies;
 
 mod policy;
