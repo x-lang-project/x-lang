@@ -18,6 +18,7 @@ pub struct LinkOptions<'a> {
 
 pub mod jit_runtime;
 
+mod runtime_cache;
 pub mod tinycc;
 mod toolchain;
 #[cfg(windows)]
