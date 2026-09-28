@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::{LinkOptions, NativeToolchain};
-
+use build::*;
 use dependencies::*;
 use policy::*;
 
@@ -24,5 +24,7 @@ struct Stamp {
 }
 
 mod dependencies;
+
+mod build;
 
 mod policy;
