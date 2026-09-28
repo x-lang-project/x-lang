@@ -59,3 +59,48 @@ pub(super) fn directory_stamps(roots: &[PathBuf]) -> io::Result<Vec<Stamp>> {
 
     Ok(paths.into_values().collect())
 }
+
+pub(super) fn dependency_paths(contents: &str) -> Option<Vec<PathBuf>> {
+    let input = contents
+        .strip_prefix("x-runtime:")?
+        .replace("\\\r\n", "")
+        .replace("\\\n", "");
+    let mut chars = input.chars().peekable();
+    let mut paths = Vec::new();
+    let mut token = String::new();
+
+    while let Some(character) = chars.next() {
+        match character {
+            '\\' if chars
+                .peek()
+                .is_some_and(|next| matches!(next, ' ' | '\t' | '\\' | '#' | ':')) =>
+            {
+                token.push(chars.next()?);
+            }
+            character if character.is_whitespace() => {
+                if !token.is_empty() {
+                    paths.push(PathBuf::from(std::mem::take(&mut token)));
+                }
+            }
+            '$' if chars.peek() == Some(&'$') => {
+                chars.next();
+                token.push('$');
+            }
+            character => token.push(character),
+        }
+    }
+
+    if !token.is_empty() {
+        paths.push(PathBuf::from(token));
+    }
+
+    (!paths.is_empty()).then_some(paths)
+}
+
+pub(super) fn digest(bytes: &[u8]) -> String {
+    hexadecimal(&Sha256::digest(bytes))
+}
+
+pub(super) fn hexadecimal(bytes: &[u8]) -> String {
+    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+}
