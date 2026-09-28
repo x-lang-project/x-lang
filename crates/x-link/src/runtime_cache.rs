@@ -58,6 +58,33 @@ struct Manifest {
     object_digest: String,
 }
 
+pub(crate) fn valid_entry(directory: &Path, key: &str) -> bool {
+    let Ok(bytes) = fs::read(directory.join("manifest.json")) else {
+        return false;
+    };
+
+    let Ok(manifest) = serde_json::from_slice::<Manifest>(&bytes) else {
+        return false;
+    };
+
+    manifest.format == FORMAT
+        && manifest.key == key
+        && !manifest.headers.is_empty()
+        && !manifest.directories.is_empty()
+        && manifest
+            .directories
+            .iter()
+            .all(|saved| stamp(&saved.path).is_ok_and(|current| current == *saved))
+        && manifest.headers.iter().all(|saved| match &saved.identity {
+            Some(identity) => {
+                NativeToolchain::file_identity(&saved.path).as_ref() == Some(identity)
+            }
+            None => fs::read(&saved.path).is_ok_and(|bytes| digest(&bytes) == saved.digest),
+        })
+        && fs::read(directory.join("runtime.obj"))
+            .is_ok_and(|bytes| !bytes.is_empty() && digest(&bytes) == manifest.object_digest)
+}
+
 fn cleanup_entry(path: &Path) {
     // Only these files in the unique directory created by this call are ours.
     for name in ["runtime.obj", "runtime.d", "manifest.json"] {
