@@ -22,3 +22,40 @@ pub(super) fn stamp(path: &Path) -> io::Result<Stamp> {
         identity,
     })
 }
+
+pub(super) fn directory_stamps(roots: &[PathBuf]) -> io::Result<Vec<Stamp>> {
+    let mut paths = BTreeMap::new();
+
+    for root in roots {
+        // Toolset/SDK selection can change when a new sibling version is added.
+        for ancestor in root.ancestors() {
+            if ancestor.is_dir() {
+                paths.insert(ancestor.to_path_buf(), stamp(ancestor)?);
+            }
+        }
+
+        if !root.is_dir() {
+            continue;
+        }
+
+        let mut pending = vec![root.clone()];
+
+        while let Some(directory) = pending.pop() {
+            paths.insert(directory.clone(), stamp(&directory)?);
+
+            for entry in fs::read_dir(directory)? {
+                let entry = entry?;
+
+                if entry.file_type()?.is_dir() {
+                    pending.push(entry.path());
+                } else if entry.file_type()?.is_symlink() {
+                    return Err(io::Error::other(
+                        "runtime header search tree contains symlinks",
+                    ));
+                }
+            }
+        }
+    }
+
+    Ok(paths.into_values().collect())
+}
