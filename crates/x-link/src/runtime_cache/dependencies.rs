@@ -60,6 +60,42 @@ pub(super) fn directory_stamps(roots: &[PathBuf]) -> io::Result<Vec<Stamp>> {
     Ok(paths.into_values().collect())
 }
 
+pub(super) fn quoted_arguments(line: &str) -> Option<Vec<String>> {
+    let mut chars = line.chars().peekable();
+    let mut arguments = Vec::new();
+
+    while chars.peek().is_some() {
+        while chars
+            .peek()
+            .is_some_and(|character| character.is_whitespace())
+        {
+            chars.next();
+        }
+
+        if chars.peek().is_none() {
+            break;
+        }
+
+        if chars.next()? != '"' {
+            return None;
+        }
+
+        let mut argument = String::new();
+
+        loop {
+            match chars.next()? {
+                '"' => break,
+                '\\' => argument.push(chars.next()?),
+                character => argument.push(character),
+            }
+        }
+
+        arguments.push(argument);
+    }
+
+    Some(arguments)
+}
+
 pub(super) fn dependency_paths(contents: &str) -> Option<Vec<PathBuf>> {
     let input = contents
         .strip_prefix("x-runtime:")?
