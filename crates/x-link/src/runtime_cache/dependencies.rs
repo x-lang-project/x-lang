@@ -60,6 +60,32 @@ pub(super) fn directory_stamps(roots: &[PathBuf]) -> io::Result<Vec<Stamp>> {
     Ok(paths.into_values().collect())
 }
 
+pub(super) fn include_directories(plan: &str) -> Option<Vec<PathBuf>> {
+    let command = plan.lines().find(|line| line.contains("\"-cc1\""))?;
+    let arguments = quoted_arguments(command)?;
+    let mut roots = arguments
+        .windows(2)
+        .filter(|pair| {
+            matches!(
+                pair.first().map(String::as_str),
+                Some("-internal-isystem" | "-internal-externc-isystem")
+            )
+        })
+        .filter_map(|pair| pair.get(1).map(PathBuf::from))
+        .collect::<Vec<_>>();
+    // Use -v because Clang's configured search paths need not follow the user profile.
+    for line in plan.lines() {
+        if let Some(directory) = line
+            .strip_prefix("System configuration file directory: ")
+            .or_else(|| line.strip_prefix("User configuration file directory: "))
+        {
+            roots.push(PathBuf::from(directory));
+        }
+    }
+
+    (!roots.is_empty()).then_some(roots)
+}
+
 pub(super) fn quoted_arguments(line: &str) -> Option<Vec<String>> {
     let mut chars = line.chars().peekable();
     let mut arguments = Vec::new();
