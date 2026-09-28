@@ -9,10 +9,18 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use crate::linker::RuntimeSource;
 use crate::{LinkOptions, NativeToolchain};
 use build::*;
 use dependencies::*;
 use policy::*;
+
+struct RuntimeBuild<'a, 'options> {
+    toolchain: &'a NativeToolchain,
+    source: &'a RuntimeSource,
+    options: &'a LinkOptions<'options>,
+    key: &'a str,
+}
 
 struct TemporaryEntry(PathBuf);
 

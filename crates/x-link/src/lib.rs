@@ -17,7 +17,7 @@ pub struct LinkOptions<'a> {
 }
 
 pub mod jit_runtime;
-
+mod linker;
 mod runtime_cache;
 pub mod tinycc;
 mod toolchain;
