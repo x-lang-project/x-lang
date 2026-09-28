@@ -15,6 +15,9 @@ use build::*;
 use dependencies::*;
 use policy::*;
 
+static NEXT_ENTRY: AtomicU64 = AtomicU64::new(0);
+const FORMAT: u32 = 4;
+
 struct RuntimeBuild<'a, 'options> {
     toolchain: &'a NativeToolchain,
     source: &'a RuntimeSource,
@@ -37,6 +40,22 @@ struct Stamp {
     len: u64,
     directory: bool,
     identity: Option<Vec<u8>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct FileDigest {
+    path: PathBuf,
+    digest: String,
+    identity: Option<Vec<u8>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Manifest {
+    format: u32,
+    key: String,
+    headers: Vec<FileDigest>,
+    directories: Vec<Stamp>,
+    object_digest: String,
 }
 
 fn cleanup_entry(path: &Path) {
