@@ -14,6 +14,14 @@ use build::*;
 use dependencies::*;
 use policy::*;
 
+struct TemporaryEntry(PathBuf);
+
+impl Drop for TemporaryEntry {
+    fn drop(&mut self) {
+        cleanup_entry(&self.0);
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 struct Stamp {
     path: PathBuf,
@@ -21,6 +29,15 @@ struct Stamp {
     len: u64,
     directory: bool,
     identity: Option<Vec<u8>>,
+}
+
+fn cleanup_entry(path: &Path) {
+    // Only these files in the unique directory created by this call are ours.
+    for name in ["runtime.obj", "runtime.d", "manifest.json"] {
+        let _ = fs::remove_file(path.join(name));
+    }
+
+    let _ = fs::remove_dir(path);
 }
 
 mod dependencies;
