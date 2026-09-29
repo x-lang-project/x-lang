@@ -49,6 +49,37 @@ impl LinkInvocation {
 
         Ok(Self { inputs, runtime })
     }
+
+    pub(super) fn render(&self, output: &str, options: &LinkOptions<'_>) -> RenderedLink {
+        let mut arguments = options.passthrough_arguments.to_vec();
+        arguments.extend(self.inputs.iter().cloned());
+        let mut inputs = self.inputs.clone();
+
+        match &self.runtime {
+            RuntimeInput::None => {}
+            RuntimeInput::Source(source) => {
+                arguments.extend(["-x".into(), "c".into(), source.0.clone(), "-fopenmp".into()]);
+            }
+            RuntimeInput::Object(object) => {
+                arguments.extend([object.clone(), "-fopenmp".into()]);
+                inputs.push(object.clone());
+            }
+        }
+
+        for (values, prefix) in [
+            (options.lib_paths, "-L"),
+            (options.include_paths, "-I"),
+            (options.libs, "-l"),
+        ] {
+            arguments.extend(values.iter().map(|value| format!("{prefix}{value}")));
+        }
+
+        append_target_arguments(&mut arguments, options.target_triple);
+        append_codegen_arguments(&mut arguments, options);
+        arguments.extend(["-o".into(), output.into()]);
+
+        RenderedLink { arguments, inputs }
+    }
 }
 
 fn append_target_arguments(arguments: &mut Vec<String>, target_triple: Option<&str>) {
