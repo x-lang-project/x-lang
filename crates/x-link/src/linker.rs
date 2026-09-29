@@ -1,5 +1,5 @@
 use super::*;
-
+use invocation::LinkInvocation;
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::LinkDiagnostic;
 use x_diagnostics::link_messages;
