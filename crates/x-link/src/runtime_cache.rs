@@ -58,6 +58,40 @@ struct Manifest {
     object_digest: String,
 }
 
+fn cache_key(
+    toolchain: &NativeToolchain,
+    options: &LinkOptions<'_>,
+    blob: &str,
+) -> io::Result<String> {
+    let environment = env::vars_os().collect::<BTreeMap<_, _>>();
+    let mut hash = Sha256::new();
+
+    for value in [
+        FORMAT.to_string(),
+        hexadecimal(
+            &toolchain
+                .cache_identity()
+                .ok_or_else(|| io::Error::other("runtime cache compiler identity unavailable"))?,
+        ),
+        hexadecimal(&NativeToolchain::discovery_fingerprint().ok_or_else(|| {
+            io::Error::other("runtime cache toolchain discovery state unavailable")
+        })?),
+        toolchain.version().to_string(),
+        blob.to_string(),
+        x_runtime::RUNTIME_ABI_HEADER.to_string(),
+        x_runtime::RUNTIME_ABI_VERSION.to_string(),
+        format!("{:?}", compile_flags(options)),
+        format!("{}", options.reproducible),
+        format!("{:?}", environment),
+        format!("{:?}", env::current_dir()?),
+    ] {
+        hash.update((value.len() as u64).to_le_bytes());
+        hash.update(value.as_bytes());
+    }
+
+    Ok(hexadecimal(&hash.finalize()))
+}
+
 fn resolved_compiler(path: &Path) -> io::Result<PathBuf> {
     if path.is_file() {
         return fs::canonicalize(path);
