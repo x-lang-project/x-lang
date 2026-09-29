@@ -16,6 +16,7 @@ pub struct LinkOptions<'a> {
     pub gc_sections: bool,
 }
 
+mod inputs;
 pub mod jit_runtime;
 mod linker;
 mod runtime_cache;

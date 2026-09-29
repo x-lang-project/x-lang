@@ -1,3 +1,4 @@
+use super::inputs::valid_object_inputs;
 use super::*;
 use invocation::LinkInvocation;
 use x_diagnostics::CompilationFailure;
