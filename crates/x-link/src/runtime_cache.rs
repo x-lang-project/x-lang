@@ -58,6 +58,16 @@ struct Manifest {
     object_digest: String,
 }
 
+fn resolved_compiler(path: &Path) -> io::Result<PathBuf> {
+    if path.is_file() {
+        return fs::canonicalize(path);
+    }
+
+    Err(io::Error::other(
+        "runtime cache cannot resolve compiler identity",
+    ))
+}
+
 pub(crate) fn valid_entry(directory: &Path, key: &str) -> bool {
     let Ok(bytes) = fs::read(directory.join("manifest.json")) else {
         return false;
