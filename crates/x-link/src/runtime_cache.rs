@@ -58,6 +58,44 @@ struct Manifest {
     object_digest: String,
 }
 
+fn cached_object(
+    toolchain: &NativeToolchain,
+    source: &RuntimeSource,
+    options: &LinkOptions<'_>,
+    blob: &str,
+) -> io::Result<PathBuf> {
+    let key = cache_key(toolchain, options, blob)?;
+    let root = env::var_os("X_RUNTIME_CACHE_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| env::temp_dir().join("x-lang-runtime-cache-v1"))
+        .join(&key);
+    fs::create_dir_all(&root)?;
+    for entry in fs::read_dir(&root)? {
+        let path = entry?.path();
+
+        if path
+            .file_name()
+            .is_some_and(|name| name.to_string_lossy().starts_with('.'))
+        {
+            continue;
+        }
+
+        if valid_entry(&path, &key) {
+            return Ok(path.join("runtime.obj"));
+        }
+    }
+
+    create_entry(
+        &RuntimeBuild {
+            toolchain,
+            source,
+            options,
+            key: &key,
+        },
+        &root,
+    )
+}
+
 fn cache_key(
     toolchain: &NativeToolchain,
     options: &LinkOptions<'_>,
