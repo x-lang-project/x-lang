@@ -22,6 +22,11 @@ pub(super) struct LinkInvocation {
     runtime: RuntimeInput,
 }
 
+pub(super) struct RenderedLink {
+    pub(super) arguments: Vec<String>,
+    pub(super) inputs: Vec<String>,
+}
+
 impl LinkInvocation {
     pub(super) fn prepare(
         object_files: &[String],
@@ -43,5 +48,35 @@ impl LinkInvocation {
         };
 
         Ok(Self { inputs, runtime })
+    }
+}
+
+fn append_target_arguments(arguments: &mut Vec<String>, target_triple: Option<&str>) {
+    if let Some(triple) = target_triple {
+        if let Some(spec) = x_utils::target::TargetSpec::parse(triple) {
+            arguments.extend(spec.compiler_arguments());
+        } else {
+            arguments.push(format!("--target={triple}"));
+        }
+    }
+}
+
+fn append_codegen_arguments(arguments: &mut Vec<String>, options: &LinkOptions<'_>) {
+    arguments.push(
+        x_utils::optimization::NativeOptimization::new(options.optimisation_level).argument(),
+    );
+    if options.gc_sections {
+        arguments.push("-ffunction-sections".to_string());
+        arguments.push("-fdata-sections".to_string());
+
+        if cfg!(target_os = "macos") {
+            arguments.push("-Wl,-dead_strip".to_string());
+        } else if !cfg!(target_os = "windows") {
+            arguments.push("-Wl,--gc-sections".to_string());
+        }
+    }
+
+    if options.reproducible && !cfg!(target_os = "windows") {
+        arguments.push("-Wl,--build-id=none".to_string());
     }
 }
