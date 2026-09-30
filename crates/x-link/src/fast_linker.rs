@@ -44,6 +44,20 @@ fn normalize(arguments: &[String], inputs: &[String], output: &str) -> Vec<Strin
         .collect()
 }
 
+fn stamp(path: &Path) -> Option<(u64, u128)> {
+    let metadata = path.metadata().ok()?;
+
+    Some((
+        metadata.len(),
+        metadata
+            .modified()
+            .ok()?
+            .duration_since(UNIX_EPOCH)
+            .ok()?
+            .as_nanos(),
+    ))
+}
+
 // Parse Clang's quoted -### arguments without invoking a shell.
 
 mod plans;

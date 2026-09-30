@@ -34,6 +34,94 @@ pub(super) fn plan_path(
     )
 }
 
+pub(super) fn read_plan(path: &Path, linker: &Path, input_count: usize) -> Option<LinkPlan> {
+    let plan: LinkPlan = serde_json::from_slice(&fs::read(path).ok()?).ok()?;
+
+    if !valid_arguments(&plan.arguments, input_count)
+        || !plan.stamps.contains_key(linker)
+        || plan
+            .stamps
+            .iter()
+            .any(|(path, expected)| stamp(path).as_ref() != Some(expected))
+    {
+        return None;
+    }
+
+    Some(plan)
+}
+
+pub(super) fn derive_plan(
+    toolchain: &NativeToolchain,
+    request: &LinkRequest<'_>,
+    linker: &Path,
+) -> Option<LinkPlan> {
+    let LinkRequest {
+        arguments: current_arguments,
+        inputs,
+        output,
+        options,
+    } = *request;
+    let mut command = toolchain.command();
+    command.arg("-###").args(current_arguments);
+    if options.reproducible {
+        command.env("SOURCE_DATE_EPOCH", "0");
+    }
+
+    let output_text = command.output().ok()?;
+
+    if !output_text.status.success() {
+        return None;
+    }
+
+    let stderr = String::from_utf8(output_text.stderr).ok()?;
+    let mut commands = stderr
+        .lines()
+        .filter(|line| line.trim_start().starts_with('"'));
+    let tokens = parse_quoted_command(commands.next()?)?;
+
+    if commands.next().is_some() {
+        // A C compilation, response tool or other subprocess is not a link plan.
+        return None;
+    }
+
+    let selected_path = Path::new(tokens.first()?);
+    // Clang omits .exe from lld-link; canonicalisation does not add it.
+    let selected_path = if selected_path.extension().is_none() {
+        selected_path.with_extension("exe")
+    } else {
+        selected_path.to_path_buf()
+    };
+
+    let selected = selected_path.canonicalize().ok()?;
+
+    if selected != linker.canonicalize().ok()? {
+        return None;
+    }
+
+    let arguments = normalize(tokens.get(1..)?, inputs, output);
+
+    if !valid_arguments(&arguments, inputs.len()) {
+        return None;
+    }
+
+    let mut paths = BTreeSet::from([linker.to_path_buf()]);
+
+    for path in arguments
+        .iter()
+        .filter_map(|argument| argument.strip_prefix("-libpath:"))
+    {
+        // New SDK/MSVC versions can appear above the selected directory.
+        paths.extend(Path::new(path).ancestors().map(Path::to_path_buf));
+    }
+
+    let stamps = paths
+        .into_iter()
+        .filter_map(|path| stamp(&path).map(|value| (path, value)))
+        .collect();
+
+    Some(LinkPlan { arguments, stamps })
+}
+
 pub(super) fn valid_arguments(arguments: &[String], input_count: usize) -> bool {
     let expected_output = format!("-out:{OUTPUT_TOKEN}");
 
