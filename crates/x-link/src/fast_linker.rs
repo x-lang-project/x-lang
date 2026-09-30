@@ -27,6 +27,23 @@ pub(crate) struct LinkRequest<'a> {
     pub(crate) options: &'a LinkOptions<'a>,
 }
 
+fn normalize(arguments: &[String], inputs: &[String], output: &str) -> Vec<String> {
+    arguments
+        .iter()
+        .map(|argument| {
+            if argument == output {
+                OUTPUT_TOKEN.to_owned()
+            } else if let Some(index) = inputs.iter().position(|input| input == argument) {
+                format!("{INPUT_PREFIX}{index}__")
+            } else if argument == &format!("-out:{output}") {
+                format!("-out:{OUTPUT_TOKEN}")
+            } else {
+                argument.clone()
+            }
+        })
+        .collect()
+}
+
 // Parse Clang's quoted -### arguments without invoking a shell.
 
 mod plans;
