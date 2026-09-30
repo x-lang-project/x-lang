@@ -33,3 +33,43 @@ pub(super) fn plan_path(
             .join(format!("{key}.json")),
     )
 }
+
+pub(crate) fn parse_quoted_command(line: &str) -> Option<Vec<String>> {
+    let mut chars = line.chars().peekable();
+    let mut arguments = Vec::new();
+
+    while chars.peek().is_some() {
+        while chars.peek().is_some_and(|ch| ch.is_whitespace()) {
+            chars.next();
+        }
+
+        if chars.peek().is_none() {
+            break;
+        }
+
+        if chars.next()? != '"' {
+            return None;
+        }
+
+        let mut argument = String::new();
+
+        loop {
+            match chars.next()? {
+                '"' => break,
+                '\\' => match chars.next()? {
+                    ch @ ('\\' | '"') => argument.push(ch),
+                    _ => return None,
+                },
+                ch => argument.push(ch),
+            }
+        }
+
+        if chars.peek().is_some_and(|ch| !ch.is_whitespace()) {
+            return None;
+        }
+
+        arguments.push(argument);
+    }
+
+    Some(arguments)
+}
