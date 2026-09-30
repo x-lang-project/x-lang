@@ -50,6 +50,13 @@ impl LinkInvocation {
         Ok(Self { inputs, runtime })
     }
 
+    pub(super) fn runtime_source(&self) -> Option<&RuntimeSource> {
+        match &self.runtime {
+            RuntimeInput::Source(source) => Some(source),
+            _ => None,
+        }
+    }
+
     pub(super) fn render(&self, output: &str, options: &LinkOptions<'_>) -> RenderedLink {
         let mut arguments = options.passthrough_arguments.to_vec();
         arguments.extend(self.inputs.iter().cloned());
