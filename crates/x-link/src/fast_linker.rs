@@ -44,6 +44,24 @@ fn normalize(arguments: &[String], inputs: &[String], output: &str) -> Vec<Strin
         .collect()
 }
 
+fn expand(arguments: &[String], inputs: &[String], output: &str) -> Option<Vec<String>> {
+    arguments
+        .iter()
+        .map(|argument| {
+            if argument == &format!("-out:{OUTPUT_TOKEN}") {
+                Some(format!("-out:{output}"))
+            } else if let Some(index) = argument
+                .strip_prefix(INPUT_PREFIX)
+                .and_then(|index| index.strip_suffix("__"))
+            {
+                inputs.get(index.parse::<usize>().ok()?).cloned()
+            } else {
+                Some(argument.clone())
+            }
+        })
+        .collect()
+}
+
 fn stamp(path: &Path) -> Option<(u64, u128)> {
     let metadata = path.metadata().ok()?;
 
