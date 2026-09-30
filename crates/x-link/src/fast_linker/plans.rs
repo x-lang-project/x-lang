@@ -34,6 +34,40 @@ pub(super) fn plan_path(
     )
 }
 
+pub(super) fn valid_arguments(arguments: &[String], input_count: usize) -> bool {
+    let expected_output = format!("-out:{OUTPUT_TOKEN}");
+
+    if arguments
+        .iter()
+        .filter(|argument| *argument == &expected_output)
+        .count()
+        != 1
+    {
+        return false;
+    }
+
+    for index in 0..input_count {
+        let expected = format!("{INPUT_PREFIX}{index}__");
+
+        if !arguments.iter().any(|argument| argument == &expected) {
+            return false;
+        }
+    }
+
+    arguments.iter().all(|argument| {
+        argument == &expected_output
+            || argument == "-nologo"
+            || argument.starts_with("-defaultlib:")
+            || argument.starts_with("-nodefaultlib:")
+            || argument.starts_with("-libpath:")
+            || argument
+                .strip_prefix(INPUT_PREFIX)
+                .and_then(|index| index.strip_suffix("__"))
+                .and_then(|index| index.parse::<usize>().ok())
+                .is_some_and(|index| index < input_count)
+    })
+}
+
 pub(crate) fn parse_quoted_command(line: &str) -> Option<Vec<String>> {
     let mut chars = line.chars().peekable();
     let mut arguments = Vec::new();
