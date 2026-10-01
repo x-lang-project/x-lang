@@ -15,7 +15,7 @@ pub struct LinkOptions<'a> {
     pub reproducible: bool,
     pub gc_sections: bool,
 }
-
+pub mod executable_cache;
 mod fast_linker;
 mod inputs;
 pub mod jit_runtime;

@@ -3,8 +3,7 @@ use std::{collections::BTreeMap, env, fs, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-use crate::LinkOptions;
-use crate::NativeToolchain;
+use crate::{LinkOptions, NativeToolchain, executable_cache};
 use x_diagnostics::{CliError, CompilationFailure};
 
 const BRIDGE: &str = "\n#include <stdarg.h>\nint x_jit_printf(const char *format, ...) { va_list args; va_start(args, format); int result = vprintf(format, args); va_end(args); return result; }\nvoid x_jit_flush(void) { fflush(NULL); }\n";
