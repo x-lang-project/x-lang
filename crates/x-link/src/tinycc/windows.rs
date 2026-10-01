@@ -141,6 +141,80 @@ pub(super) fn configured(options: &LinkOptions<'_>) -> Result<bool, CompilationF
     Ok(config.directory.as_os_str().is_ascii() && config.ucrt.as_os_str().is_ascii())
 }
 
+pub(super) fn link_elf(
+    objects: &[String],
+    output: &str,
+    options: &LinkOptions<'_>,
+) -> Result<LinkOutcome, CompilationFailure> {
+    if !supported_options(options) {
+        return Ok(LinkOutcome::Unsupported(
+            "optimised runtime, custom linker options or target require Clang",
+        ));
+    }
+
+    let Some(config) = Configuration::from_environment()? else {
+        return Ok(LinkOutcome::Unsupported("X_TCC_DIR is not configured"));
+    };
+
+    if !output.is_ascii()
+        || objects.iter().any(|object| !object.is_ascii())
+        || !config.directory.as_os_str().is_ascii()
+        || !config.ucrt.as_os_str().is_ascii()
+    {
+        return Ok(LinkOutcome::Unsupported(
+            "TinyCC narrow filesystem paths require Clang for Unicode names",
+        ));
+    }
+
+    if objects.is_empty() {
+        return Ok(LinkOutcome::Unsupported("no object inputs"));
+    }
+
+    for object in objects {
+        let bytes = fs::read(object).map_err(failure)?;
+
+        if !cache::elf_object(&bytes) {
+            return Ok(LinkOutcome::Unsupported(
+                "TinyCC requires x86-64 ELF relocatable objects",
+            ));
+        }
+
+        if bytes
+            .windows(x_runtime::abi::PARALLEL_FOR.len())
+            .any(|part| part == x_runtime::abi::PARALLEL_FOR.as_bytes())
+        {
+            return Ok(LinkOutcome::Unsupported(
+                "OpenMP dispatch requires the Clang runtime",
+            ));
+        }
+
+        if bytes
+            .windows(b"__chkstk\0".len())
+            .any(|part| part == b"__chkstk\0")
+        {
+            return Ok(LinkOutcome::Unsupported(
+                "LLVM object lacks the TinyCC-specific stack probe",
+            ));
+        }
+    }
+
+    let runtime = PreparedRuntime::new(&config)?;
+
+    if link_objects(&runtime, &config, objects, Path::new(output)).is_err() {
+        return Ok(LinkOutcome::Unsupported(
+            "TinyCC cannot link this ELF relocation or external symbol set",
+        ));
+    }
+
+    if options.reproducible && !cache::zero_pe_timestamp(Path::new(output))? {
+        return Ok(LinkOutcome::Unsupported(
+            "TinyCC output has a nonzero PE timestamp",
+        ));
+    }
+
+    Ok(LinkOutcome::Linked)
+}
+
 fn link_objects(
     runtime: &PreparedRuntime,
     config: &Configuration,

@@ -9,6 +9,20 @@ pub(super) struct PreparedRuntime {
 }
 
 impl PreparedRuntime {
+    pub(super) fn new(config: &Configuration) -> Result<Self, CompilationFailure> {
+        let guard = TINYCC
+            .lock()
+            .map_err(|_| failure("TinyCC serialisation lock poisoned"))?;
+        let library = Library::open(&config.directory)?;
+        let runtime = cache::runtime_object(&library, config)?;
+
+        Ok(Self {
+            library,
+            runtime,
+            _guard: guard,
+        })
+    }
+
     pub(super) fn executable(&self) -> Result<library::State<'_>, CompilationFailure> {
         executable_state(&self.library, &self.runtime.path)
     }

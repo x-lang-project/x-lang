@@ -13,6 +13,57 @@ pub(in crate::tinycc) struct Session {
 }
 
 impl Session {
+    pub(in crate::tinycc) fn new(
+        options: &LinkOptions<'_>,
+    ) -> Result<Option<Self>, CompilationFailure> {
+        if !supported_options(options) {
+            return Ok(None);
+        }
+
+        let Some(config) = Configuration::from_environment()? else {
+            return Ok(None);
+        };
+
+        if !config.directory.as_os_str().is_ascii() || !config.ucrt.as_os_str().is_ascii() {
+            return Ok(None);
+        }
+
+        let _guard = TINYCC
+            .lock()
+            .map_err(|_| failure("TinyCC serialisation lock poisoned"))?;
+        let mut library = Library::open(&config.directory)?;
+        let runtime = cache::runtime_object(&library, &config)?;
+
+        if !runtime.is_guarded() {
+            return Err(failure(
+                "persistent session requires a lockable compiler package",
+            ));
+        }
+
+        let runtime_guard = read_guard(&runtime.path)?;
+        let ucrt_guard = read_guard(&config.ucrt)?;
+        let resources = Resources::snapshot(&config.directory)?;
+        // Revalidate the locked package after copying to reject mixed snapshots.
+        let rechecked = cache::runtime_object(&library, &config)?;
+
+        if runtime.path != rechecked.path {
+            return Err(failure(
+                "compiler package changed during session initialisation",
+            ));
+        }
+
+        library.use_resource_directory(&resources.root)?;
+
+        Ok(Some(Self {
+            _runtime_guard: runtime_guard,
+            _ucrt_guard: ucrt_guard,
+            runtime,
+            resources,
+            library,
+            config,
+        }))
+    }
+
     pub(in crate::tinycc) fn link_elf(
         &mut self,
         objects: &[String],

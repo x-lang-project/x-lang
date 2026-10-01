@@ -11,6 +11,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::NativeToolchain;
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Dependencies {
+    runtime: (PathBuf, String),
+    files: BTreeMap<PathBuf, Option<Vec<u8>>>,
+}
 thread_local! {
     static CAPTURE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     static RUNTIME: RefCell<Option<(PathBuf, String)>> = const { RefCell::new(None) };
@@ -34,8 +39,22 @@ pub fn begin_capture() -> Capture {
     Capture
 }
 
+pub fn take_dependencies() -> Option<Dependencies> {
+    CAPTURE.with(|slot| slot.set(false));
+
+    Some(Dependencies {
+        runtime: RUNTIME.with(|slot| slot.borrow_mut().take())?,
+        files: FILES.with(|slot| slot.borrow_mut().take())?,
+    })
+}
+
 pub(crate) fn capturing() -> bool {
     CAPTURE.with(|slot| slot.get())
+}
+
+pub fn validate(dependencies: &Dependencies) -> bool {
+    crate::runtime_cache::valid_entry(&dependencies.runtime.0, &dependencies.runtime.1)
+        && valid_files(&dependencies.files)
 }
 
 pub(crate) fn valid_files(files: &BTreeMap<PathBuf, Option<Vec<u8>>>) -> bool {
