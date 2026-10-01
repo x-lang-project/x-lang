@@ -26,3 +26,5 @@ mod toolchain;
 #[cfg(windows)]
 mod windows_file;
 pub use toolchain::{NativeToolchain, clang_program};
+
+pub use linker::link;

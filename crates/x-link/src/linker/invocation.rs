@@ -57,6 +57,18 @@ impl LinkInvocation {
         }
     }
 
+    pub(super) fn reuse_runtime_object(
+        &mut self,
+        toolchain: &NativeToolchain,
+        options: &LinkOptions<'_>,
+    ) {
+        if let Some(source) = self.runtime_source()
+            && let Some(object) = crate::runtime_cache::runtime_object(toolchain, source, options)
+        {
+            self.runtime = RuntimeInput::Object(object.to_string_lossy().into_owned());
+        }
+    }
+
     pub(super) fn render(&self, output: &str, options: &LinkOptions<'_>) -> RenderedLink {
         let mut arguments = options.passthrough_arguments.to_vec();
         arguments.extend(self.inputs.iter().cloned());

@@ -58,6 +58,40 @@ struct Manifest {
     object_digest: String,
 }
 
+pub(crate) fn runtime_object(
+    toolchain: &NativeToolchain,
+    source: &RuntimeSource,
+    options: &LinkOptions<'_>,
+) -> Option<PathBuf> {
+    if !supported(options) {
+        return None;
+    }
+
+    let blob = x_runtime::get_runtime_c_blob();
+
+    if !cacheable_source(&blob) {
+        return None;
+    }
+
+    if [
+        "__FILE__",
+        "__BASE_FILE__",
+        "__DATE__",
+        "__TIME__",
+        "__TIMESTAMP__",
+    ]
+    .iter()
+    .any(|needle| blob.contains(needle))
+    {
+        return None;
+    }
+
+    let object = cached_object(toolchain, source, options, &blob).ok()?;
+    crate::executable_cache::record_runtime(&object);
+
+    Some(object)
+}
+
 fn cached_object(
     toolchain: &NativeToolchain,
     source: &RuntimeSource,

@@ -27,6 +27,74 @@ pub(crate) struct LinkRequest<'a> {
     pub(crate) options: &'a LinkOptions<'a>,
 }
 
+pub(crate) fn try_link(
+    toolchain: &NativeToolchain,
+    request: LinkRequest<'_>,
+) -> Option<Result<(), CompilationFailure>> {
+    let LinkRequest {
+        arguments: current_arguments,
+        inputs,
+        output,
+        options,
+    } = request;
+
+    if !eligible(options) || inputs.is_empty() {
+        return None;
+    }
+
+    let compiler = toolchain.compiler().canonicalize().ok()?;
+    let linker = compiler.parent()?.join("lld-link.exe");
+
+    if !linker.is_file() {
+        return None;
+    }
+
+    let normalized = normalize(current_arguments, inputs, output);
+    let cache_path = plan_path(toolchain, &compiler, &linker, &normalized)?;
+    let plan = read_plan(&cache_path, &linker, inputs.len()).or_else(|| {
+        let plan = derive_plan(toolchain, &request, &linker)?;
+
+        if let Some(parent) = cache_path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+
+        if let Ok(bytes) = serde_json::to_vec(&plan) {
+            let _ = fs::write(&cache_path, bytes);
+        }
+
+        Some(plan)
+    })?;
+    let captured = if crate::executable_cache::capturing() {
+        crate::executable_cache::library_files(&plan.arguments, plan.stamps.keys().cloned())
+    } else {
+        None
+    };
+
+    let arguments = expand(&plan.arguments, inputs, output)?;
+    let mut command = Command::new(linker);
+    command.args(arguments);
+    if options.reproducible {
+        command.env("SOURCE_DATE_EPOCH", "0");
+    }
+
+    let status = match command.status() {
+        Ok(status) => status,
+        Err(_) => return None,
+    };
+
+    Some(if !status.success() {
+        Err(link_messages::clang_failure(status))
+    } else if !Path::new(output).is_file() {
+        Err(link_messages::output_missing(output))
+    } else {
+        crate::executable_cache::record_files(
+            captured.filter(crate::executable_cache::valid_files),
+        );
+
+        Ok(())
+    })
+}
+
 fn eligible(options: &LinkOptions<'_>) -> bool {
     cfg!(all(windows, target_arch = "x86_64"))
         && env::var_os("X_CLANG").is_none()

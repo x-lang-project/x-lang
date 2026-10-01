@@ -11,8 +11,32 @@ use serde::{Deserialize, Serialize};
 
 use crate::NativeToolchain;
 
+thread_local! {
+    static CAPTURE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    static RUNTIME: RefCell<Option<(PathBuf, String)>> = const { RefCell::new(None) };
+    static FILES: RefCell<Option<BTreeMap<PathBuf, Option<Vec<u8>>>>> = const { RefCell::new(None) };
+}
 #[must_use]
 pub struct Capture;
+impl Drop for Capture {
+    fn drop(&mut self) {
+        CAPTURE.with(|slot| slot.set(false));
+        RUNTIME.with(|slot| *slot.borrow_mut() = None);
+        FILES.with(|slot| *slot.borrow_mut() = None);
+    }
+}
+
+pub fn begin_capture() -> Capture {
+    CAPTURE.with(|slot| slot.set(true));
+    RUNTIME.with(|slot| *slot.borrow_mut() = None);
+    FILES.with(|slot| *slot.borrow_mut() = None);
+
+    Capture
+}
+
+pub(crate) fn capturing() -> bool {
+    CAPTURE.with(|slot| slot.get())
+}
 
 pub(crate) fn valid_files(files: &BTreeMap<PathBuf, Option<Vec<u8>>>) -> bool {
     files.iter().all(|(path, identity)| match identity {
@@ -22,6 +46,20 @@ pub(crate) fn valid_files(files: &BTreeMap<PathBuf, Option<Vec<u8>>>) -> bool {
             fs::symlink_metadata(path).is_err_and(|error| error.kind() == io::ErrorKind::NotFound)
         }
     })
+}
+
+pub(crate) fn record_runtime(object: &Path) {
+    let record = object.parent().and_then(|entry| {
+        Some((
+            entry.to_path_buf(),
+            entry.parent()?.file_name()?.to_str()?.to_owned(),
+        ))
+    });
+    RUNTIME.with(|slot| *slot.borrow_mut() = record);
+}
+
+pub(crate) fn record_files(files: Option<BTreeMap<PathBuf, Option<Vec<u8>>>>) {
+    FILES.with(|slot| *slot.borrow_mut() = files);
 }
 
 pub(crate) fn library_files(
