@@ -27,6 +27,21 @@ pub(crate) struct LinkRequest<'a> {
     pub(crate) options: &'a LinkOptions<'a>,
 }
 
+fn eligible(options: &LinkOptions<'_>) -> bool {
+    cfg!(all(windows, target_arch = "x86_64"))
+        && env::var_os("X_CLANG").is_none()
+        && !options.freestanding
+        && !options.gc_sections
+        && options.libs.is_empty()
+        && options.lib_paths.is_empty()
+        && options.include_paths.is_empty()
+        && options.passthrough_arguments.is_empty()
+        && options.target_triple.is_none_or(|triple| {
+            x_utils::target::ProductTarget::parse(triple)
+                == Some(x_utils::target::ProductTarget::WindowsMsvc)
+        })
+}
+
 fn normalize(arguments: &[String], inputs: &[String], output: &str) -> Vec<String> {
     arguments
         .iter()
