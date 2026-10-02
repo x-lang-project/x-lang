@@ -11,6 +11,9 @@
     )
 )]
 
+#[cfg(feature = "c-backend")]
+pub mod c_backend;
+
 mod module_names;
 
 mod sources;
