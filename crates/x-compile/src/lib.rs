@@ -20,12 +20,16 @@ pub mod jit;
 
 mod module_names;
 
+mod source_mir;
 mod source_object;
 mod sources;
 
 pub use artifact::DebugArtifact;
 
 pub use module_names::qualify_module;
+
+pub use source_mir::SourceMirArtifact;
+pub use source_mir::SourceMirOptions;
 
 pub use sources::SourceCatalog;
 pub use x_diagnostics::CompilationFailure;
