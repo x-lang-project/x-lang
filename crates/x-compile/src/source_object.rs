@@ -6,6 +6,7 @@ use std::{
 
 use inkwell::targets::{TargetMachine, TargetTriple};
 
+use crate::CHERI_RISCV64_PURECAP_PROFILE;
 use crate::CompilationFailure;
 use crate::IrCompileOptions;
 use crate::ObjectCompileOptions;
