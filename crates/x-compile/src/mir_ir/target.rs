@@ -17,3 +17,25 @@ pub(super) struct CompilationTarget {
     triple: TargetTriple,
     profile: TargetProfile,
 }
+
+impl CompilationTarget {
+    pub(super) fn new(requested: Option<&str>) -> Self {
+        let profile = if requested == Some(CHERI_RISCV64_PURECAP_PROFILE) {
+            TargetProfile::CheriPurecap
+        } else {
+            TargetProfile::Native
+        };
+
+        let effective_triple = match profile {
+            TargetProfile::CheriPurecap => Some(CHERI_RISCV64_TRIPLE),
+            TargetProfile::Native => requested,
+        };
+
+        Self {
+            triple: effective_triple
+                .map(TargetTriple::create)
+                .unwrap_or_else(TargetMachine::get_default_triple),
+            profile,
+        }
+    }
+}
