@@ -7,6 +7,8 @@ use std::{
 use inkwell::targets::{TargetMachine, TargetTriple};
 
 use crate::CompilationFailure;
+use crate::IrCompileOptions;
+use crate::ObjectCompileOptions;
 use x_codegen::ObjectEmissionOptions;
 use x_diagnostics::{StageDiagnostic, contract_messages};
 use x_logging::info;

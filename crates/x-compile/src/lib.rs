@@ -20,6 +20,8 @@ pub mod jit;
 
 mod module_names;
 
+mod options;
+
 mod source_mir;
 mod source_object;
 mod sources;
@@ -27,6 +29,8 @@ mod sources;
 pub use artifact::DebugArtifact;
 
 pub use module_names::qualify_module;
+
+pub use options::{IrCompileOptions, ObjectCompileOptions};
 
 pub use source_mir::SourceMirArtifact;
 pub use source_mir::SourceMirOptions;
