@@ -11,6 +11,8 @@
     )
 )]
 
+mod artifact;
+
 #[cfg(feature = "c-backend")]
 pub mod c_backend;
 
@@ -20,6 +22,8 @@ mod module_names;
 
 mod source_object;
 mod sources;
+
+pub use artifact::DebugArtifact;
 
 pub use module_names::qualify_module;
 
