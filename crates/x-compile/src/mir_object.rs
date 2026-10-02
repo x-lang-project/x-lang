@@ -4,7 +4,7 @@ use std::{fs, path::Path};
 use inkwell::targets;
 
 use crate::IrCompileOptions;
-
+use crate::frontend;
 use x_codegen::CodeGenerationError;
 use x_codegen::ObjectEmissionOptions;
 use x_diagnostics::CompilationFailure;

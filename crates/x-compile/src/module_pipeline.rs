@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::SourceCatalog;
-
+use crate::frontend;
 use crate::qualify_module;
 use x_ast::Program;
 use x_ast::Statement;

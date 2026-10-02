@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::DebugArtifact;
-
+use crate::frontend;
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::contract_messages::ContractValidationPhase;
 use x_mir::MirProgram;

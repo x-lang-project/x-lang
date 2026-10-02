@@ -16,6 +16,7 @@ mod artifact;
 #[cfg(feature = "c-backend")]
 pub mod c_backend;
 
+mod frontend;
 pub mod jit;
 mod mir_ir;
 mod mir_object;

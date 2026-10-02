@@ -3,8 +3,7 @@ use std::path::Path;
 use inkwell::values::AsValueRef;
 use inkwell::{OptimizationLevel, context::Context};
 
-use crate::IrCompileOptions;
-use crate::mir_ir;
+use crate::{IrCompileOptions, frontend, mir_ir};
 use x_diagnostics::{CliError, CompilationFailure};
 use x_mir::MirProgram;
 
