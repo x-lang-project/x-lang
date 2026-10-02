@@ -17,7 +17,7 @@ mod artifact;
 pub mod c_backend;
 
 pub mod jit;
-
+mod mir_ir;
 mod mir_object;
 mod module_names;
 mod module_pipeline;
