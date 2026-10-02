@@ -20,6 +20,7 @@ pub mod jit;
 
 mod module_names;
 
+mod object;
 mod options;
 
 mod source_mir;
@@ -37,3 +38,5 @@ pub use source_mir::SourceMirOptions;
 
 pub use sources::SourceCatalog;
 pub use x_diagnostics::CompilationFailure;
+
+use object::object_context;
