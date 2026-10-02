@@ -805,6 +805,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-compile"
+version = "1.0.0"
+dependencies = [
+ "inkwell",
+ "x-ast",
+ "x-borrow-checker",
+ "x-codegen",
+ "x-diagnostics",
+ "x-hir",
+ "x-logging",
+ "x-mir",
+ "x-parser",
+ "x-project",
+ "x-typechecker",
+ "x-utils",
+]
+
+[[package]]
 name = "x-diagnostics"
 version = "1.0.0"
 dependencies = [

@@ -1,0 +1,35 @@
+[package]
+name = "x-compile"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lib]
+test = true
+doctest = true
+name = "x_compile"
+path = "src/lib.rs"
+
+[features]
+c-backend = []
+
+[dependencies]
+x-project = { workspace = true }
+inkwell = { workspace = true }
+x-codegen = { workspace = true }
+x-parser = { workspace = true }
+x-ast = { workspace = true }
+x-hir = { workspace = true }
+x-mir = { workspace = true }
+x-borrow-checker = { workspace = true }
+x-typechecker = { workspace = true }
+x-utils = { workspace = true }
+x-logging = { workspace = true }
+x-diagnostics = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+inkwell = { workspace = true, features = ["llvm22-1-no-llvm-linking"] }
