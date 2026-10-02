@@ -18,6 +18,7 @@ pub mod jit;
 
 mod module_names;
 
+mod source_object;
 mod sources;
 
 pub use module_names::qualify_module;
