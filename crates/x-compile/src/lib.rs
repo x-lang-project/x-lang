@@ -45,3 +45,4 @@ use object::object_context;
 
 pub const CHERI_RISCV64_PURECAP_PROFILE: &str = x_utils::target::CheriPurecap::PROFILE;
 pub const CHERI_RISCV64_TRIPLE: &str = x_utils::target::CheriPurecap::TRIPLE;
+pub const CHERI_RISCV64_DATALAYOUT: &str = x_utils::target::CheriPurecap::DATA_LAYOUT;
