@@ -19,7 +19,7 @@ pub mod c_backend;
 pub mod jit;
 
 mod module_names;
-
+mod module_pipeline;
 mod object;
 mod options;
 
@@ -30,7 +30,7 @@ mod sources;
 pub use artifact::DebugArtifact;
 
 pub use module_names::qualify_module;
-
+pub use module_pipeline::ModuleCompileOptions;
 pub use options::{IrCompileOptions, ObjectCompileOptions};
 
 pub use source_mir::SourceMirArtifact;
