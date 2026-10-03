@@ -12,3 +12,8 @@ pub(crate) struct SourceInput<'a> {
     pub text: &'a str,
     pub path: &'a Path,
 }
+
+pub(crate) struct SourceContext<'a> {
+    pub input: SourceInput<'a>,
+    pub catalog: Option<&'a mut SourceCatalog>,
+}
