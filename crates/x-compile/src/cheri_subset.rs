@@ -1,3 +1,4 @@
+use operations::*;
 use x_ast::{Layout, StructDefinition, Type};
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::contract_messages;
@@ -44,3 +45,5 @@ fn validate_type(value_type: &Type, context: &str) -> Result<(), CompilationFail
         }
     }
 }
+
+mod operations;
