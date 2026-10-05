@@ -1,5 +1,24 @@
 use super::*;
 
+pub(super) fn validate_statement(
+    statement: &MirStatement,
+    function: &str,
+) -> Result<(), CompilationFailure> {
+    match statement {
+        MirStatement::Assign(place, value) => {
+            validate_place(place, function)?;
+
+            validate_rvalue(value, function)
+        }
+        MirStatement::StorageLive(_) | MirStatement::StorageDead(_) | MirStatement::Comment(_) => {
+            Ok(())
+        }
+        MirStatement::ParallelFor { .. } => {
+            reject(contract_messages::cheri_parallel_loop(function))
+        }
+    }
+}
+
 pub(super) fn validate_rvalue(value: &Rvalue, function: &str) -> Result<(), CompilationFailure> {
     match value {
         Rvalue::Use(operand) | Rvalue::UnaryOperator(_, operand) => {
@@ -47,6 +66,37 @@ pub(super) fn validate_rvalue(value: &Rvalue, function: &str) -> Result<(), Comp
             }
 
             Ok(())
+        }
+    }
+}
+
+pub(super) fn validate_terminator(
+    terminator: &MirTerminator,
+    function: &str,
+) -> Result<(), CompilationFailure> {
+    match terminator {
+        MirTerminator::Return
+        | MirTerminator::Goto(_)
+        | MirTerminator::Abort
+        | MirTerminator::Unreachable => Ok(()),
+        MirTerminator::SwitchInteger { discriminant, .. } => {
+            validate_operand(discriminant, function)
+        }
+        MirTerminator::Exit { code } => validate_operand(code, function),
+        MirTerminator::Call {
+            arguments,
+            destination,
+            ..
+        } => {
+            validate_operands(arguments, function)?;
+
+            validate_place(destination, function)
+        }
+        MirTerminator::TailCall { arguments, .. } => validate_operands(arguments, function),
+        MirTerminator::Throw { .. }
+        | MirTerminator::TryCall { .. }
+        | MirTerminator::CatchCall { .. } => {
+            reject(contract_messages::exception_control_flow_in_function_function(function))
         }
     }
 }
