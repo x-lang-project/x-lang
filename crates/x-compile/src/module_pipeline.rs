@@ -16,6 +16,40 @@ pub struct ModuleCompileOptions {
     pub no_borrow_check: bool,
 }
 
+pub fn compile_module_graph_to_mir(
+    resolver: &ModuleResolver,
+    entry_source: &str,
+    entry_path: &Path,
+    options: ModuleCompileOptions,
+) -> Result<MirProgram, CompilationFailure> {
+    let mut program = ModuleProgram::default();
+
+    for name in resolver.order() {
+        let node = resolver
+            .modules()
+            .get(name)
+            .ok_or_else(|| contract_messages::resolved_module_missing(name))?;
+        program.append(node, node.parse_for_compilation()?)?;
+    }
+
+    program.lower(entry_source, entry_path, options)
+}
+
+pub fn compile_owned_module_graph_to_mir(
+    resolver: ModuleResolver,
+    entry_source: &str,
+    entry_path: &Path,
+    options: ModuleCompileOptions,
+) -> Result<MirProgram, CompilationFailure> {
+    let mut program = ModuleProgram::default();
+
+    for module in resolver.into_compilation_modules()? {
+        program.append(&module.node, module.parsed)?;
+    }
+
+    program.lower(entry_source, entry_path, options)
+}
+
 #[derive(Default)]
 struct ModuleProgram {
     items: Vec<Statement>,
@@ -45,5 +79,43 @@ impl ModuleProgram {
         self.items.extend(part_program.statements);
 
         Ok(())
+    }
+
+    fn lower(
+        mut self,
+        entry_source: &str,
+        entry_path: &Path,
+        options: ModuleCompileOptions,
+    ) -> Result<MirProgram, CompilationFailure> {
+        let mut declarations = Vec::new();
+        let mut functions = Vec::new();
+
+        for item in self.items {
+            match item {
+                Statement::Function { .. } => functions.push(item),
+                _ => declarations.push(item),
+            }
+        }
+
+        declarations.extend(functions);
+
+        frontend::check_and_lower(
+            Program {
+                statements: declarations,
+            },
+            frontend::FrontendOptions {
+                no_borrow_check: options.no_borrow_check,
+                contract_phase: contract_messages::ContractValidationPhase::ManifestLowering,
+                ..Default::default()
+            },
+            frontend::SourceContext {
+                input: frontend::SourceInput {
+                    text: entry_source,
+                    path: entry_path,
+                },
+                catalog: Some(&mut self.sources),
+            },
+        )
+        .map(|checked| checked.mir)
     }
 }

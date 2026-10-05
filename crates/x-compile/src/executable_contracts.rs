@@ -16,6 +16,16 @@ struct FunctionShape {
     result: Type,
 }
 
+pub fn validate_executable_contracts(program: &Program) -> Result<(), CompilationFailure> {
+    let mut functions = HashMap::new();
+    let mut structures = HashMap::new();
+
+    collect_structures(&program.statements, &mut structures);
+    collect_functions(&program.statements, &mut functions);
+
+    validate_statements(&program.statements, &functions, &structures, false)
+}
+
 fn collect_structures(statements: &[Statement], structures: &mut HashMap<String, Vec<Type>>) {
     for statement in statements {
         if let Statement::StructDeclaration(definition) = statement {
@@ -92,11 +102,55 @@ fn collect_functions(statements: &[Statement], functions: &mut HashMap<String, F
     }
 }
 
+fn validate_statements(
+    statements: &[Statement],
+    functions: &HashMap<String, FunctionShape>,
+    structures: &HashMap<String, Vec<Type>>,
+    in_expression: bool,
+) -> Result<(), CompilationFailure> {
+    for (index, statement) in statements.iter().enumerate() {
+        match statement {
+            _ => {}
+        }
+
+        let mut expressions = ExpressionContracts {
+            functions,
+            structures,
+            depth: 0,
+            error: None,
+        };
+        x_ast::ExpressionVisitor::visit_statement(&mut expressions, statement);
+
+        if let Some(error) = expressions.error {
+            return Err(error);
+        }
+    }
+
+    Ok(())
+}
+
 struct ExpressionContracts<'a> {
     functions: &'a HashMap<String, FunctionShape>,
     structures: &'a HashMap<String, Vec<Type>>,
     depth: usize,
     error: Option<CompilationFailure>,
+}
+
+impl x_ast::ExpressionVisitor for ExpressionContracts<'_> {
+    fn visit_expression(&mut self, expression: &Expression) {
+        if self.error.is_none() {
+            self.depth += 1;
+            x_ast::walk_expression_children(self, expression);
+            self.depth -= 1;
+        }
+    }
+
+    fn visit_statements(&mut self, statements: &[Statement]) {
+        if self.depth != 0 && self.error.is_none() {
+            self.error =
+                validate_statements(statements, self.functions, self.structures, true).err();
+        }
+    }
 }
 
 mod functions;

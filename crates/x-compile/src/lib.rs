@@ -32,13 +32,15 @@ mod sources;
 
 pub use artifact::DebugArtifact;
 
+pub use executable_contracts::validate_executable_contracts;
 pub use mir_object::MirObjectOptions;
 pub use module_names::qualify_module;
-pub use module_pipeline::ModuleCompileOptions;
+pub use module_pipeline::{
+    ModuleCompileOptions, compile_module_graph_to_mir, compile_owned_module_graph_to_mir,
+};
 pub use options::{IrCompileOptions, ObjectCompileOptions};
 
-pub use source_mir::SourceMirArtifact;
-pub use source_mir::SourceMirOptions;
+pub use source_mir::{SourceMirArtifact, SourceMirOptions, check_source, compile_source_to_mir};
 
 pub use sources::SourceCatalog;
 pub use x_diagnostics::CompilationFailure;

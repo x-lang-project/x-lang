@@ -1,5 +1,71 @@
 use super::*;
 
+pub(super) fn validate_function(
+    statement: &Statement,
+    functions: &HashMap<String, FunctionShape>,
+    structures: &HashMap<String, Vec<Type>>,
+) -> Result<(), CompilationFailure> {
+    let Statement::Function {
+        name,
+        parameters,
+        return_type,
+        body,
+        is_pure,
+        is_memoised,
+        is_multi,
+        is_throws,
+        generic_parameters,
+        ..
+    } = statement
+    else {
+        return Ok(());
+    };
+
+    if *is_pure && *is_throws {
+        return Err(contract_messages::pure_function_throws(name));
+    }
+
+    if *is_memoised {
+        if !*is_pure {
+            return Err(contract_messages::memoized_function_impure(name));
+        }
+
+        if *is_throws {
+            return Err(contract_messages::memoized_function_throws(name));
+        }
+
+        if *is_multi {
+            return Err(contract_messages::memoized_multi_function(name));
+        }
+
+        let scalar_or_parameter = |value_type: &Type| {
+            value_type.is_scalar()
+                || matches!(value_type, Type::TypeParameter(name) | Type::Custom(name)
+                    if generic_parameters.iter().any(|parameter|
+                        matches!(parameter, x_ast::GenericParameter::Type { name: declared, .. }
+                            if declared == name)))
+        };
+
+        if parameters
+            .iter()
+            .any(|pointer| !scalar_or_parameter(&pointer.value_type))
+            || !scalar_or_parameter(return_type)
+        {
+            return Err(contract_messages::memoized_function_non_scalar(name));
+        }
+    }
+
+    if *is_multi && (parameters.is_empty() || parameters.iter().any(|pointer| pointer.is_static)) {
+        return Err(contract_messages::multi_function_dispatch_missing(name));
+    }
+
+    if let Some(body) = body {
+        validate_statements(body, functions, structures, false)?;
+    }
+
+    Ok(())
+}
+
 pub(super) fn validate_parallel_range(
     variable: &str,
     body: &[Statement],

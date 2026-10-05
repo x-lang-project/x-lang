@@ -50,3 +50,17 @@ fn borrow_check_with_sources(
         context.diagnostic_failure(error.source_span(), |span| error.into_diagnostic(span))
     })
 }
+
+pub(super) fn validate_program(
+    program: &Program,
+    options: &FrontendOptions,
+    context: &SourceContext<'_>,
+) -> Result<(), CompilationFailure> {
+    borrow_check_with_sources(program, options.no_borrow_check, context)?;
+
+    crate::validate_executable_contracts(program).map_err(|error| {
+        error
+            .with_note(options.contract_phase.note())
+            .with_source(context.input.text, context.input.path)
+    })
+}

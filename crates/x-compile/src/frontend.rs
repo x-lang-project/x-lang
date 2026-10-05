@@ -57,6 +57,46 @@ impl Default for FrontendOptions {
     }
 }
 
+pub(crate) fn check_and_lower(
+    program: Program,
+    options: FrontendOptions,
+    mut context: SourceContext<'_>,
+) -> Result<CheckedFrontend, CompilationFailure> {
+    let mut debug_artifacts = Vec::new();
+    let program = checks::typecheck(program, &mut context)?;
+
+    if options.show_parse {
+        debug_artifacts.push(DebugArtifact {
+            stage: "Type-Checked AST",
+            text: format!("{program:?}"),
+        });
+    }
+
+    checks::validate_program(&program, &options, &context)?;
+    let hir = lowering::lower_hir(program, &context)?;
+
+    if options.show_parse {
+        debug_artifacts.push(DebugArtifact {
+            stage: "HIR",
+            text: format!("{hir:?}"),
+        });
+    }
+
+    let mir = lowering::lower_mir(hir, &context)?;
+
+    if options.show_parse {
+        debug_artifacts.push(DebugArtifact {
+            stage: "MIR",
+            text: format!("{mir:?}"),
+        });
+    }
+
+    Ok(CheckedFrontend {
+        mir,
+        debug_artifacts,
+    })
+}
+
 pub(crate) struct CheckedFrontend {
     pub mir: MirProgram,
     pub debug_artifacts: Vec<DebugArtifact>,
