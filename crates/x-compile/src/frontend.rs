@@ -40,3 +40,24 @@ impl SourceContext<'_> {
         CompilationFailure::diagnostic(source, path, diagnostic(span))
     }
 }
+
+pub(crate) struct FrontendOptions {
+    pub no_borrow_check: bool,
+    pub show_parse: bool,
+    pub contract_phase: ContractValidationPhase,
+}
+
+impl Default for FrontendOptions {
+    fn default() -> Self {
+        Self {
+            no_borrow_check: false,
+            show_parse: false,
+            contract_phase: ContractValidationPhase::Lowering,
+        }
+    }
+}
+
+pub(crate) struct CheckedFrontend {
+    pub mir: MirProgram,
+    pub debug_artifacts: Vec<DebugArtifact>,
+}

@@ -1,4 +1,4 @@
-use super::SourceContext;
+use super::{FrontendOptions, SourceContext};
 use x_ast::{Program, SourceError};
 use x_borrow_checker::BorrowChecker;
 use x_diagnostics::CompilationFailure;
