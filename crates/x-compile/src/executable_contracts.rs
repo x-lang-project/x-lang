@@ -55,6 +55,17 @@ fn shareable_storage(
     }
 
     match value_type {
+        Type::FixedSizedArray(inner, _)
+        | Type::Reference {
+            is_mut: false,
+            inner,
+            ..
+        } => shareable_storage(inner, structures, depth + 1),
+        Type::Custom(name) => structures.get(name).is_some_and(|fields| {
+            fields
+                .iter()
+                .all(|field| shareable_storage(field, structures, depth + 1))
+        }),
         _ => false,
     }
 }
@@ -110,6 +121,67 @@ fn validate_statements(
 ) -> Result<(), CompilationFailure> {
     for (index, statement) in statements.iter().enumerate() {
         match statement {
+            Statement::Function { .. } => validate_function(statement, functions, structures)?,
+            Statement::StructDeclaration(definition) => {
+                if let Some(invariant) = &definition.invariant
+                    && !executable_invariant(invariant)
+                {
+                    return Err(contract_messages::struct_invariant_unsupported(
+                        &definition.name,
+                    ));
+                }
+            }
+            Statement::ForRangeLoop {
+                variable,
+                body,
+                is_parallel,
+                ..
+            } => {
+                if *is_parallel {
+                    validate_parallel_range(variable, body, functions, structures)?;
+                }
+
+                validate_statements(body, functions, structures, in_expression)?;
+            }
+            Statement::ForEachLoop {
+                is_parallel: true, ..
+            } => {
+                return Err(contract_messages::parallel_foreach_unsupported());
+            }
+            Statement::Become { .. }
+                if in_expression
+                    || statements
+                        .iter()
+                        .skip(index + 1)
+                        .any(|next| !matches!(next, Statement::Comment(_))) =>
+            {
+                return Err(contract_messages::become_not_final());
+            }
+            Statement::Block { statements } => {
+                validate_statements(statements, functions, structures, in_expression)?
+            }
+            Statement::If {
+                then_block,
+                else_block,
+                ..
+            } => {
+                validate_statements(then_block, functions, structures, in_expression)?;
+
+                if let Some(else_block) = else_block {
+                    validate_statements(else_block, functions, structures, in_expression)?;
+                }
+            }
+            Statement::WhileLoop { body, .. } => {
+                validate_statements(body, functions, structures, in_expression)?
+            }
+            Statement::ImplDeclaration(definition) => {
+                validate_statements(&definition.methods, functions, structures, false)?
+            }
+            Statement::TraitDeclaration(definition) => {
+                for method in definition.methods.values().flatten() {
+                    validate_statements(slice::from_ref(method), functions, structures, false)?;
+                }
+            }
             _ => {}
         }
 
