@@ -15,7 +15,7 @@ mod artifact;
 
 #[cfg(feature = "c-backend")]
 pub mod c_backend;
-
+mod cheri_subset;
 mod executable_contracts;
 mod frontend;
 pub mod jit;
