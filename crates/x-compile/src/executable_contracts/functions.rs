@@ -1,5 +1,55 @@
 use super::*;
 
+pub(super) fn validate_parallel_range(
+    variable: &str,
+    body: &[Statement],
+    functions: &HashMap<String, FunctionShape>,
+    structures: &HashMap<String, Vec<Type>>,
+) -> Result<(), CompilationFailure> {
+    let mut executable = body
+        .iter()
+        .filter(|statement| !matches!(statement, Statement::Comment(_)));
+    let (Some(Statement::Expression { expression }), None) = (executable.next(), executable.next())
+    else {
+        return Err(contract_messages::parallel_body_unsupported());
+    };
+
+    let ExpressionKind::FunctionCall { target, arguments } = &expression.kind else {
+        return Err(contract_messages::parallel_body_unsupported());
+    };
+
+    let name = target.symbol_name();
+
+    if !matches!(arguments.first(), Some(argument) if matches!(&argument.kind, ExpressionKind::Identifier(input) if input == variable))
+    {
+        return Err(contract_messages::parallel_worker_input_invalid());
+    }
+
+    let Some(shape) = functions.get(name.as_ref()) else {
+        return Err(contract_messages::parallel_worker_unknown(&name));
+    };
+
+    if !shape.pure
+        || shape.throws
+        || shape.parameters.first() != Some(&Type::I32)
+        || shape.parameters.len() != arguments.len()
+        || shape.result != Type::I32
+    {
+        return Err(contract_messages::parallel_worker_signature_invalid(&name));
+    }
+
+    for (argument, parameter) in arguments.iter().zip(&shape.parameters).skip(1) {
+        if !invariant_capture(argument, variable)
+            || !shareable_capture(parameter, structures)
+            || !shareable_capture(&argument.value_type, structures)
+        {
+            return Err(contract_messages::parallel_capture_unsupported());
+        }
+    }
+
+    Ok(())
+}
+
 fn invariant_capture(expression: &Expression, iteration_variable: &str) -> bool {
     struct Dependencies<'a> {
         iteration_variable: &'a str,
