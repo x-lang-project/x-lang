@@ -8,6 +8,9 @@ use x_diagnostics::{
 };
 use x_mir::MirProgram;
 
+mod checks;
+mod lowering;
+
 pub(crate) struct SourceInput<'a> {
     pub text: &'a str,
     pub path: &'a Path,
@@ -16,4 +19,24 @@ pub(crate) struct SourceInput<'a> {
 pub(crate) struct SourceContext<'a> {
     pub input: SourceInput<'a>,
     pub catalog: Option<&'a mut SourceCatalog>,
+}
+
+impl SourceContext<'_> {
+    fn source_for(&self, span: Option<SourceSpan>) -> (&Path, &str) {
+        self.catalog
+            .as_deref()
+            .and_then(|catalog| catalog.source_for(span))
+            .unwrap_or((self.input.path, self.input.text))
+    }
+
+    fn diagnostic_failure(
+        &self,
+        origin: Option<SourceSpan>,
+        diagnostic: impl FnOnce(Span) -> Diagnostic,
+    ) -> CompilationFailure {
+        let (path, source) = self.source_for(origin);
+        let span = source_span_for_diagnostic(SourceIdentifier(0), source);
+
+        CompilationFailure::diagnostic(source, path, diagnostic(span))
+    }
 }
