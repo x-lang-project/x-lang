@@ -64,6 +64,23 @@ pub(super) fn ctype(value_type: &Type) -> Result<String> {
     })
 }
 
+pub(super) fn throws_ctype(value_type: &Type) -> String {
+    format!("struct _x_throws{}", encoded(&format!("{value_type:?}")))
+}
+
+pub(super) fn zero(value_type: &Type) -> Result<String> {
+    Ok(
+        if matches!(
+            value_type,
+            Type::Custom(_) | Type::Tuple(_) | Type::FixedSizedArray(_, _)
+        ) {
+            format!("(({}){{0}})", ctype(value_type)?)
+        } else {
+            "0".into()
+        },
+    )
+}
+
 pub(super) fn string_element(second_value: &MirBody, place: &Place) -> bool {
     match place {
         Place::Index { base, .. } => {
@@ -101,12 +118,52 @@ pub(super) fn signed_view(value: &Value) -> Result<String> {
     ))
 }
 
+pub(super) fn string(value: &str) -> String {
+    let mut text = String::from("\"");
+
+    for byte in value.as_bytes() {
+        text.push('\\');
+
+        for shift in [6, 3, 0] {
+            text.push(char::from(b'0' + ((byte >> shift) & 7)));
+        }
+    }
+
+    text.push('"');
+
+    text
+}
+
 pub(super) fn convert(value: Value, target: &Type, sign_extend: bool) -> Result<Value> {
     if &value.value_type == target {
         return Ok(value);
     }
 
     let code = match (width(&value.value_type), width(target)) {
+        (Some(first_value), Some(second_value)) if first_value == second_value => value.code,
+        (Some(first_value), Some(second_value)) => {
+            let expression = if second_value > first_value && sign_extend {
+                signed_view(&value)?
+            } else {
+                value.code
+            };
+
+            bits(&expression, second_value)
+        }
+        (None, None) if pointer(&value.value_type) && pointer(target) => {
+            format!("(({})({}))", ctype(target)?, value.code)
+        }
+        (Some(_), None) if pointer(target) => {
+            format!(
+                "(({})((unsigned long long)({})))",
+                ctype(target)?,
+                value.code
+            )
+        }
+        (None, Some(writer)) if pointer(&value.value_type) => {
+            bits(&format!("((unsigned long long)({}))", value.code), writer)
+        }
+
         _ => {
             return Err(backend_messages::c_emission_unsupported_conversion(
                 value.value_type,
