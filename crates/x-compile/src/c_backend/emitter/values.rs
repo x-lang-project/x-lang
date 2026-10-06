@@ -3,6 +3,10 @@ use super::*;
 impl Emitter<'_> {
     pub(super) fn place(&self, second_value: &MirBody, current_place: &Place) -> Result<String> {
         match current_place {
+            Place::Local(identifier) => Ok(format!("v{}", identifier.0)),
+            Place::Dereference { base, .. } if pointer(&second_value.place_type(base)) => {
+                Ok(format!("(*({}))", self.place(second_value, base)?))
+            }
             Place::Field {
                 base, field_name, ..
             } => {
@@ -32,7 +36,17 @@ impl Emitter<'_> {
 
                         format!("f{}", encoded(field_name))
                     }
+                    Type::Tuple(items) => {
+                        let position = field_name
+                            .parse::<usize>()
+                            .map_err(|_| backend_messages::c_emission_nonnumeric_tuple_field())?;
 
+                        if position >= items.len() {
+                            return Err(backend_messages::c_emission_tuple_field_bounds().into());
+                        }
+
+                        format!("f{position}")
+                    }
                     _ => return Err(backend_messages::c_emission_field_on_nonaggregate().into()),
                 };
 
@@ -43,7 +57,32 @@ impl Emitter<'_> {
                     suffix
                 ))
             }
+            Place::Index { base, index, .. } => {
+                let type_value = second_value.place_type(base);
+                let value = self.operand(second_value, index, Some(&Type::USize))?;
+                let code = self.place(second_value, base)?;
 
+                match &type_value {
+                    Type::FixedSizedArray(_, count) => Ok(format!(
+                        "({code}).data[_x_index({},{}ULL)]",
+                        value.code, count
+                    )),
+                    Type::Reference { inner, .. } => {
+                        if let Type::FixedSizedArray(_, count) = inner.as_ref() {
+                            Ok(format!(
+                                "({code})->data[_x_index({},{}ULL)]",
+                                value.code, count
+                            ))
+                        } else {
+                            Err(backend_messages::c_emission_unbounded_pointer_index().into())
+                        }
+                    }
+                    Type::RawPointer { .. } | Type::String => {
+                        Err(backend_messages::c_emission_unresolved_index_layout().into())
+                    }
+                    _ => Err(backend_messages::c_emission_unresolved_index_layout().into()),
+                }
+            }
             _ => Err(backend_messages::c_emission_unsupported_place(current_place).into()),
         }
     }
@@ -56,6 +95,21 @@ impl Emitter<'_> {
     ) -> Result<Value> {
         let mut value_type = second_value.operand_type(o);
         let code = match o {
+            Operand::Copy(pointer) | Operand::Move(pointer) => self.place(second_value, pointer)?,
+            Operand::ConstantInteger(index) => {
+                if let Some(expected) = expected.filter(|type_value| width(type_value).is_some()) {
+                    value_type = expected.clone();
+                }
+
+                bits(
+                    &format!("{}ULL", *index as u64),
+                    width(&value_type).ok_or_else(|| {
+                        EmitError::internal(
+                            backend_messages::c_emission_integer_literal_width_is_missing(),
+                        )
+                    })?,
+                )
+            }
             Operand::ConstantFloat(function) => {
                 if !function.is_finite() {
                     return Err(backend_messages::c_emission_nonfinite_literal().into());
