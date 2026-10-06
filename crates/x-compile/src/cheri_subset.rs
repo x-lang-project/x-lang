@@ -4,8 +4,85 @@ use x_diagnostics::CompilationFailure;
 use x_diagnostics::contract_messages;
 use x_mir::{GlobalItem, MirBody, MirProgram, MirStatement, MirTerminator, Operand, Place, Rvalue};
 
+pub(crate) fn validate(program: &MirProgram) -> Result<(), CompilationFailure> {
+    for item in &program.items {
+        validate_item(item)?;
+    }
+
+    Ok(())
+}
+
 fn reject(detail: String) -> Result<(), CompilationFailure> {
     Err(contract_messages::cheri_unsupported_construct(&detail))
+}
+
+fn validate_item(item: &GlobalItem) -> Result<(), CompilationFailure> {
+    match item {
+        GlobalItem::Function {
+            name,
+            parameter_types,
+            return_type,
+            body,
+            ..
+        } => validate_function(name, parameter_types, return_type, body.as_ref()),
+        GlobalItem::Struct(definition) => validate_structure(definition),
+        GlobalItem::Trait(definition) => {
+            reject(contract_messages::cheri_trait_call(&definition.name))
+        }
+        GlobalItem::Impl { trait_name, .. } => {
+            reject(contract_messages::cheri_trait_implementation(trait_name))
+        }
+        GlobalItem::Static { name, .. } => reject(contract_messages::cheri_static(name)),
+    }
+}
+
+fn validate_function(
+    name: &str,
+    parameter_types: &[Type],
+    return_type: &Type,
+    body: Option<&MirBody>,
+) -> Result<(), CompilationFailure> {
+    for value_type in parameter_types {
+        validate_type(
+            value_type,
+            &contract_messages::parameter_of_function_name(name),
+        )?;
+    }
+
+    validate_type(
+        return_type,
+        &contract_messages::return_type_of_function_name(name),
+    )?;
+    let Some(body) = body else {
+        return reject(contract_messages::cheri_external_function(name));
+    };
+
+    if body.is_throws {
+        return reject(contract_messages::cheri_throwing_function(name));
+    }
+
+    for local in body.locals.values() {
+        let local_context = match local.name.as_deref() {
+            Some(local_name) => {
+                contract_messages::local_local_name_in_function_name(local_name, name)
+            }
+            None => contract_messages::compiler_temporary_in_function_function(name),
+        };
+
+        validate_type(&local.value_type, &local_context)?;
+    }
+
+    for block in body.basic_blocks.values() {
+        for statement in &block.statements {
+            validate_statement(statement, name)?;
+        }
+
+        if let Some(terminator) = &block.terminator {
+            validate_terminator(terminator, name)?;
+        }
+    }
+
+    Ok(())
 }
 
 fn validate_structure(definition: &StructDefinition) -> Result<(), CompilationFailure> {

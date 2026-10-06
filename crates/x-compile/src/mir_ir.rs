@@ -66,3 +66,64 @@ impl<'ctx> GeneratedMirIr<'ctx> {
         }
     }
 }
+
+pub(crate) fn generate_mir_ir<'ctx>(
+    context: &'ctx Context,
+    mir_program: &MirProgram,
+    input: frontend::SourceInput<'_>,
+    options: IrCompileOptions<'_>,
+) -> Result<GeneratedMirIr<'ctx>, CompilationFailure> {
+    let target = CompilationTarget::new(options.target_triple);
+    let (mut codegen, machine) =
+        target.prepare_codegen(context, options.optimisation_level, &input)?;
+    let cheri_purecap = target.is_cheri_purecap();
+    let codegen_failure = |error: CodeGenerationError| {
+        let span = source_span_for_diagnostic(SourceIdentifier(0), input.text);
+
+        CompilationFailure::diagnostic(input.text, input.path, error.into_diagnostic(span))
+    };
+
+    if cheri_purecap {
+        cheri_subset::validate(mir_program)?;
+    }
+
+    codegen.generate(mir_program).map_err(codegen_failure)?;
+    target.configure_stack_probe(&codegen);
+
+    if let Some(machine) = &machine {
+        codegen
+            .optimize_module_with_target_machine_with_policy(
+                options.optimisation_level,
+                machine,
+                OptimizationPolicy {
+                    dce: options.dce,
+                    inline_budget: options.inline_budget,
+                },
+            )
+            .map_err(codegen_failure)?;
+    }
+
+    let mut ir = codegen.get_ir();
+
+    if cheri_purecap {
+        ir = ir
+            .replace(
+                "@__x_cheri_bounds_set_exact",
+                "@llvm.cheri.cap.bounds.set.exact.i64",
+            )
+            .replace("@__x_cheri_perms_and", "@llvm.cheri.cap.perms.and.i64");
+    }
+
+    let needs_rewrite = cheri_purecap;
+
+    let representation = match (needs_rewrite, machine) {
+        (false, Some(machine)) => IrRepresentation::Native {
+            module: codegen.module,
+            machine,
+            optimisation_level: options.optimisation_level,
+        },
+        _ => IrRepresentation::Text { context },
+    };
+
+    Ok(GeneratedMirIr { ir, representation })
+}
