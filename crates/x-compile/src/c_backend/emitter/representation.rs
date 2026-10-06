@@ -17,3 +17,38 @@ pub(super) fn signed(value_type: &Type) -> bool {
         Type::I8 | Type::I16 | Type::I32 | Type::I64 | Type::ISize
     )
 }
+
+pub(super) fn encoded(name: &str) -> String {
+    name.as_bytes()
+        .iter()
+        .map(|value| format!("{value:02x}"))
+        .collect()
+}
+
+pub(super) fn pointer(value_type: &Type) -> bool {
+    matches!(
+        value_type,
+        Type::String | Type::RawPointer { .. } | Type::Reference { .. }
+    )
+}
+
+pub(super) fn convert(value: Value, target: &Type, sign_extend: bool) -> Result<Value> {
+    if &value.value_type == target {
+        return Ok(value);
+    }
+
+    let code = match (width(&value.value_type), width(target)) {
+        _ => {
+            return Err(backend_messages::c_emission_unsupported_conversion(
+                value.value_type,
+                target,
+            )
+            .into());
+        }
+    };
+
+    Ok(Value {
+        code,
+        value_type: target.clone(),
+    })
+}
