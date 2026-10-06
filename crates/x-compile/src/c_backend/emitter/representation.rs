@@ -27,6 +27,15 @@ pub(super) fn uint(writer: u32) -> &'static str {
     }
 }
 
+pub(super) fn sint(writer: u32) -> &'static str {
+    match writer {
+        1 | 8 => "signed char",
+        16 => "short",
+        32 => "int",
+        _ => "long long",
+    }
+}
+
 pub(super) fn encoded(name: &str) -> String {
     name.as_bytes()
         .iter()
@@ -68,6 +77,16 @@ pub(super) fn bits(expression: &str, writer: u32) -> String {
     } else {
         format!("(({})({expression}))", uint(writer))
     }
+}
+
+pub(super) fn signed_view(value: &Value) -> Result<String> {
+    Ok(format!(
+        "(({})({}))",
+        sint(width(&value.value_type).ok_or_else(|| EmitError::internal(
+            backend_messages::c_emission_numeric_value_width_is_missing()
+        ))?),
+        value.code
+    ))
 }
 
 pub(super) fn convert(value: Value, target: &Type, sign_extend: bool) -> Result<Value> {
