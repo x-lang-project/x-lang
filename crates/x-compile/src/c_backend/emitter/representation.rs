@@ -34,6 +34,27 @@ pub(super) fn encoded(name: &str) -> String {
         .collect()
 }
 
+pub(super) fn ctype(value_type: &Type) -> Result<String> {
+    Ok(match value_type {
+        Type::Void => "void".into(),
+        Type::F32 => "float".into(),
+        Type::F64 => "double".into(),
+        Type::String => "struct _x_str *".into(),
+        Type::RawPointer { inner, .. } | Type::Reference { inner, .. } => {
+            format!("{} *", ctype(inner)?)
+        }
+        Type::Custom(name) => format!("struct _x_t{}", encoded(name)),
+        Type::FixedSizedArray(_, _) | Type::Tuple(_) => {
+            format!("struct _x_a{}", encoded(&format!("{value_type:?}")))
+        }
+        value_type => uint(
+            width(value_type)
+                .ok_or_else(|| backend_messages::c_emission_unsupported_type(value_type))?,
+        )
+        .into(),
+    })
+}
+
 pub(super) fn pointer(value_type: &Type) -> bool {
     matches!(
         value_type,

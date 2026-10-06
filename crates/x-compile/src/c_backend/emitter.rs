@@ -30,5 +30,6 @@ struct Emitter<'a> {
 }
 
 mod representation;
+mod rvalues;
 
 mod values;
