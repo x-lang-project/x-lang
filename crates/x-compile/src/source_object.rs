@@ -8,6 +8,7 @@ use inkwell::targets::{TargetMachine, TargetTriple};
 
 use crate::CHERI_RISCV64_PURECAP_PROFILE;
 use crate::CompilationFailure;
+use crate::GeneratedIr;
 use crate::IrCompileOptions;
 use crate::ObjectCompileOptions;
 use x_codegen::ObjectEmissionOptions;

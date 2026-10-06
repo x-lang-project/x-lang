@@ -31,6 +31,7 @@ mod source_object;
 mod sources;
 
 pub use artifact::DebugArtifact;
+pub use artifact::GeneratedIr;
 
 pub use executable_contracts::validate_executable_contracts;
 pub use mir_object::MirObjectOptions;

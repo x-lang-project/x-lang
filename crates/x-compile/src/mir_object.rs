@@ -3,6 +3,7 @@ use std::{fs, path::Path};
 
 use inkwell::targets;
 
+use crate::GeneratedIr;
 use crate::IrCompileOptions;
 use crate::frontend;
 use x_codegen::CodeGenerationError;
