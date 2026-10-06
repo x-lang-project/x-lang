@@ -9,6 +9,7 @@ use x_ast::{Operator, Type, UnaryOperator, intrinsics::BuiltinKind};
 use x_diagnostics::backend_messages;
 use x_mir::*;
 
+mod memoise;
 mod registry;
 type Result<T> = std::result::Result<T, EmitError>;
 #[derive(Clone)]
