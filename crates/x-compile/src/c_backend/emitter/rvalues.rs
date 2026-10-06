@@ -8,6 +8,18 @@ impl Emitter<'_> {
         target: &Type,
     ) -> Result<Value> {
         match result {
+            Rvalue::Use(o) => self.operand(second_value, o, Some(target)),
+
+            Rvalue::AddressOf { expression, .. } => {
+                if string_element(second_value, expression) {
+                    return Err(backend_messages::c_emission_address_of_string_element().into());
+                }
+
+                Ok(Value {
+                    code: format!("(&({}))", self.place(second_value, expression)?),
+                    value_type: target.clone(),
+                })
+            }
             Rvalue::Array(items) => {
                 let Type::FixedSizedArray(inner, count) = target else {
                     return Err(backend_messages::c_emission_dynamic_array_layout().into());
@@ -32,7 +44,77 @@ impl Emitter<'_> {
                     value_type: target.clone(),
                 })
             }
+            Rvalue::Tuple(items) => {
+                let Type::Tuple(types) = target else {
+                    return Err(backend_messages::c_emission_tuple_target_layout().into());
+                };
 
+                if items.len() != types.len() {
+                    return Err(EmitError::internal(
+                        backend_messages::c_emission_tuple_arity(),
+                    ));
+                }
+
+                let values = items
+                    .iter()
+                    .zip(types)
+                    .map(|(o, type_value)| {
+                        self.operand(second_value, o, Some(type_value))
+                            .map(|value| value.code)
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+
+                Ok(Value {
+                    code: format!("(({}){{{}}})", ctype(target)?, values.join(",")),
+                    value_type: target.clone(),
+                })
+            }
+            Rvalue::StructInstantiate { name, fields } => {
+                let definition = self
+                    .structs
+                    .get(name.as_str())
+                    .ok_or_else(backend_messages::c_emission_unknown_struct_initializer)?;
+
+                if definition.fields.len() != fields.len() {
+                    return Err(backend_messages::c_emission_partial_struct_initializer().into());
+                }
+
+                if !matches!(target, Type::Custom(target_name) if target_name == name) {
+                    return Err(backend_messages::c_emission_unknown_struct_initializer().into());
+                }
+
+                let mut initialized = std::collections::HashSet::new();
+
+                for (field, _) in fields {
+                    if !initialized.insert(field) {
+                        return Err(
+                            backend_messages::duplicate_struct_initializer_field_name_field_name(
+                                name, field,
+                            )
+                            .into(),
+                        );
+                    }
+                }
+
+                let mut values = Vec::new();
+
+                for (field, operand) in fields {
+                    let (_, value_type) = definition
+                        .fields
+                        .iter()
+                        .find(|(count, _)| count == field)
+                        .ok_or_else(backend_messages::c_emission_unknown_field)?;
+                    let value = self.operand(second_value, operand, None)?;
+                    let sign = signed(&value.value_type);
+                    let value = convert(value, value_type, sign)?;
+                    values.push(format!(".f{}={}", encoded(field), value.code));
+                }
+
+                Ok(Value {
+                    code: format!("(({}){{{}}})", ctype(target)?, values.join(",")),
+                    value_type: target.clone(),
+                })
+            }
             Rvalue::Cast { expression, to } => {
                 let value = self.operand(second_value, expression, None)?;
 
