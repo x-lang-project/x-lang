@@ -18,6 +18,15 @@ pub(super) fn signed(value_type: &Type) -> bool {
     )
 }
 
+pub(super) fn uint(writer: u32) -> &'static str {
+    match writer {
+        1 | 8 => "unsigned char",
+        16 => "unsigned short",
+        32 => "unsigned int",
+        _ => "unsigned long long",
+    }
+}
+
 pub(super) fn encoded(name: &str) -> String {
     name.as_bytes()
         .iter()
@@ -30,6 +39,14 @@ pub(super) fn pointer(value_type: &Type) -> bool {
         value_type,
         Type::String | Type::RawPointer { .. } | Type::Reference { .. }
     )
+}
+
+pub(super) fn bits(expression: &str, writer: u32) -> String {
+    if writer == 1 {
+        format!("((unsigned char)(({expression})&1))")
+    } else {
+        format!("(({})({expression}))", uint(writer))
+    }
 }
 
 pub(super) fn convert(value: Value, target: &Type, sign_extend: bool) -> Result<Value> {
