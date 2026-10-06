@@ -22,6 +22,38 @@ pub(super) fn capacity(body: &MirBody) -> Result<u32> {
     Ok(character.capacity)
 }
 
+pub(super) fn globals(symbol: &str, signature: &Signature<'_>) -> Result<String> {
+    let body = signature.body;
+    let count = capacity(body)?;
+
+    if body.is_throws
+        || (!matches!(signature.return_value, Type::F32 | Type::F64)
+            && width(signature.return_value).is_none())
+    {
+        return Err(backend_messages::c_emission_nonscalar_or_throwing_memoise_result().into());
+    }
+
+    for type_value in signature.parameters {
+        if !matches!(type_value, Type::F32 | Type::F64) && width(type_value).is_none() {
+            return Err(backend_messages::c_emission_nonscalar_memoise_key().into());
+        }
+    }
+
+    let mut text = format!(
+        "static volatile unsigned char {symbol}_lock;static unsigned char {symbol}_valid[{count}];static {} {symbol}_values[{count}];\n",
+        ctype(signature.return_value)?
+    );
+
+    for index in 0..signature.parameters.len() {
+        writeln!(
+            text,
+            "static unsigned long long {symbol}_key{index}[{count}];"
+        )?;
+    }
+
+    Ok(text)
+}
+
 fn keys(signature: &Signature<'_>, prefix: &str) -> Result<String> {
     let mut output = String::new();
 
