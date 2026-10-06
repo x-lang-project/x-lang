@@ -8,6 +8,28 @@ fn reject(detail: String) -> Result<(), CompilationFailure> {
     Err(contract_messages::cheri_unsupported_construct(&detail))
 }
 
+fn validate_structure(definition: &StructDefinition) -> Result<(), CompilationFailure> {
+    if definition.layout != Layout::AoS {
+        return reject(contract_messages::cheri_structure_layout(
+            &definition.name,
+            definition.layout,
+        ));
+    }
+
+    if definition.generic_parameters.is_some() {
+        return reject(contract_messages::cheri_generic_structure(&definition.name));
+    }
+
+    for (field, value_type) in &definition.fields {
+        validate_type(
+            value_type,
+            &contract_messages::field_field_of_structure_value(field, &definition.name),
+        )?;
+    }
+
+    Ok(())
+}
+
 fn validate_type(value_type: &Type, context: &str) -> Result<(), CompilationFailure> {
     match value_type {
         Type::I8
