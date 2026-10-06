@@ -29,6 +29,8 @@ struct Emitter<'a> {
     strings: RefCell<HashMap<String, usize>>,
 }
 
+mod arithmetic;
+
 mod representation;
 mod rvalues;
 
