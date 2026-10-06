@@ -64,6 +64,18 @@ pub(super) fn ctype(value_type: &Type) -> Result<String> {
     })
 }
 
+pub(super) fn string_element(second_value: &MirBody, place: &Place) -> bool {
+    match place {
+        Place::Index { base, .. } => {
+            second_value.place_type(base) == Type::String || string_element(second_value, base)
+        }
+        Place::Field { base, .. } | Place::Dereference { base, .. } => {
+            string_element(second_value, base)
+        }
+        _ => false,
+    }
+}
+
 pub(super) fn pointer(value_type: &Type) -> bool {
     matches!(
         value_type,
