@@ -92,6 +92,71 @@ impl Emitter<'_> {
         Ok(())
     }
 
+    pub(super) fn type_declarations(&self) -> Result<String> {
+        let mut declarations = TypeDeclarations {
+            source: String::from(
+                "struct _x_str {const unsigned char *data; unsigned long long length;};\n",
+            ),
+            ..Default::default()
+        };
+        let mut records: Vec<_> = self.structs.values().copied().collect();
+        records.sort_by_key(|definition| &definition.name);
+        for current_definition in &records {
+            writeln!(
+                declarations.source,
+                "struct _x_t{};",
+                encoded(&current_definition.name)
+            )?;
+        }
+
+        for current_definition in &records {
+            self.declare_type(
+                &Type::Custom(current_definition.name.clone()),
+                &mut declarations,
+            )?;
+        }
+
+        for name in &self.order {
+            let signature = self.symbols.get(name).ok_or_else(|| {
+                EmitError::internal(backend_messages::c_emission_registered_function_is_missing())
+            })?;
+            self.declare_type(signature.return_value, &mut declarations)?;
+            for value_type in signature.parameters {
+                self.declare_type(value_type, &mut declarations)?;
+            }
+
+            for local in signature.body.locals.values() {
+                self.declare_type(&local.value_type, &mut declarations)?;
+            }
+        }
+
+        let mut throwing = BTreeSet::new();
+
+        for name in &self.order {
+            let signature = self.symbols.get(name).ok_or_else(|| {
+                EmitError::internal(backend_messages::c_emission_registered_function_is_missing())
+            })?;
+
+            if signature.body.is_throws {
+                let tag = throws_ctype(signature.return_value);
+
+                if throwing.insert(tag.clone()) {
+                    writeln!(
+                        declarations.source,
+                        "{tag}{{unsigned char ok;{} value;struct _x_str *error;}};",
+                        if *signature.return_value == Type::Void {
+                            "unsigned char".into()
+                        } else {
+                            ctype(signature.return_value)?
+                        }
+                    )?;
+                }
+            }
+        }
+
+        Ok(declarations.source)
+    }
+
     pub(super) fn memoise_globals(&self) -> Result<String> {
         let mut memo_globals = String::new();
 
