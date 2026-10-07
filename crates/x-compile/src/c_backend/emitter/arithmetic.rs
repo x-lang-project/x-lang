@@ -37,6 +37,18 @@ impl Emitter<'_> {
                 | Operator::GreaterThanOrEqual
         );
         let token = match operator {
+            Operator::Add => "+",
+            Operator::Subtract => "-",
+            Operator::Multiply => "*",
+            Operator::Equal => "==",
+            Operator::NotEqual => "!=",
+            Operator::LessThan => "<",
+            Operator::LessThanOrEqual => "<=",
+            Operator::GreaterThan => ">",
+            Operator::GreaterThanOrEqual => ">=",
+            Operator::BitAnd | Operator::And => "&",
+            Operator::BitOr | Operator::Or => "|",
+            Operator::Xor => "^",
             _ => "",
         };
         let result = if let (Some(wa), Some(wz)) = (
@@ -45,6 +57,10 @@ impl Emitter<'_> {
         ) {
             let writer = wa.max(wz);
             let common = match writer {
+                1 => Type::Boolean,
+                8 => Type::U8,
+                16 => Type::U16,
+                32 => Type::U32,
                 _ => Type::U64,
             };
 
@@ -103,6 +119,10 @@ impl Emitter<'_> {
                 } else {
                     if is_signed {
                         match writer {
+                            8 => Type::I8,
+                            16 => Type::I16,
+                            32 => Type::I32,
+                            64 => Type::I64,
                             _ => common,
                         }
                     } else {
@@ -157,4 +177,61 @@ impl Emitter<'_> {
 
         Ok(result)
     }
+}
+
+pub(super) fn helper(name: &str) -> Result<String> {
+    let mut parts = name.rsplit('_');
+    let writer: u32 = parts
+        .next()
+        .ok_or_else(|| EmitError::internal(backend_messages::c_emission_helper_width_is_missing()))?
+        .parse()
+        .map_err(|_| EmitError::internal(backend_messages::c_emission_helper_width_is_invalid()))?;
+    let signed = parts.next().ok_or_else(|| {
+        EmitError::internal(backend_messages::c_emission_helper_signedness_is_missing())
+    })? == "s";
+    let operator = parts.next().ok_or_else(|| {
+        EmitError::internal(backend_messages::c_emission_helper_operation_is_missing())
+    })?;
+    let u = uint(writer);
+    let text = sint(writer);
+    let mask = if writer == 64 {
+        "18446744073709551615ULL".to_owned()
+    } else {
+        format!("{}ULL", (1u64 << writer) - 1)
+    };
+    let body = match operator {
+        "div" | "rem" => format!(
+            "if(!b{} )_x_trap();return ({u})({}a{}{}b);",
+            if signed {
+                format!("||(a=={}ULL&&b=={mask})", 1u64 << (writer - 1))
+            } else {
+                String::new()
+            },
+            if signed {
+                format!("({text})")
+            } else {
+                String::new()
+            },
+            if operator == "div" { "/" } else { "%" },
+            if signed {
+                format!("({text})")
+            } else {
+                String::new()
+            }
+        ),
+        "shl" => format!("if(b>={writer})_x_trap();return ({u})((unsigned long long)a<<b);"),
+        _ => format!(
+            "if(b>={writer})_x_trap();return ({u})((a>>b){});",
+            if signed {
+                format!(
+                    "|((b&&(a&{}ULL))?({mask}^({mask}>>b)):0)",
+                    1u64 << (writer - 1)
+                )
+            } else {
+                String::new()
+            }
+        ),
+    };
+
+    Ok(format!("static {u} {name}({u} a,{u} b){{{body}}}\n"))
 }
