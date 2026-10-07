@@ -3,6 +3,7 @@ use std::{fs, path::Path};
 
 use inkwell::targets;
 
+use crate::CompileArtifact;
 use crate::GeneratedIr;
 use crate::IrCompileOptions;
 use crate::frontend;

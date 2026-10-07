@@ -30,8 +30,7 @@ mod source_mir;
 mod source_object;
 mod sources;
 
-pub use artifact::DebugArtifact;
-pub use artifact::GeneratedIr;
+pub use artifact::{CompileArtifact, CompileMetrics, DebugArtifact, GeneratedIr};
 pub use c_artifact::{CArtifact, CEmissionMetrics};
 pub use executable_contracts::validate_executable_contracts;
 pub use mir_object::MirObjectOptions;

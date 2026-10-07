@@ -6,12 +6,10 @@ use std::{
 
 use inkwell::targets::{TargetMachine, TargetTriple};
 
-use crate::CHERI_RISCV64_PURECAP_PROFILE;
-use crate::CompilationFailure;
-use crate::GeneratedIr;
-use crate::IrCompileOptions;
-use crate::ObjectCompileOptions;
-use crate::compile_and_generate_module;
+use crate::{
+    CHERI_RISCV64_PURECAP_PROFILE, CompilationFailure, CompileArtifact, GeneratedIr,
+    IrCompileOptions, ObjectCompileOptions, compile_and_generate_module,
+};
 use x_codegen::ObjectEmissionOptions;
 use x_diagnostics::{StageDiagnostic, contract_messages};
 use x_logging::info;
