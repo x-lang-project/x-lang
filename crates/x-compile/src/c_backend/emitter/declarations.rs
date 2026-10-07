@@ -13,6 +13,101 @@ struct TypeDeclarations {
 }
 
 impl Emitter<'_> {
+    fn declare_type(&self, value_type: &Type, declarations: &mut TypeDeclarations) -> Result<()> {
+        let key = ctype(value_type)?;
+
+        if declarations.done.contains(&key) {
+            return Ok(());
+        }
+
+        if let Type::RawPointer { inner, .. } | Type::Reference { inner, .. } = value_type {
+            if matches!(inner.as_ref(), Type::Tuple(_) | Type::FixedSizedArray(_, _)) {
+                self.declare_type(inner, declarations)?;
+            }
+
+            return Ok(());
+        }
+
+        if matches!(value_type, Type::String) {
+            return Ok(());
+        }
+
+        if !matches!(
+            value_type,
+            Type::Custom(_) | Type::Tuple(_) | Type::FixedSizedArray(_, _)
+        ) {
+            return Ok(());
+        }
+
+        if !declarations.active.insert(key.clone()) {
+            return Err(backend_messages::c_emission_recursive_value_aggregate_layout().into());
+        }
+
+        let fields: Vec<(String, Type)> = match value_type {
+            Type::Custom(count) => self
+                .structs
+                .get(count.as_str())
+                .ok_or_else(backend_messages::c_emission_missing_record_definition)?
+                .fields
+                .iter()
+                .map(|(count, type_value)| (format!("f{}", encoded(count)), type_value.clone()))
+                .collect(),
+            Type::Tuple(items) => items
+                .iter()
+                .enumerate()
+                .map(|(index, type_value)| (format!("f{index}"), type_value.clone()))
+                .collect(),
+            Type::FixedSizedArray(inner, count) => {
+                self.declare_type(inner, declarations)?;
+                writeln!(
+                    declarations.source,
+                    "{key}{{{} data[{count}];}};",
+                    ctype(inner)?
+                )?;
+                declarations.active.remove(&key);
+                declarations.done.insert(key);
+
+                return Ok(());
+            }
+            _ => {
+                return Err(EmitError::internal(
+                    backend_messages::c_emission_aggregate_type_classification_changed(),
+                ));
+            }
+        };
+
+        for (_, type_value) in &fields {
+            self.declare_type(type_value, declarations)?;
+        }
+
+        write!(declarations.source, "{key}{{")?;
+        for (count, type_value) in &fields {
+            write!(declarations.source, "{} {count};", ctype(type_value)?)?;
+        }
+
+        declarations.source.push_str("};\n");
+        declarations.active.remove(&key);
+        declarations.done.insert(key);
+
+        Ok(())
+    }
+
+    pub(super) fn memoise_globals(&self) -> Result<String> {
+        let mut memo_globals = String::new();
+
+        for name in &self.order {
+            let signature = self.symbols.get(name).ok_or_else(|| {
+                EmitError::internal(backend_messages::c_emission_registered_function_is_missing())
+            })?;
+
+            if signature.body.is_memoised {
+                memo_globals.push_str(&memoise::globals(&signature.symbol, signature)?);
+            }
+        }
+
+        Ok(memo_globals)
+    }
+
     pub(super) fn declare_functions(&self, declarations: &mut String) -> Result<()> {
         for name in &self.order {
             let text = self.symbols.get(name).ok_or_else(|| {
