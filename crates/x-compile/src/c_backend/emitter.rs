@@ -33,6 +33,7 @@ struct Emitter<'a> {
 
 mod arithmetic;
 
+mod definitions;
 mod representation;
 mod rvalues;
 
