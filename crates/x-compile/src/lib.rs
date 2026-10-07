@@ -33,7 +33,7 @@ mod sources;
 pub use artifact::{CompileArtifact, CompileMetrics, DebugArtifact, GeneratedIr};
 pub use c_artifact::{CArtifact, CEmissionMetrics};
 pub use executable_contracts::validate_executable_contracts;
-pub use mir_object::MirObjectOptions;
+pub use mir_object::{MirObjectOptions, compile_mir_program_to_object};
 pub use module_names::qualify_module;
 pub use module_pipeline::{
     ModuleCompileOptions, compile_module_graph_to_mir, compile_owned_module_graph_to_mir,
@@ -43,7 +43,7 @@ pub use source_ir::{
     compile_and_generate_ir, compile_source_to_cheri_riscv64_ir, compile_source_to_ir,
 };
 pub use source_mir::{SourceMirArtifact, SourceMirOptions, check_source, compile_source_to_mir};
-
+pub use source_object::compile_file_to_object;
 pub use sources::SourceCatalog;
 pub use x_diagnostics::CompilationFailure;
 

@@ -24,3 +24,24 @@ pub struct CompileArtifact {
     pub ir: String,
     pub debug_artifacts: Vec<DebugArtifact>,
 }
+
+impl CompileArtifact {
+    pub(crate) fn new(
+        path: PathBuf,
+        target_triple: String,
+        elapsed_seconds: f64,
+        generated: GeneratedIr,
+    ) -> Self {
+        Self {
+            path,
+            target_triple,
+            metrics: CompileMetrics {
+                elapsed_seconds,
+                ir_bytes: generated.ir.len(),
+                ir_lines: generated.ir.lines().count(),
+            },
+            ir: generated.ir,
+            debug_artifacts: generated.debug_artifacts,
+        }
+    }
+}
