@@ -12,7 +12,7 @@
 )]
 
 mod artifact;
-
+mod c_artifact;
 #[cfg(feature = "c-backend")]
 pub mod c_backend;
 mod cheri_subset;
@@ -32,7 +32,7 @@ mod sources;
 
 pub use artifact::DebugArtifact;
 pub use artifact::GeneratedIr;
-
+pub use c_artifact::{CArtifact, CEmissionMetrics};
 pub use executable_contracts::validate_executable_contracts;
 pub use mir_object::MirObjectOptions;
 pub use module_names::qualify_module;
