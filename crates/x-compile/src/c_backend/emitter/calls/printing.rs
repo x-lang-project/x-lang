@@ -35,6 +35,12 @@ impl Emitter<'_> {
         }
 
         let fmt = match value.value_type {
+            Type::Character => "%c",
+            Type::Boolean => "%s",
+            Type::F32 | Type::F64 => "%g",
+            Type::I64 | Type::ISize => "%lld",
+            Type::U64 | Type::USize => "%llu",
+            Type::I8 | Type::I16 | Type::I32 => "%d",
             Type::U8 | Type::U16 | Type::U32 => "%u",
             _ => {
                 return Err(
