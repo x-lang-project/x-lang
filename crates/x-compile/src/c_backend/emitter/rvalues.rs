@@ -9,7 +9,10 @@ impl Emitter<'_> {
     ) -> Result<Value> {
         match result {
             Rvalue::Use(o) => self.operand(second_value, o, Some(target)),
-
+            Rvalue::Call {
+                function,
+                arguments,
+            } => self.call(second_value, function, arguments),
             Rvalue::AddressOf { expression, .. } => {
                 if string_element(second_value, expression) {
                     return Err(backend_messages::c_emission_address_of_string_element().into());

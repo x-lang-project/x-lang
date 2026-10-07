@@ -1,6 +1,41 @@
 use super::*;
 
+mod printing;
+
 impl Emitter<'_> {
+    pub(super) fn call(
+        &self,
+        second_value: &MirBody,
+        name: &str,
+        arguments: &[Operand],
+    ) -> Result<Value> {
+        match second_value
+            .call_targets
+            .get(name)
+            .ok_or_else(|| backend_messages::c_emission_unresolved(name))?
+        {
+            ResolvedCall::Source { name, .. } => {
+                let signature = self
+                    .symbols
+                    .get(name.as_str())
+                    .ok_or_else(|| backend_messages::c_emission_external_call(name))?;
+
+                if signature.body.is_throws {
+                    return Err(backend_messages::c_emission_unchecked_throwing_call().into());
+                }
+
+                self.source_call(second_value, signature, arguments)
+            }
+            ResolvedCall::Builtin(_) => {
+                let builtin = second_value
+                    .builtin_call(name, arguments, None)
+                    .ok_or_else(backend_messages::c_emission_ambiguous_builtin)?;
+
+                self.print_call(second_value, builtin.kind, arguments)
+            }
+        }
+    }
+
     pub(super) fn throwing_call(
         &self,
         second_value: &MirBody,
