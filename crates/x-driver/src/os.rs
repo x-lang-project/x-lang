@@ -36,6 +36,25 @@ fn run_checked_tool(
     ))
 }
 
+fn link_kernel(objects: &[PathBuf], config: &OsBuildConfig) -> Result<(), CompilationFailure> {
+    let mut link_arguments = vec![
+        "-m".to_string(),
+        "elf_i386".to_string(),
+        "-T".to_string(),
+        config.linker_script.to_string_lossy().into_owned(),
+        "-nostdlib".to_string(),
+        "-o".to_string(),
+        config.kernel.to_string_lossy().into_owned(),
+    ];
+    link_arguments.extend(
+        objects
+            .iter()
+            .map(|object| object.to_string_lossy().into_owned()),
+    );
+
+    run_checked_tool(&config.ld, &link_arguments, OsBuildStage::LinkKernel)
+}
+
 fn package_iso(config: &OsBuildConfig) -> Result<(), CompilationFailure> {
     if let (Some(grub), Some(iso), Some(iso_directory), Some(grub_cfg)) = (
         config.grub_mkrescue.as_deref(),
