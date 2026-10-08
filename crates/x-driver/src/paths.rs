@@ -18,6 +18,14 @@ pub fn is_x_source_path(path: &str) -> bool {
         .is_some_and(|name| strip_ascii_suffix(name, ".fail").is_some())
 }
 
+pub fn x_output_stem(path: &str) -> String {
+    [".x.fail", ".fail", ".x"]
+        .into_iter()
+        .find_map(|suffix| strip_ascii_suffix(path, suffix))
+        .unwrap_or(path)
+        .to_owned()
+}
+
 fn strip_ascii_suffix<'a>(value: &'a str, suffix: &str) -> Option<&'a str> {
     let start = value.len().checked_sub(suffix.len())?;
 

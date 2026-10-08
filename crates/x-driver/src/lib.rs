@@ -29,4 +29,5 @@ pub use build::BuildOutput;
 pub use build::CBuildArtifact;
 pub use paths::collect_x_files_recursive;
 pub use paths::is_x_source_path;
+pub use paths::x_output_stem;
 pub use project::scaffold_new_project;
