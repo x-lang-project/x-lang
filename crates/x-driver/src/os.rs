@@ -82,6 +82,70 @@ fn compile_os_native_source(
     run_checked_tool(compiler, &arguments, OsBuildStage::Compile(source))
 }
 
+pub fn build_os_artifact(
+    project_root: &Path,
+    x_object: &Path,
+    config: &OsBuildConfig,
+    optimisation_level: u8,
+) -> Result<PathBuf, CompilationFailure> {
+    let build_directory = config.kernel.parent().unwrap_or(project_root);
+    fs::create_dir_all(build_directory)
+        .map_err(|error| DriverError::os_build_directory(build_directory.display(), error))?;
+
+    let mut objects = build_startup_objects(build_directory, x_object, config, optimisation_level)?;
+
+    for (index, source) in config.support.iter().enumerate() {
+        let stem = source
+            .file_stem()
+            .and_then(|value| value.to_str())
+            .unwrap_or("support");
+        let object = build_directory.join(format!("support-{index}-{stem}.o"));
+        compile_os_native_source(config, source, &object, optimisation_level)?;
+        objects.push(object);
+    }
+
+    link_kernel(&objects, config)?;
+    package_iso(config)?;
+
+    x_logging::info!("X-OS kernel: {}", config.kernel.display());
+
+    Ok(config.kernel.clone())
+}
+
+fn build_startup_objects(
+    build_directory: &Path,
+    x_object: &Path,
+    config: &OsBuildConfig,
+    optimisation_level: u8,
+) -> Result<Vec<PathBuf>, CompilationFailure> {
+    let multiboot_object = build_directory.join("multiboot.o");
+    run_checked_tool(
+        &config.nasm,
+        &[
+            "-f".to_string(),
+            "elf32".to_string(),
+            config.boot_asm.to_string_lossy().into_owned(),
+            "-o".to_string(),
+            multiboot_object.to_string_lossy().into_owned(),
+        ],
+        OsBuildStage::AssembleMultiboot,
+    )?;
+
+    let crt_object = build_directory.join("crt0.o");
+    compile_os_native_source(config, &config.crt0, &crt_object, optimisation_level)?;
+
+    let mut objects = vec![multiboot_object, crt_object, x_object.to_path_buf()];
+    // LLVM can introduce memory libcalls even when the source calls none.
+    let runtime_source = build_directory.join("freestanding_runtime.c");
+    fs::write(&runtime_source, x_runtime::source::FREESTANDING)
+        .map_err(DriverError::os_runtime_write)?;
+    let runtime_object = build_directory.join("freestanding_runtime.o");
+    compile_os_native_source(config, &runtime_source, &runtime_object, optimisation_level)?;
+    objects.push(runtime_object);
+
+    Ok(objects)
+}
+
 fn link_kernel(objects: &[PathBuf], config: &OsBuildConfig) -> Result<(), CompilationFailure> {
     let mut link_arguments = vec![
         "-m".to_string(),
