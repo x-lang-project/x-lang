@@ -36,6 +36,52 @@ fn run_checked_tool(
     ))
 }
 
+fn compile_os_native_source(
+    config: &OsBuildConfig,
+    source: &Path,
+    output: &Path,
+    optimisation_level: u8,
+) -> Result<(), CompilationFailure> {
+    let extension = source
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let is_cpp = matches!(extension.as_str(), "cc" | "cpp" | "cxx");
+    let compiler = if is_cpp { &config.cxx } else { &config.cc };
+
+    let mut arguments = vec![
+        format!(
+            "--target={}",
+            x_utils::target::ProductTarget::FreestandingX86.triple()
+        ),
+        "-m32".to_string(),
+        "-ffreestanding".to_string(),
+        "-fno-stack-protector".to_string(),
+        "-fno-pic".to_string(),
+        "-fno-pie".to_string(),
+        "-nostdlib".to_string(),
+        // X-OS leaves x87/SSE uninitialised; use the integer ABI.
+        "-mno-sse".to_string(),
+        "-mno-mmx".to_string(),
+        "-msoft-float".to_string(),
+        x_utils::optimization::NativeOptimization::new(optimisation_level).argument(),
+    ];
+
+    if is_cpp {
+        arguments.extend(["-fno-exceptions".to_string(), "-fno-rtti".to_string()]);
+    }
+
+    arguments.extend([
+        "-c".to_string(),
+        source.to_string_lossy().into_owned(),
+        "-o".to_string(),
+        output.to_string_lossy().into_owned(),
+    ]);
+
+    run_checked_tool(compiler, &arguments, OsBuildStage::Compile(source))
+}
+
 fn link_kernel(objects: &[PathBuf], config: &OsBuildConfig) -> Result<(), CompilationFailure> {
     let mut link_arguments = vec![
         "-m".to_string(),
