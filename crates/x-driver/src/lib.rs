@@ -21,6 +21,7 @@ use x_link::{LinkOptions, link};
 
 mod build;
 
+pub mod os;
 mod paths;
 mod project;
 
