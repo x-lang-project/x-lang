@@ -836,6 +836,20 @@ name = "x-differential"
 version = "1.0.0"
 
 [[package]]
+name = "x-driver"
+version = "1.0.0"
+dependencies = [
+ "x-compile",
+ "x-diagnostics",
+ "x-link",
+ "x-logging",
+ "x-mir",
+ "x-project",
+ "x-runtime",
+ "x-utils",
+]
+
+[[package]]
 name = "x-hir"
 version = "1.0.0"
 dependencies = [

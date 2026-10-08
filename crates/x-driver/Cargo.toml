@@ -1,0 +1,27 @@
+[package]
+name = "x-driver"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[features]
+c-backend = ["x-compile/c-backend", "x-link/tinycc-session"]
+
+[dependencies]
+x-diagnostics = { workspace = true }
+x-logging = { workspace = true }
+x-mir = { workspace = true }
+x-project = { workspace = true }
+x-utils = { workspace = true }
+x-compile = { workspace = true }
+x-link = { workspace = true }
+x-runtime = { workspace = true }
+
+[lib]
+test = true
+doctest = true
+

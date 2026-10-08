@@ -27,6 +27,7 @@ members = [
   "x-codegen",
   "x-link",
   "x-compile",
+  "x-driver",
 ]
 
 [workspace.dependencies]
