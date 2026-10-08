@@ -20,7 +20,7 @@ use x_compile::compile_file_to_object;
 use x_link::{LinkOptions, link};
 
 mod build;
-
+pub mod manifest_project;
 pub mod os;
 mod paths;
 mod project;
