@@ -1,0 +1,48 @@
+use super::*;
+use x_diagnostics::CompilationFailure;
+use x_diagnostics::DriverError;
+
+pub fn collect_x_files_recursive(
+    path: &Path,
+    output: &mut Vec<PathBuf>,
+) -> Result<(), CompilationFailure> {
+    if !path.exists() {
+        return Err(DriverError::project_input_not_found(path.display()));
+    }
+
+    if path.is_file() {
+        if path.extension().and_then(|text| text.to_str()) == Some("x") {
+            output.push(path.to_path_buf());
+        }
+
+        return Ok(());
+    }
+
+    let mut directories = vec![path.to_path_buf()];
+
+    while let Some(directory) = directories.pop() {
+        let entries = fs::read_dir(&directory)
+            .map_err(|error| DriverError::project_directory_read(directory.display(), error))?;
+
+        for entry in entries {
+            let entry = entry.map_err(|error| {
+                DriverError::project_directory_entry_read(directory.display(), error)
+            })?;
+            let child = entry.path();
+            let file_type = entry
+                .file_type()
+                .map_err(|error| DriverError::project_input_inspection(child.display(), error))?;
+
+            // Do not follow nested symbolic links: a link may point back to an ancestor.
+            if file_type.is_dir() {
+                directories.push(child);
+            } else if file_type.is_file()
+                && child.extension().and_then(|extension| extension.to_str()) == Some("x")
+            {
+                output.push(child);
+            }
+        }
+    }
+
+    Ok(())
+}

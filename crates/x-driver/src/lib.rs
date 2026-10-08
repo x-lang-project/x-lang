@@ -21,10 +21,11 @@ use x_link::{LinkOptions, link};
 
 mod build;
 
+mod paths;
 mod project;
 
 pub use build::BuildArtifact;
 pub use build::BuildOutput;
 pub use build::CBuildArtifact;
-
+pub use paths::collect_x_files_recursive;
 pub use project::scaffold_new_project;
