@@ -36,6 +36,44 @@ fn run_checked_tool(
     ))
 }
 
+fn package_iso(config: &OsBuildConfig) -> Result<(), CompilationFailure> {
+    if let (Some(grub), Some(iso), Some(iso_directory), Some(grub_cfg)) = (
+        config.grub_mkrescue.as_deref(),
+        config.iso.as_ref(),
+        config.iso_directory.as_ref(),
+        config.grub_cfg.as_ref(),
+    ) {
+        let grub_directory = iso_directory.join("boot").join("grub");
+        fs::create_dir_all(&grub_directory)
+            .map_err(|error| DriverError::os_iso_directory(grub_directory.display(), error))?;
+        fs::copy(
+            &config.kernel,
+            iso_directory.join("boot").join("kernel.elf"),
+        )
+        .map_err(DriverError::os_kernel_staging)?;
+        fs::copy(grub_cfg, grub_directory.join("grub.cfg"))
+            .map_err(DriverError::os_grub_config_staging)?;
+        let iso_arguments = vec![
+            "-o".to_string(),
+            iso.to_string_lossy().into_owned(),
+            iso_directory.to_string_lossy().into_owned(),
+        ];
+
+        match run_checked_tool(grub, &iso_arguments, OsBuildStage::CreateIso) {
+            Ok(()) => x_logging::info!("X-OS ISO: {}", iso.display()),
+            Err(error) if error.code() == OperationalDiagnostic::OsToolLaunch.code() => {
+                eprintln!(
+                    "{}",
+                    DriverError::iso_tool_unavailable(config.kernel.display())
+                )
+            }
+            Err(error) => return Err(error),
+        }
+    }
+
+    Ok(())
+}
+
 pub fn run_os_artifact(kernel: &Path, config: &OsRunConfig) -> Result<(), CompilationFailure> {
     println!("Booting X-OS with {} (Ctrl-C to stop)", config.command);
     let qemu = x_utils::tools::resolve_program(&config.command);
