@@ -80,3 +80,24 @@ pub fn collect_x_files_recursive(
 
     Ok(())
 }
+
+pub fn collect_x_files_from_inputs(paths: &[String]) -> Result<Vec<PathBuf>, CompilationFailure> {
+    let mut files = Vec::new();
+
+    if paths.is_empty() {
+        collect_x_files_recursive(Path::new("."), &mut files)?;
+    } else {
+        for path in paths {
+            collect_x_files_recursive(Path::new(path), &mut files)?;
+        }
+    }
+
+    files.sort_by(|first_value, second_value| {
+        first_value
+            .to_string_lossy()
+            .cmp(&second_value.to_string_lossy())
+    });
+    files.dedup_by(|first_value, second_value| first_value == second_value);
+
+    Ok(files)
+}

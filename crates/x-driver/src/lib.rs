@@ -27,7 +27,7 @@ mod project;
 pub use build::BuildArtifact;
 pub use build::BuildOutput;
 pub use build::CBuildArtifact;
-pub use paths::collect_x_files_recursive;
-pub use paths::is_x_source_path;
-pub use paths::x_output_stem;
+pub use paths::{
+    collect_x_files_from_inputs, collect_x_files_recursive, is_x_source_path, x_output_stem,
+};
 pub use project::scaffold_new_project;
