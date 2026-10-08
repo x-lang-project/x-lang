@@ -26,6 +26,7 @@ mod paths;
 mod project;
 
 pub use build::BuildArtifact;
+pub use build::BuildOptions;
 pub use build::BuildOutput;
 pub use build::CBuildArtifact;
 pub use paths::{
