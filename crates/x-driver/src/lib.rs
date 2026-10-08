@@ -21,6 +21,10 @@ use x_link::{LinkOptions, link};
 
 mod build;
 
+mod project;
+
 pub use build::BuildArtifact;
 pub use build::BuildOutput;
 pub use build::CBuildArtifact;
+
+pub use project::scaffold_new_project;
