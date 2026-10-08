@@ -2,6 +2,32 @@ use super::*;
 use x_diagnostics::CompilationFailure;
 use x_diagnostics::DriverError;
 
+pub fn is_x_source_path(path: &str) -> bool {
+    let path = Path::new(path);
+
+    if path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("x"))
+    {
+        return true;
+    }
+
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| strip_ascii_suffix(name, ".fail").is_some())
+}
+
+fn strip_ascii_suffix<'a>(value: &'a str, suffix: &str) -> Option<&'a str> {
+    let start = value.len().checked_sub(suffix.len())?;
+
+    if value.get(start..)?.eq_ignore_ascii_case(suffix) {
+        value.get(..start)
+    } else {
+        None
+    }
+}
+
 pub fn collect_x_files_recursive(
     path: &Path,
     output: &mut Vec<PathBuf>,
