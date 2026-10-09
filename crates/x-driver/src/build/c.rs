@@ -1,3 +1,5 @@
+use std::mem;
+
 use std::path::Path;
 use std::time::Instant;
 use std::{env, fs};
@@ -14,6 +16,48 @@ use x_utils::target::TinyCcWindows;
 
 pub(crate) fn enabled() -> bool {
     env::var_os("X_TCC_BACKEND").is_some_and(|value| value == "c")
+}
+
+fn build_checked(
+    source: &str,
+    input: &str,
+    output: &str,
+    options: &BuildOptions<'_>,
+) -> Result<BuildOutput, CompilationFailure> {
+    let started = Instant::now();
+    let mut checked = x_compile::compile_source_to_mir(
+        source,
+        Path::new(input),
+        SourceMirOptions {
+            show_parse: options.show_parse,
+            ..Default::default()
+        },
+    )?;
+    let frontend_seconds = started.elapsed().as_secs_f64();
+    let output_path = ArtifactPaths::new(output).executable();
+    let debug = mem::take(&mut checked.debug_artifacts);
+
+    if let Some(mut artifact) = compile_checked(
+        &checked.mir,
+        &output_path,
+        &options.link_options(TinyCcWindows::HOST_TRIPLE),
+        debug.clone(),
+    )? {
+        artifact.elapsed_seconds += frontend_seconds;
+
+        return Ok(BuildOutput::C(artifact));
+    }
+
+    checked.debug_artifacts = debug;
+    let checked_seconds = started.elapsed().as_secs_f64();
+
+    native_from_checked(checked, output, options)
+        .map(|mut artifact| {
+            artifact.compilation.metrics.elapsed_seconds += checked_seconds;
+
+            BuildOutput::Native(artifact)
+        })
+        .map_err(|error| error.with_source(source, Path::new(input)))
 }
 
 pub(crate) fn compile_checked(
