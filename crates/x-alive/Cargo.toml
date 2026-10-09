@@ -1,0 +1,30 @@
+[package]
+name = "x-alive"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+x-utils = { workspace = true }
+x-diagnostics = { workspace = true }
+clap = { workspace = true }
+regex = { workspace = true }
+walkdir = { workspace = true }
+inkwell = { workspace = true }
+
+x-parser = { workspace = true }
+x-compile = { workspace = true }
+x-logging = { workspace = true }
+x-proofs = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+inkwell = { workspace = true, features = ["llvm22-1-no-llvm-linking"] }
+
+[[bin]]
+name = "x-alive"
+path = "src/main.rs"
+test = true
