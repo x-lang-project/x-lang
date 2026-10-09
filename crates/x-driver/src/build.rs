@@ -6,6 +6,8 @@ use x_compile::ObjectCompileOptions;
 use x_diagnostics::DriverError;
 use x_utils::artifacts::ArtifactPaths;
 
+mod fast;
+
 #[derive(Debug, Clone, Default)]
 pub struct BuildOptions<'a> {
     pub emit_llvm: bool,
