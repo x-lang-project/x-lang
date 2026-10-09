@@ -6,6 +6,8 @@ use x_compile::ObjectCompileOptions;
 use x_diagnostics::DriverError;
 use x_utils::artifacts::ArtifactPaths;
 
+#[cfg(feature = "c-backend")]
+pub(crate) mod c;
 mod fast;
 
 #[derive(Debug, Clone, Default)]
