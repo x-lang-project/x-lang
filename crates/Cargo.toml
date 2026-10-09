@@ -28,6 +28,7 @@ members = [
   "x-link",
   "x-compile",
   "x-driver",
+  "x-cli",
 ]
 
 [workspace.dependencies]

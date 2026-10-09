@@ -1,0 +1,35 @@
+[package]
+name = "x-cli"
+autobins = false
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[features]
+c-backend = ["x-driver/c-backend"]
+
+[[bin]]
+test = true
+name = "x"
+path = "src/main.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+x-project = { workspace = true }
+x-utils = { workspace = true }
+x-logging = { workspace = true }
+x-compile = { workspace = true }
+x-link = { workspace = true }
+x-driver = { workspace = true }
+x-diagnostics = { workspace = true }
+clap = { workspace = true }
+inkwell = { workspace = true }
+sha2 = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+inkwell = { workspace = true, features = ["llvm22-1-no-llvm-linking"] }

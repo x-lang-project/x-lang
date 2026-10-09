@@ -792,6 +792,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "x-cli"
+version = "1.0.0"
+dependencies = [
+ "clap",
+ "inkwell",
+ "serde",
+ "serde_json",
+ "sha2",
+ "x-compile",
+ "x-diagnostics",
+ "x-driver",
+ "x-link",
+ "x-logging",
+ "x-project",
+ "x-utils",
+]
+
+[[package]]
 name = "x-codegen"
 version = "1.0.0"
 dependencies = [
