@@ -160,3 +160,17 @@ pub struct CBuildArtifact {
     pub debug_artifacts: Vec<x_compile::DebugArtifact>,
     pub elapsed_seconds: f64,
 }
+
+pub fn build_output_with_options(
+    source: &str,
+    input_file: &str,
+    output: &str,
+    options: BuildOptions<'_>,
+) -> Result<BuildOutput, CompilationFailure> {
+    #[cfg(feature = "c-backend")]
+    if let Some(result) = c::try_build(source, input_file, output, &options) {
+        return result;
+    }
+
+    build_with_options(source, input_file, output, options).map(BuildOutput::Native)
+}

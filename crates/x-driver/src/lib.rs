@@ -25,11 +25,10 @@ pub mod os;
 mod paths;
 mod project;
 
-pub use build::BuildArtifact;
-pub use build::BuildOptions;
-pub use build::BuildOutput;
 pub use build::CBuildArtifact;
-pub use build::build_with_options;
+pub use build::{
+    BuildArtifact, BuildOptions, BuildOutput, build_output_with_options, build_with_options,
+};
 pub use paths::{
     collect_x_files_from_inputs, collect_x_files_recursive, is_x_source_path, x_output_stem,
 };
