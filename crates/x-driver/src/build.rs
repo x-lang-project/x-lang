@@ -25,6 +25,53 @@ pub struct BuildOptions<'a> {
     pub link_arguments: &'a [String],
 }
 
+pub fn build_with_options(
+    source: &str,
+    input_file: &str,
+    output: &str,
+    options: BuildOptions<'_>,
+) -> Result<BuildArtifact, CompilationFailure> {
+    if let Some(result) = fast::try_build(source, input_file, output, &options) {
+        return result;
+    }
+
+    let output_path = ArtifactPaths::new(output).executable();
+    let output_filename = output_path.to_string_lossy();
+    let object_file_path = prepare_object_path(output)?;
+    let object_file_str = object_file_path
+        .to_str()
+        .ok_or_else(DriverError::project_object_path_encoding)?;
+
+    let compilation = compile_file_to_object(
+        source,
+        input_file,
+        object_file_str,
+        options.object_options(),
+    )?;
+
+    if options.emit_llvm || options.emit_object {
+        return Ok(BuildArtifact {
+            path: compilation.path.clone(),
+            compilation,
+            executable: false,
+        });
+    }
+
+    link(
+        &[compilation.path.to_string_lossy().into_owned()],
+        &output_filename,
+        options.link_options(&compilation.target_triple),
+    )?;
+
+    fs::remove_file(object_file_str).ok();
+
+    Ok(BuildArtifact {
+        path: output_path,
+        compilation,
+        executable: true,
+    })
+}
+
 impl<'a> BuildOptions<'a> {
     fn object_options(&self) -> ObjectCompileOptions<'a> {
         let target_triple = self.target_triple.or_else(|| {
