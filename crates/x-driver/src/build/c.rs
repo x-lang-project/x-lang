@@ -18,6 +18,32 @@ pub(crate) fn enabled() -> bool {
     env::var_os("X_TCC_BACKEND").is_some_and(|value| value == "c")
 }
 
+pub(super) fn try_build(
+    source: &str,
+    input: &str,
+    output: &str,
+    options: &BuildOptions<'_>,
+) -> Option<Result<BuildOutput, CompilationFailure>> {
+    if !enabled() || options.emit_object || options.emit_llvm || options.save_ir {
+        return None;
+    }
+
+    let target = options.target_triple.unwrap_or(TinyCcWindows::HOST_TRIPLE);
+
+    match tinycc::configured(&options.link_options(target)) {
+        Ok(false) => None,
+        Err(error) => Some(Err(error)),
+        Ok(true) => match fast::source_target(input, options) {
+            Err(error) => Some(Err(error)),
+            Ok(Some(target)) if target != TinyCcWindows::HOST_TRIPLE => None,
+            Ok(_) => Some(
+                build_checked(source, input, output, options)
+                    .map_err(|error| error.with_source(source, Path::new(input))),
+            ),
+        },
+    }
+}
+
 fn build_checked(
     source: &str,
     input: &str,
