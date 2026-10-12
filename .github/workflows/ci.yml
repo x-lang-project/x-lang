@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [master, nightly]
+  pull_request:
+    branches: [master, nightly]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - uses: dtolnay/rust-toolchain@efcb852328a9f50117170cc43094fb6f09eaf1ae
+        with:
+          toolchain: 1.97.1
+          components: rustfmt, clippy
+
+      - name: Install LLVM on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor > "$RUNNER_TEMP/llvm-22.gpg"
+          sudo install -m 644 "$RUNNER_TEMP/llvm-22.gpg" /usr/share/keyrings/llvm-22.gpg
+          echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/llvm-22.gpg] https://apt.llvm.org/noble/ llvm-toolchain-noble-22 main' | sudo tee /etc/apt/sources.list.d/llvm-22.list > /dev/null
+          sudo apt-get update
+          llvmPackageVersion='1:22.1.8~++20260714014902+ca7933e47d3a-1~exp1~20260714135019.80'
+          sudo apt-get install --yes --no-install-recommends \
+            "clang-22=$llvmPackageVersion" "llvm-22-dev=$llvmPackageVersion" "libpolly-22-dev=$llvmPackageVersion" \
+            "libomp-22-dev=$llvmPackageVersion" "libomp5=$llvmPackageVersion" \
+            build-essential zlib1g-dev libzstd-dev libffi-dev libxml2-dev
+          test "$(/usr/lib/llvm-22/bin/llvm-config --version)" = 22.1.8
+          /usr/lib/llvm-22/bin/clang --version | grep -F 'clang version 22.1.8'
+          echo 'LLVM_SYS_221_PREFIX=/usr/lib/llvm-22' >> "$GITHUB_ENV"
+          echo '/usr/lib/llvm-22/bin' >> "$GITHUB_PATH"
+
+      - name: Install LLVM on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $llvmPrefix = Join-Path $env:RUNNER_TEMP 'llvm-22.1.8'
+          $installer = Join-Path $env:RUNNER_TEMP 'LLVM-22.1.8-win64.exe'
+          Invoke-WebRequest -Uri 'https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-win64.exe' -OutFile $installer
+          $expectedSha256 = '16e5709785fef73c854646241c4a92c5cd574318d1b33c63330dd7721903e55c'
+          if ((Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedSha256) { throw 'LLVM installer checksum did not match' }
+          $process = Start-Process -WindowStyle Hidden -FilePath $installer -ArgumentList '/S', "/D=$llvmPrefix" -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "LLVM installer exited with code $($process.ExitCode)" }
+          $llvmBin = Join-Path $llvmPrefix 'bin'
+          if (-not (& (Join-Path $llvmBin 'clang.exe') --version | Select-String -SimpleMatch 'clang version 22.1.8')) { throw 'LLVM installer did not provide Clang 22.1.8' }
+          "LLVM_SYS_221_PREFIX=$llvmPrefix" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $llvmBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check workspace
+        run: cargo check --workspace --all-features --locked
+
+      - name: Lint workspace
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+      - name: Build workspace
+        run: cargo build --workspace --all-features --locked
+
+      - name: Run a native program
+        run: cargo run --locked -p x-cli -- run examples/pure.x --no-cache
